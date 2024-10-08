@@ -1,0 +1,22 @@
+Oct  7 14:10:36 linux-server sshd[1457]: Accepted password for user1 from 203.0.113.10 port 54321 ssh2
+Oct  7 14:10:36 linux-server sshd[1457]: pam_unix(sshd:session): session opened for user user1 by (uid=0)
+Oct  7 14:12:05 linux-server sudo:    user1 : TTY=pts/0 ; PWD=/home/user1 ; USER=root ; COMMAND=/usr/bin/vim /etc/hosts
+Oct  7 14:12:05 linux-server sudo: pam_unix(sudo:session): session opened for user root by user1(uid=0)
+Oct  7 14:12:15 linux-server sudo: pam_unix(sudo:session): session closed for user root
+Oct  7 14:13:12 linux-server sshd[1467]: Failed password for root from 198.51.100.10 port 57222 ssh2
+Oct  7 14:13:15 linux-server sshd[1467]: Failed password for root from 198.51.100.10 port 57222 ssh2
+Oct  7 14:13:18 linux-server sshd[1467]: Failed password for root from 198.51.100.10 port 57222 ssh2
+Oct  7 14:13:19 linux-server sshd[1467]: Received disconnect from 198.51.100.10 port 57222:11: Bye Bye [preauth]
+Oct  7 14:13:19 linux-server sshd[1467]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.10  user=root
+Oct  7 14:14:45 linux-server sshd[1478]: Accepted publickey for admin from 192.168.1.15 port 49876 ssh2: RSA SHA256:dGVxqQ...
+Oct  7 14:14:45 linux-server sshd[1478]: pam_unix(sshd:session): session opened for user admin by (uid=0)
+Oct  7 14:15:30 linux-server sudo:    admin : TTY=pts/1 ; PWD=/home/admin ; USER=root ; COMMAND=/bin/systemctl restart apache2
+Oct  7 14:15:30 linux-server sudo: pam_unix(sudo:session): session opened for user root by admin(uid=0)
+Oct  7 14:15:35 linux-server sudo: pam_unix(sudo:session): session closed for user root
+Oct  7 14:16:45 linux-server sshd[1490]: Failed password for invalid user testuser from 203.0.113.50 port 61123 ssh2
+Oct  7 14:16:48 linux-server sshd[1490]: Received disconnect from 203.0.113.50 port 61123:11: Bye Bye [preauth]
+Oct  7 14:16:48 linux-server sshd[1490]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.50  user=testuser
+Oct  7 14:17:12 linux-server sshd[1502]: Failed publickey for invalid user guest from 192.168.1.100 port 52345 ssh2: RSA SHA256:aRdFJx...
+Oct  7 14:17:13 linux-server sshd[1502]: Received disconnect from 192.168.1.100 port 52345:11: Bye Bye [preauth]
+Oct  7 14:18:20 linux-server sshd[1512]: Accepted password for user2 from 192.168.1.50 port 55222 ssh2
+Oct  7 14:18:20 linux-server sshd[1512]: pam_unix(sshd:session): session opened for user user2 by (uid=0)
