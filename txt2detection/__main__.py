@@ -84,8 +84,6 @@ def main(args: Args):
     bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels)
     bundler.bundle_detections(detections)
     out = bundler.to_json()
-    print(out)
-    print(detections)
 
     output_path = Path("./output")/f"{bundler.bundle.id}.json"
     output_path.parent.mkdir(exist_ok=True)
@@ -94,6 +92,5 @@ def main(args: Args):
 
 if __name__ == '__main__':
     load_dotenv(override=True)
-    parse_products('linux')
     args = parse_args()
     main(args)

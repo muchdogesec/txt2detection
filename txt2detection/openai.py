@@ -15,23 +15,12 @@ import yaml
 from .utils import DetectionLanguage
 
 
-class SCO(BaseModel):
-    """
-    STIX 2.0 defines a set of Cyber Observable Objects for characterizing host-based, network, and related entities. Each of these objects correspond to a data point commonly represented in CTI and digital forensics. Using the building blocks of Cyber Observable Objects, in conjunction with relationships between these objects, individuals can create, document, and share comprehensive information about computer systems and their state.
-    """
-
-    type: str = Field(description="valid STIX 2.0 SCO type")
-    value: str
-
-
 class Detection(BaseModel):
     name: str = Field(description="descriptive name for the detection", examples=["Unauthorized read", "Suspicious activity"])
     description: str
     rule: str = Field(description="express detecion rule in format described, escape properly.")
     indicator_types: list[str]
     mitre_attack_ids: list[str]
-    log_source: str
-    observables: list[SCO]
 
 
 class DetectionContainer(BaseModel):

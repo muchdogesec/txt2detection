@@ -238,7 +238,6 @@ class Bundler:
         }
         self.add_ref(indicator)
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
-            print(type(obj), len(obj), detection.mitre_attack_ids)
             self.add_ref(obj)
             self.add_relation(indicator, obj)
 
@@ -287,9 +286,7 @@ class Bundler:
             )
             """
             binds[f'@collection_{matrix}'] = f'mitre_attack_{matrix}_vertex_collection'
-        query += "FOR d IN APPEND(mobile, enterprise, ics) RETURN d" + "\n"*10
-        print(query)
-        print(__import__('json').dumps(binds), "==============")
+        query += "FOR d IN APPEND(mobile, enterprise, ics) RETURN d" 
         return [obj for obj in self.db.aql.execute(query, bind_vars=binds)]
     
     @staticmethod
