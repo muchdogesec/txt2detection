@@ -67,7 +67,7 @@ def parse_args():
             choices=detection_languages.keys(),
         )
 
-    args = parser.parse_args()
+    args: Args = parser.parse_args()
     args.detection_language = detection_languages[args.detection_language]
     
     if args.created is None:
