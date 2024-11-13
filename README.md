@@ -72,6 +72,10 @@ python3 txt2detection.py \
 * `--use_identity` (optional): can pass a full STIX 2.1 identity object (make sure to properly escape). Will be validated by the STIX2 library. If none passed, the default SIEM Rules identity will be used.
 * `--products_in_stack_keys` (required): the products listed provide the AI with the context of how to write the detecion rules to search the correct log source. You can find a list of all products in `config/logs.yaml` under each records `product` value (e.g. `amazon_web_services,google_cloud_platform`)
 * `--detection_language_key` (required): the detection rule language you want the output to be in. You can find a list of detection language keys in `config/detection_languages.yaml`
+* `ai_provider` (required): defines the `provider:model` to be used. Select one option. Currently supports:
+    * Provider: `openai:`, models e.g.: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-4` ([More here](https://platform.openai.com/docs/models))
+    * Provider: `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
+    * Provider: `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
 
 ## Adding new logs / detection languages
 
