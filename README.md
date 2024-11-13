@@ -319,15 +319,8 @@ For each detection rule produced by the AI (there could be more than one) an Ind
 
 ### MITRE ATT&CK lookup 
 
-Designed to work with a store of intelligence in ArangoDB uploaded using stix2arango in the specified `ARANGODB_DATABASE` found in .env.
 
-Assumes collection names are those used in these scripts
-
-https://github.com/muchdogesec/stix2arango/tree/main/utilities/arango_cti_processor
-
-(this is the same logic as employed by txt2stix)
-
-The ATT&CK objects are joined to the Indicator Object created
+Where MITRE ATT&CK Enterprise tactics/techniques detected, they are added to the bundle and joined to the Indicator object containing the detection;
 
 ```json
 {
@@ -347,6 +340,8 @@ The ATT&CK objects are joined to the Indicator Object created
     ]
 }
 ```
+
+The objects themselves are imported from [CTI Butler](https://github.com/muchdogesec/ctibutler) defined in the `.env` file.
 
 ## Bundle (script output)
 
