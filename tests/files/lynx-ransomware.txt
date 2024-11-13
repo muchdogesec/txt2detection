@@ -1,5 +1,0 @@
-Like many other ransomware strains, Lynx ransomware uses the Restart Manager API RstrtMgr to enhance its encryption capabilities and maximize its impact on the victim's system. By incorporating RstrtMgr into its attack process, Lynx ransomware can target files that are currently in use or locked by other applications.
-
-RstrtMgr helps the ransomware identify which applications are using the desired files. Ransomware such as Conti, Cactus and BiBi Wiper have also been observed employing this technique.
-
-After the ransomware encrypts all files, it attempts to print a report via Microsoft OneNote as shown in the debugger output in Figure 13 and the command-line output in Figure 14.
