@@ -1,6 +1,8 @@
 import enum
 import logging
 import os
+from urllib.parse import urljoin
+import requests
 from stix2 import (
     Report,
     Identity,
@@ -10,7 +12,6 @@ from stix2 import (
 )
 from stix2.serialization import serialize
 import hashlib
-from arango import ArangoClient
 
 from txt2detection.openai import Detection, DetectionContainer
 
@@ -265,29 +266,27 @@ class Bundler:
     def to_json(self):
         return serialize(self.bundle, indent=4)
     
-    def get_attack_objects(self, mitre_attack_ids):
-        host_url, db_name, user, passwd = (
-            os.environ["ARANGODB_HOST_URL"],
-            os.environ["ARANGODB_DATABASE"],
-            os.environ["ARANGODB_USERNAME"],
-            os.environ["ARANGODB_PASSWORD"],
-        )
-        self.client = ArangoClient(hosts=host_url)
-        self.db = self.client.db(db_name, username=user, password=passwd)
+    def get_attack_objects(self, attack_ids):
+        endpoint = urljoin(os.environ['CTIBUTLER_HOST'], f"api/v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
-        binds = {'mitre_attack_ids': mitre_attack_ids}
-        query = ""
-        for matrix in ['mobile', 'enterprise', 'ics']:
-            query += f"""
-            LET {matrix} = (
-            FOR doc IN @@collection_{matrix}
-                FILTER IS_ARRAY(doc.external_references) AND doc.external_references[0].external_id IN @mitre_attack_ids
-                RETURN KEEP(doc, KEYS(doc, true))
-            )
-            """
-            binds[f'@collection_{matrix}'] = f'mitre_attack_{matrix}_vertex_collection'
-        query += "FOR d IN APPEND(mobile, enterprise, ics) RETURN d" 
-        return [obj for obj in self.db.aql.execute(query, bind_vars=binds)]
+        s = requests.Session()
+        if api_key := os.environ.get('CTIBUTLER_API_KEY'):
+            s.headers['Authorization'] = f"Bearer {api_key}"
+            
+        data = []
+        page = 1
+        while True:
+            resp = s.get(endpoint, params=dict(page=page, page_size=1000))
+            if resp.status_code != 200:
+                break
+            d = resp.json()
+            if len(d['objects']) == 0:
+                break
+            data.extend(d['objects'])
+            page+=1
+            if d['page_results_count'] < d['page_size']:
+                break
+        return data
     
     @staticmethod
     def indicator_id_from_value(name, rule):

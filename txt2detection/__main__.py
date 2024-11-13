@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 
@@ -89,8 +90,3 @@ def main(args: Args):
     output_path.parent.mkdir(exist_ok=True)
     output_path.write_text(out)
     logging.info(f"Writing bundle output to `{output_path}`")
-
-if __name__ == '__main__':
-    load_dotenv(override=True)
-    args = parse_args()
-    main(args)
