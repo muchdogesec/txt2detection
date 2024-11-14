@@ -2,18 +2,42 @@ import argparse
 from datetime import datetime
 
 from dataclasses import dataclass
+from functools import partial
+from itertools import chain
 import os
 from pathlib import Path
 import logging
 import sys
 
-logging.basicConfig(level=logging.INFO)
+from txt2detection.ai_extractor.base import BaseAIExtractor
+
+def configureLogging():
+    # Configure logging
+    stream_handler = logging.StreamHandler()  # Log to stdout and stderr
+    stream_handler.setLevel(logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG,  # Set the desired logging level
+        format=f"%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[stream_handler],
+        datefmt='%d-%b-%y %H:%M:%S'
+    )
+
+    return logging.root
+configureLogging()
+
+def setLogFile(logger, file: Path):
+    file.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Saving log to `{file.absolute()}`")
+    handler = logging.FileHandler(file, "w")
+    handler.formatter = logging.Formatter(fmt='%(levelname)s %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    handler.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.info("=====================txt2stix======================")
 
 from dotenv import load_dotenv
-from .openai import run_prediction_openapi
 from .bundler import Bundler
 
-from .utils import load_config, load_detection_languages
+from .utils import load_config, load_detection_languages, parse_model
 
 @dataclass
 class Args:
@@ -25,6 +49,7 @@ class Args:
     use_identity: str
     products_in_stack: str
     detection_language: str
+    ai_provider: BaseAIExtractor
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -33,19 +58,18 @@ def parse_created(value):
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.sssZ.")
     
-def parse_products(value):
-    products = [s.strip() for s in value.split(',')]
-    all_sources = load_config()
+def parse_products(all_sources, value):
     log_sources = {}
     for k, source in all_sources.items():
-        if source['product'] in products:
+        if source['product'] == value:
             log_sources[k] = source
     if not log_sources:
-        raise argparse.ArgumentTypeError("at least one log source is required")
+        raise argparse.ArgumentTypeError(f"invalid product `{value}`")
     return log_sources
 
 
 def parse_args():
+    log_sources = load_config()
     detection_languages = load_detection_languages()
     parser = argparse.ArgumentParser(description='Convert text file to detection format.')
     
@@ -61,15 +85,17 @@ def parse_args():
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
     parser.add_argument('--products_in_stack', required=True, 
             help='Comma-separated list of products. Provides context for writing detection rules. Check config/logs.yaml for values.',
-            type=parse_products,
+            type=partial(parse_products, log_sources), nargs='+',
         )
     parser.add_argument('--detection_language', required=True, 
             help='Detection rule language for the output. Check config/detection_languages.yaml for available keys.',
             choices=detection_languages.keys(),
         )
+    parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
 
     args: Args = parser.parse_args()
     args.detection_language = detection_languages[args.detection_language]
+    args.products_in_stack = dict(chain(*map(dict.items, args.products_in_stack)))
     
     if args.created is None:
         args.created = datetime.now()
@@ -80,8 +106,9 @@ def parse_args():
     return args
     
 def main(args: Args):
+    setLogFile(logging.root, Path(f"logs/log-{int(args.created.timestamp())}.log"))
     input_str = Path(args.input_file).read_text()
-    detections = run_prediction_openapi(input_str, detection_language=args.detection_language, log_sources=args.products_in_stack)
+    detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language, log_sources=args.products_in_stack)
     bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels)
     bundler.bundle_detections(detections)
     out = bundler.to_json()

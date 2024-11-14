@@ -13,7 +13,7 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
-from txt2detection.openai import Detection, DetectionContainer
+from txt2detection.ai_extractor.utils import Detection, DetectionContainer
 
 from datetime import datetime as dt
 import uuid
@@ -21,7 +21,7 @@ import uuid
 
 UUID_NAMESPACE = uuid.UUID('116f8cc9-4c31-490a-b26d-342627b12401')
 
-logger = logging.getLogger("txt2detection.stix")
+logger = logging.getLogger("txt2detection.bundler")
 
 
 class TLP_LEVEL(enum.Enum):
@@ -267,6 +267,7 @@ class Bundler:
         return serialize(self.bundle, indent=4)
     
     def get_attack_objects(self, attack_ids):
+        logger.debug(f"retrieving attack objects: {attack_ids}")
         endpoint = urljoin(os.environ['CTIBUTLER_HOST'], f"api/v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
         s = requests.Session()
