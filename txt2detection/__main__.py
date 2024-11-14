@@ -104,10 +104,19 @@ def parse_args():
         parser.error(f"The specified input file does not exist: {args.input_file}")
 
     return args
+
+def validate_token_count(max_tokens, input, extractor: BaseAIExtractor):
+    logging.info('INPUT_TOKEN_LIMIT = %d', max_tokens)
+    token_count = extractor.count_tokens(input)
+    logging.info('TOKEN COUNT FOR %s: %d', extractor.extractor_name, token_count)
+    if  token_count > max_tokens:
+        raise Exception(f"{extractor.extractor_name}: input_file token count ({token_count}) exceeds INPUT_TOKEN_LIMIT ({max_tokens})")
+
     
 def main(args: Args):
     setLogFile(logging.root, Path(f"logs/log-{int(args.created.timestamp())}.log"))
     input_str = Path(args.input_file).read_text()
+    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_str, args.ai_provider)
     detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language, log_sources=args.products_in_stack)
     bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels)
     bundler.bundle_detections(detections)
