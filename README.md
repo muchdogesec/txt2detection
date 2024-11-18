@@ -2,6 +2,8 @@
 
 ## Overview
 
+![txt2detection](docs/txt2detection.png)
+
 A command line tool that takes a txt file containing threat intelligence and turns it into a detection rule.
 
 ## The problems
@@ -44,11 +46,17 @@ source txt2detection-venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Now copy the `.env` file to set your config:
+### Set variables
+
+txt2detection has various settings that are defined in an `.env` file.
+
+To create a template for the file:
 
 ```shell
 cp .env.example .env
 ```
+
+To see more information about how to set the variables, and what they do, read the `.env.markdown` file.
 
 ### Run
 
