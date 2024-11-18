@@ -1,1 +1,7 @@
 .DS_Store
+
+__pycache__/
+.env
+txt2detection-venv/
+logs/
+output/
