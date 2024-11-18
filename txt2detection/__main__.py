@@ -37,7 +37,7 @@ def setLogFile(logger, file: Path):
 from dotenv import load_dotenv
 from .bundler import Bundler
 
-from .utils import load_config, load_detection_languages, parse_model
+from .utils import load_detection_languages, parse_model
 
 @dataclass
 class Args:
@@ -47,7 +47,6 @@ class Args:
     labels: list[str]
     created: datetime
     use_identity: str
-    products_in_stack: str
     detection_language: str
     ai_provider: BaseAIExtractor
 
@@ -57,19 +56,8 @@ def parse_created(value):
         return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.sssZ.")
-    
-def parse_products(all_sources, value):
-    log_sources = {}
-    for k, source in all_sources.items():
-        if source['product'] == value:
-            log_sources[k] = source
-    if not log_sources:
-        raise argparse.ArgumentTypeError(f"invalid product `{value}`")
-    return log_sources
-
 
 def parse_args():
-    log_sources = load_config()
     detection_languages = load_detection_languages()
     parser = argparse.ArgumentParser(description='Convert text file to detection format.')
     
@@ -83,10 +71,6 @@ def parse_args():
             help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')
     parser.add_argument('--use_identity', 
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
-    parser.add_argument('--products_in_stack', required=True, 
-            help='Comma-separated list of products. Provides context for writing detection rules. Check config/logs.yaml for values.',
-            type=partial(parse_products, log_sources), nargs='+',
-        )
     parser.add_argument('--detection_language', required=True, 
             help='Detection rule language for the output. Check config/detection_languages.yaml for available keys.',
             choices=detection_languages.keys(),
@@ -95,7 +79,6 @@ def parse_args():
 
     args: Args = parser.parse_args()
     args.detection_language = detection_languages[args.detection_language]
-    args.products_in_stack = dict(chain(*map(dict.items, args.products_in_stack)))
     
     if args.created is None:
         args.created = datetime.now()
@@ -117,7 +100,7 @@ def main(args: Args):
     setLogFile(logging.root, Path(f"logs/log-{int(args.created.timestamp())}.log"))
     input_str = Path(args.input_file).read_text()
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_str, args.ai_provider)
-    detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language, log_sources=args.products_in_stack)
+    detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language)
     bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels)
     bundler.bundle_detections(detections)
     out = bundler.to_json()

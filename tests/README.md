@@ -5,6 +5,6 @@ python3 txt2detection.py \
   --name "lynx ransomware" \
   --tlp_level green \
   --labels label1,label2 \
-  --products_in_stack google_cloud_platform \
-  --detection_language spl
+  --detection_language spl \
+  --ai_provider openai:gpt-4o
 ```

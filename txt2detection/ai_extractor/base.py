@@ -87,13 +87,12 @@ class BaseAIExtractor():
         ))
     
 
-    def get_detections(self, input_text, log_sources, detection_language):
+    def get_detections(self, input_text, detection_language):
         logging.info('getting detections')
         return self.llm.structured_predict(
             prompt=self.detection_template,
             output_cls=DetectionContainer,
             input_str=input_text,
-            log_sources=yaml.safe_dump(log_sources),
             detection_rule=detection_language,
         )
     

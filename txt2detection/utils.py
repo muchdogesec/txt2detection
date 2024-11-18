@@ -6,15 +6,6 @@ from .ai_extractor import ALL_AI_EXTRACTORS
 class DetectionLanguage(SimpleNamespace):
     pass
 
-
-
-def load_config():
-    log_sources = {}
-    for k, v in yaml.safe_load(Path("config/logs.yaml").open()).items():
-        v['slug'] = k
-        log_sources[k] = v
-    return log_sources
-
 def load_detection_languages():
     langs = {}
     for k, v in yaml.safe_load(Path("config/detection_languages.yaml").open()).items():

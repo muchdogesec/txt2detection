@@ -60,7 +60,6 @@ python3 txt2detection.py \
   --labels label1,label2 \
   --created DATE \
   --use_identity \{IDENTITY JSON\} \
-  --products_in_stack product1,products2 \
   --detection_language DETECTION_LANGUAGE \
   --ai_provider PROVIDER:MODEL
 ```
@@ -71,22 +70,13 @@ python3 txt2detection.py \
 * `--labels` (optional): comma seperated list of labels. Case-insensitive (will all be converted to lower-case). Allowed `a-z`, `0-9`. e.g.`label1,label2` would create 2 labels.
 * `--created` (optional): by default all object `created` times will take the time the script was run. If you want to explicitly set these times you can do so using this flag. Pass the value in the format `YYYY-MM-DDTHH:MM:SS.sssZ` e.g. `2020-01-01T00:00:00.000Z`
 * `--use_identity` (optional): can pass a full STIX 2.1 identity object (make sure to properly escape). Will be validated by the STIX2 library. If none passed, the default SIEM Rules identity will be used.
-* `--products_in_stack_keys` (required): the products listed provide the AI with the context of how to write the detecion rules to search the correct log source. You can find a list of all products in `config/logs.yaml` under each records `product` value (e.g. `amazon_web_services,google_cloud_platform`)
 * `--detection_language_key` (required): the detection rule language you want the output to be in. You can find a list of detection language keys in `config/detection_languages.yaml`
 * `ai_provider` (required): defines the `provider:model` to be used. Select one option. Currently supports:
     * Provider: `openai:`, models e.g.: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-4` ([More here](https://platform.openai.com/docs/models))
     * Provider: `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
     * Provider: `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
 
-## Adding new logs / detection languages
-
-### To add a new log
-
-First, add some samples of the log in `log_samples`. These will be passed to the AI to help it understand its structure. The more samples you can provide, the more accurate the detections will be for it.
-
-Then create a record for the log type in `config/logs.yaml`.
-
-### To add a new detection language
+## Adding new detection languages
 
 Adding a new detection language is fairly trivial. However, there is a implicit understanding the model understands the detection rule structure. Results can therefore be mixed, so it is worth testing in detail.
 
