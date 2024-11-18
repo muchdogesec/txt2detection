@@ -3,3 +3,5 @@
 __pycache__/
 .env
 txt2detection-venv/
+logs/
+output/
