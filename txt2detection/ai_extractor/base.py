@@ -53,6 +53,8 @@ class BaseAIExtractor():
 
             By combining intelligence and log sources identified, create a {detection_rule.name} format. If you need help refer to the {detection_rule.name} documentation here {detection_rule.documentation}.
 
+            The detection rule you provide in the output `rule` property must conform to the the {detection_rule.name} schema.
+
             It is possible that you create zero or more detection rules out of the input depending on the contents of the input.
 
             You need to document each detection rule clearly, outlining its purpose (as its name) and the logic and the specific TTP it addresses (as its `description`). You should also classify each rule with one or more `indicator_types` from the following list; 
@@ -65,7 +67,7 @@ class BaseAIExtractor():
             * `attribution`
             * `unknown`
             
-            Also, when relevant, you should add a list of MITRE ATT&CK Tactics, Techniques, or Sub-Techniques detected by this rule. You should print the ATT&CK IDs in the property `mitre_attack_ids`.        
+            Also, when relevant, you should add a list of MITRE ATT&CK Tactics, Techniques, or Sub-Techniques detected by this rule. You should print the ATT&CK IDs in the property `mitre_attack_ids`.
 
         </requirements>
 

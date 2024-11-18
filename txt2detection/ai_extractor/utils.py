@@ -8,11 +8,10 @@ from pydantic import BaseModel, Field
 from llama_index.core.output_parsers import PydanticOutputParser
 
 
-
 class Detection(BaseModel):
-    name: str = Field(description="descriptive name for the detection", examples=["Unauthorized read", "Suspicious activity"])
+    name: str = Field(description="A descriptive name for the detection rule", examples=["Unauthorized read", "Suspicious activity"])
     description: str
-    rule: str = Field(description="express detecion rule in format described, escape properly.")
+    rule: str = Field(description="The detection rule in format described, escape properly.")
     indicator_types: list[str]
     mitre_attack_ids: list[str]
 
@@ -20,8 +19,6 @@ class Detection(BaseModel):
 class DetectionContainer(BaseModel):
     success: bool
     detections: list[Detection]
-
-
 
 class ParserWithLogging(PydanticOutputParser):
     def parse(self, text: str):
