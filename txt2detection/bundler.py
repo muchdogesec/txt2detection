@@ -208,9 +208,6 @@ class Bundler:
         self.bundle.objects.extend([self.default_marking, self.identity, self.report])
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
-        # add import tlp:red for notes if it's not imported already
-        if self.tlp_level != TLP_LEVEL.RED:
-            self.bundle.objects.append(TLP_LEVEL.RED.value)
 
 
     def add_ref(self, sdo):
