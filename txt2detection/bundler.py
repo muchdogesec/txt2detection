@@ -269,7 +269,7 @@ class Bundler:
 
         s = requests.Session()
         if api_key := os.environ.get('CTIBUTLER_API_KEY'):
-            s.headers['Authorization'] = f"Bearer {api_key}"
+            s.headers['API-KEY'] = api_key
             
         data = []
         page = 1
