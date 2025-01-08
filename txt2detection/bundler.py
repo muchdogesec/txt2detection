@@ -265,11 +265,11 @@ class Bundler:
     
     def get_attack_objects(self, attack_ids):
         logger.debug(f"retrieving attack objects: {attack_ids}")
-        endpoint = urljoin(os.environ['CTIBUTLER_HOST'], f"api/v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
+        endpoint = urljoin(os.environ['CTIBUTLER_BASE_URL'] + '/', f"v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
         s = requests.Session()
         if api_key := os.environ.get('CTIBUTLER_API_KEY'):
-            s.headers['Authorization'] = f"Bearer {api_key}"
+            s.headers['API-KEY'] = api_key
             
         data = []
         page = 1
