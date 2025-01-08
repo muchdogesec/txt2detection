@@ -84,6 +84,18 @@ python3 txt2detection.py \
     * Provider: `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
     * Provider: `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
 
+e.g.
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-1212.txt \
+  --name "lynx ransomware" \
+  --tlp_level green \
+  --labels label1,label2 \
+  --detection_language spl \
+  --ai_provider openai:gpt-4o
+```
+
 ## Adding new detection languages
 
 Adding a new detection language is fairly trivial. However, there is a implicit understanding the model understands the detection rule structure. Results can therefore be mixed, so it is worth testing in detail.
