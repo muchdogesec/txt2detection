@@ -230,29 +230,32 @@ class Bundler:
             "pattern": detection.rule,
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": [
-                dict(source_name="mitre_attack_ids", description=detection.mitre_attack_ids)
-            ]
+            # "external_references": [
+            #     dict(source_name="mitre_attack_ids", description=detection.mitre_attack_ids),
+            #     dict(source_name="cve-ids", description=detection.cve_ids),
+            # ]
         }
         self.add_ref(indicator)
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
-            self.add_relation(indicator, obj)
+            self.add_relation(indicator, obj, 'mitre-attack')
 
+        for obj in self.get_cve_objects(detection.cve_ids):
+            self.add_ref(obj)
+            self.add_relation(indicator, obj, 'nvd-cve')
 
-    def add_relation(self, indicator, attack):
+    def add_relation(self, indicator, target_object, type='mitre-attack'):
         rel =  Relationship(
-            id="relationship--"
-            + str(
+            id="relationship--" + str(
                 uuid.uuid5(
-                    UUID_NAMESPACE, f"mitre-attack+{indicator['id']}+{attack['id']}"
+                    UUID_NAMESPACE, f"{type}+{indicator['id']}+{target_object['id']}"
                 )
             ),
             source_ref=indicator['id'],
-            target_ref=attack['id'],
-            relationship_type="mitre-attack",
+            target_ref=target_object['id'],
+            relationship_type=type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} is linked to  {attack['external_references'][0]['external_id']} ({attack['name']})",
+            description=f"{indicator['name']} is linked to  {target_object['external_references'][0]['external_id']} ({target_object['name']})",
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
@@ -267,14 +270,28 @@ class Bundler:
         logger.debug(f"retrieving attack objects: {attack_ids}")
         endpoint = urljoin(os.environ['CTIBUTLER_BASE_URL'] + '/', f"v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
-        s = requests.Session()
+        headers = {}
         if api_key := os.environ.get('CTIBUTLER_API_KEY'):
-            s.headers['API-KEY'] = api_key
-            
+            headers['API-KEY'] = api_key
+
+        return self._get_objects(endpoint, headers)
+    
+        
+    def get_cve_objects(self, cve_ids):
+        logger.debug(f"retrieving cve objects: {cve_ids}")
+        endpoint = urljoin(os.environ['VULMATCH_BASE_URL'] + '/', f"v1/cve/objects/?cve_id="+','.join(cve_ids))
+        headers = {}
+        if api_key := os.environ.get('VULMATCH_API_KEY'):
+            headers['API-KEY'] = api_key
+
+        return self._get_objects(endpoint, headers)
+    
+    
+    def _get_objects(self, endpoint, headers):
         data = []
         page = 1
         while True:
-            resp = s.get(endpoint, params=dict(page=page, page_size=1000))
+            resp = requests.get(endpoint, params=dict(page=page, page_size=1000), headers=headers)
             if resp.status_code != 200:
                 break
             d = resp.json()
