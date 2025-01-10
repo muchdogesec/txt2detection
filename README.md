@@ -88,7 +88,7 @@ e.g.
 
 ```shell
 python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-1212.txt \
+  --input_file tests/files/CVE-2024-56520.txt \
   --name "lynx ransomware" \
   --tlp_level green \
   --labels label1,label2 \
