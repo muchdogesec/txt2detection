@@ -14,6 +14,7 @@ class Detection(BaseModel):
     rule: str = Field(description="The detection rule in format described, escape properly.")
     indicator_types: list[str]
     mitre_attack_ids: list[str]
+    cve_ids : list[str] = Field(description="CVE ID that matches the rule or is explicitly stated in the input", examples=["CVE-2019-1234", "CVE-2024-41312"])
 
 
 class DetectionContainer(BaseModel):
