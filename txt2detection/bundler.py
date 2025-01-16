@@ -159,6 +159,14 @@ class Bundler:
         ]
     })
 
+    @classmethod
+    def generate_report_id(cls, created_by_ref, created, name):
+        if not created_by_ref:
+            created_by_ref = cls.default_identity['id']
+        return str(
+            uuid.uuid5(UUID_NAMESPACE, f"{created_by_ref}+{created}+{name}")
+        )
+
     def __init__(
         self,
         name,
@@ -169,13 +177,13 @@ class Bundler:
         confidence,
         labels,
         created=dt.now(),
+        report_id=None,
     ) -> None:
         self.created = created
         self.identity = identity or self.default_identity
         self.tlp_level = TLP_LEVEL.get(tlp_level)
-        self.uuid = str(
-            uuid.uuid5(UUID_NAMESPACE, f"{self.identity.id}+{self.created}+{name}")
-        )
+        self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
+
         self.detection_language = detection_language
         self.job_id = f"report--{self.uuid}"
         self.report = Report(
