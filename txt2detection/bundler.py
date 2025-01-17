@@ -275,6 +275,8 @@ class Bundler:
         return serialize(self.bundle, indent=4)
     
     def get_attack_objects(self, attack_ids):
+        if not attack_ids:
+            return []
         logger.debug(f"retrieving attack objects: {attack_ids}")
         endpoint = urljoin(os.environ['CTIBUTLER_BASE_URL'] + '/', f"v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
@@ -286,6 +288,8 @@ class Bundler:
     
         
     def get_cve_objects(self, cve_ids):
+        if not cve_ids:
+            return []
         logger.debug(f"retrieving cve objects: {cve_ids}")
         endpoint = urljoin(os.environ['VULMATCH_BASE_URL'] + '/', f"v1/cve/objects/?cve_id="+','.join(cve_ids))
         headers = {}
