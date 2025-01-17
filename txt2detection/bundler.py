@@ -178,6 +178,7 @@ class Bundler:
         labels,
         created=dt.now(),
         report_id=None,
+        external_refs: list=None,
     ) -> None:
         self.created = created
         self.identity = identity or self.default_identity
@@ -203,7 +204,7 @@ class Bundler:
                     "source_name": "description_md5_hash",
                     "external_id": hashlib.md5(description.encode()).hexdigest(),
                 },
-            ],
+            ] + (external_refs or []),
             confidence=confidence,
         )
         self.report.object_refs.clear()  # clear object refs
