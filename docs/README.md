@@ -224,7 +224,6 @@ For each detection rule produced by the AI (there could be more than one) an Ind
 
 ### MITRE ATT&CK lookup 
 
-
 Where MITRE ATT&CK Enterprise tactics/techniques detected, they are added to the bundle and joined to the Indicator object containing the detection;
 
 ```json

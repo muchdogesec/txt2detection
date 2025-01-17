@@ -63,17 +63,12 @@ To see more information about how to set the variables, and what they do, read t
 ```shell
 python3 txt2detection.py \
   --input_file FILE.txt \
-  --name NAME \
-  --tlp_level TLP_LEVEL \
-  --labels label1,label2 \
-  --created DATE \
-  --use_identity \{IDENTITY JSON\} \
-  --detection_language DETECTION_LANGUAGE \
-  --ai_provider PROVIDER:MODEL
+  ...
 ```
 
 * `--input_file` (required): the file to be converted. Must be `.txt`
 * `--name` (required): name of file, max 72 chars. Will be used in the STIX Report Object created.
+* `--report_id` (OPTIONAL): Sometimes it is required to control the id of the `report` object generated. You can therefore pass a valid UUIDv4 in this field to be assigned to the report. e.g. passing `2611965-930e-43db-8b95-30a1e119d7e2` would create a STIX object id `report--2611965-930e-43db-8b95-30a1e119d7e2`. If this argument is not passed, the UUID will be randomly generated.
 * `--tlp_level` (optional): Options are `clear`, `green`, `amber`, `amber_strict`, `red`. Default if not passed, is `clear`.
 * `--labels` (optional): comma seperated list of labels. Case-insensitive (will all be converted to lower-case). Allowed `a-z`, `0-9`. e.g.`label1,label2` would create 2 labels.
 * `--created` (optional): by default all object `created` times will take the time the script was run. If you want to explicitly set these times you can do so using this flag. Pass the value in the format `YYYY-MM-DDTHH:MM:SS.sssZ` e.g. `2020-01-01T00:00:00.000Z`
@@ -93,7 +88,8 @@ python3 txt2detection.py \
   --tlp_level green \
   --labels label1,label2 \
   --detection_language spl \
-  --ai_provider openai:gpt-4o
+  --ai_provider openai:gpt-4o \
+  --report_id 2611965-930e-43db-8b95-30a1e119d7e2
 ```
 
 ## Adding new detection languages
