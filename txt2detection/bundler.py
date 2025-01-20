@@ -122,16 +122,16 @@ class Bundler:
     object_marking_refs = []
     uuid = None
     id_map = dict()
-    # this identity is https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/siemrules.json
+    # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/txt2detection.json
     default_identity = Identity(**{
         "type": "identity",
         "spec_version": "2.1",
-        "id": "identity--8ef05850-cb0d-51f7-80be-50e4376dbe63",
+        "id": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
         "created_by_ref": "identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5",
         "created": "2020-01-01T00:00:00.000Z",
         "modified": "2020-01-01T00:00:00.000Z",
-        "name": "siemrules",
-        "description": "https://github.com/muchdogsec/siemrules",
+        "name": "txt2detection",
+        "description": "https://github.com/muchdogesec/txt2detection",
         "identity_class": "system",
         "sectors": [
             "technology"
@@ -142,16 +142,16 @@ class Bundler:
             "marking-definition--97ba4e8b-04f6-57e8-8f6e-3a0f0a7dc0fb"
         ]
     })
-    # this marking-definition is https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/siemrules.json
+    # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/txt2detection.json
     default_marking = MarkingDefinition(**{
         "type": "marking-definition",
         "spec_version": "2.1",
-        "id": "marking-definition--8ef05850-cb0d-51f7-80be-50e4376dbe63",
+        "id": "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7",
         "created_by_ref": "identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5",
         "created": "2020-01-01T00:00:00.000Z",
         "definition_type": "statement",
         "definition": {
-            "statement": "This object was created using: https://github.com/muchdogesec/siemrules"
+            "statement": "This object was created using: https://github.com/muchdogesec/txt2detection"
         },
         "object_marking_refs": [
             "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
