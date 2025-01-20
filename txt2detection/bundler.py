@@ -122,16 +122,16 @@ class Bundler:
     object_marking_refs = []
     uuid = None
     id_map = dict()
-    # this identity is https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/siemrules.json
+    # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/txt2detection.json
     default_identity = Identity(**{
         "type": "identity",
         "spec_version": "2.1",
-        "id": "identity--8ef05850-cb0d-51f7-80be-50e4376dbe63",
+        "id": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
         "created_by_ref": "identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5",
         "created": "2020-01-01T00:00:00.000Z",
         "modified": "2020-01-01T00:00:00.000Z",
-        "name": "siemrules",
-        "description": "https://github.com/muchdogsec/siemrules",
+        "name": "txt2detection",
+        "description": "https://github.com/muchdogesec/txt2detection",
         "identity_class": "system",
         "sectors": [
             "technology"
@@ -142,16 +142,16 @@ class Bundler:
             "marking-definition--97ba4e8b-04f6-57e8-8f6e-3a0f0a7dc0fb"
         ]
     })
-    # this marking-definition is https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/siemrules.json
+    # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/txt2detection.json
     default_marking = MarkingDefinition(**{
         "type": "marking-definition",
         "spec_version": "2.1",
-        "id": "marking-definition--8ef05850-cb0d-51f7-80be-50e4376dbe63",
+        "id": "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7",
         "created_by_ref": "identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5",
         "created": "2020-01-01T00:00:00.000Z",
         "definition_type": "statement",
         "definition": {
-            "statement": "This object was created using: https://github.com/muchdogesec/siemrules"
+            "statement": "This object was created using: https://github.com/muchdogesec/txt2detection"
         },
         "object_marking_refs": [
             "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
@@ -178,6 +178,7 @@ class Bundler:
         labels,
         created=dt.now(),
         report_id=None,
+        external_refs: list=None,
     ) -> None:
         self.created = created
         self.identity = identity or self.default_identity
@@ -203,7 +204,7 @@ class Bundler:
                     "source_name": "description_md5_hash",
                     "external_id": hashlib.md5(description.encode()).hexdigest(),
                 },
-            ],
+            ] + (external_refs or []),
             confidence=confidence,
         )
         self.report.object_refs.clear()  # clear object refs
@@ -275,6 +276,8 @@ class Bundler:
         return serialize(self.bundle, indent=4)
     
     def get_attack_objects(self, attack_ids):
+        if not attack_ids:
+            return []
         logger.debug(f"retrieving attack objects: {attack_ids}")
         endpoint = urljoin(os.environ['CTIBUTLER_BASE_URL'] + '/', f"v1/attack-enterprise/objects/?attack_id="+','.join(attack_ids))
 
@@ -286,6 +289,8 @@ class Bundler:
     
         
     def get_cve_objects(self, cve_ids):
+        if not cve_ids:
+            return []
         logger.debug(f"retrieving cve objects: {cve_ids}")
         endpoint = urljoin(os.environ['VULMATCH_BASE_URL'] + '/', f"v1/cve/objects/?cve_id="+','.join(cve_ids))
         headers = {}

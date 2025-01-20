@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import logging
+import re
 import sys
 import uuid
 from stix2 import Identity, parse as parse_stix
@@ -58,6 +59,7 @@ class Args:
     detection_language: str
     ai_provider: BaseAIExtractor
     report_id: uuid.UUID
+    external_refs: dict[str, str]
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -65,6 +67,13 @@ def parse_created(value):
         return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.sssZ.")
+
+
+def parse_ref(value):
+    m = re.compile(r'(.+?)=(.+)').match(value)
+    if not m:
+        raise argparse.ArgumentTypeError("must be in format key=value")
+    return dict(source_name=m.group(1), external_id=m.group(2))
 
 def parse_args():
     detection_languages = load_detection_languages()
@@ -86,6 +95,7 @@ def parse_args():
             choices=detection_languages.keys(),
         )
     parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
+    parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
 
     args: Args = parser.parse_args()
     args.detection_language = detection_languages[args.detection_language]
@@ -108,7 +118,7 @@ def main(args: Args):
     input_str = Path(args.input_file).read_text()
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_str, args.ai_provider)
     detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language)
-    bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels, report_id=args.report_id)
+    bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels, report_id=args.report_id, external_refs=args.external_refs)
     bundler.bundle_detections(detections)
     out = bundler.to_json()
 
