@@ -107,8 +107,8 @@ e.g.
 
 ```shell
 python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-56520.txt \
-  --name "CVE-2024-56520" \
+  --input_file tests/files/EC2-exfil.txt \
+  --name "EC2 exfil" \
   --tlp_level green \
   --detection_language sigma \
   --ai_provider openrouter:openai/gpt-4o \
