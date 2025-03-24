@@ -21,6 +21,19 @@ class DetectionContainer(BaseModel):
     success: bool
     detections: list[Detection]
 
+
+class NewDetection(BaseModel):
+    name: str
+    description: str
+    detection: dict
+    logsource: dict
+    falsepositives: list[str]
+    tags: list[str]
+
+class NewDetectionContainer(BaseModel):
+    success: bool
+    detections: list[NewDetection]
+
 class ParserWithLogging(PydanticOutputParser):
     def parse(self, text: str):
         f = io.StringIO()

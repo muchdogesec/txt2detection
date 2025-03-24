@@ -8,7 +8,7 @@ from llama_index.llms.openrouter import OpenRouter
 class OpenRouterExtractor(BaseAIExtractor, provider="openrouter"):
     def __init__(self, **kwargs) -> None:
         kwargs.setdefault('temperature', float(os.environ.get('TEMPERATURE', 0.0)))
-        self.llm = OpenRouter(system_prompt=self.system_prompt, **kwargs)
+        self.llm = OpenRouter(system_prompt=self.system_prompt, max_tokens=4096, **kwargs)
         super().__init__()
 
     def count_tokens(self, text):
