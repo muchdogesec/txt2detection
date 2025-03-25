@@ -9,15 +9,6 @@ import logging
 class DetectionLanguage(SimpleNamespace):
     pass
 
-def load_detection_languages(path = Path("config/detection_languages.yaml")):
-    if not path.exists():
-        path = resources.files(txt2detection) / "config/detection_languages.yaml"
-    langs = {}
-    for k, v in yaml.safe_load(path.open()).items():
-        v["slug"] = k
-        langs[k] = DetectionLanguage(**v)
-    return langs
-
 def parse_model(value: str):
     splits = value.split(':', 1)
     provider = splits[0]

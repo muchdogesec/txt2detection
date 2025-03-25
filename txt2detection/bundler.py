@@ -170,7 +170,6 @@ class Bundler:
     def __init__(
         self,
         name,
-        detection_language,
         identity,
         tlp_level,
         description,
@@ -185,7 +184,6 @@ class Bundler:
         self.tlp_level = TLP_LEVEL.get(tlp_level)
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
 
-        self.detection_language = detection_language
         self.job_id = f"report--{self.uuid}"
         self.report = Report(
             created_by_ref=self.identity.id,
@@ -228,14 +226,14 @@ class Bundler:
     def add_rule_indicator(self, detection: Detection):
         indicator = {
             "type": "indicator",
-            "id": self.indicator_id_from_value(detection.name, detection.rule),
+            "id": self.indicator_id_from_value(detection.title, detection.rule),
             "spec_version": "2.1",
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
-            "name": detection.name,
-            "pattern_type": self.detection_language,
+            "name": detection.title,
+            "pattern_type": 'sigma',
             "pattern": detection.rule,
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,

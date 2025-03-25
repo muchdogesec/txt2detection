@@ -9,7 +9,7 @@ import yaml
 
 from txt2detection.ai_extractor import prompts
 
-from .utils import NewDetectionContainer, ParserWithLogging, DetectionContainer
+from .utils import DetectionContainer, ParserWithLogging, DetectionContainer
 from llama_index.core.utils import get_tokenizer
 
 
@@ -29,12 +29,12 @@ class BaseAIExtractor():
     """))
     
 
-    def get_detections(self, input_text, detection_language) -> DetectionContainer:
+    def get_detections(self, input_text) -> DetectionContainer:
         logging.info('getting detections')
 
 
         return LLMTextCompletionProgram.from_defaults(
-            output_parser=ParserWithLogging(NewDetectionContainer),
+            output_parser=ParserWithLogging(DetectionContainer),
             prompt=prompts.SIEMRULES_PROMPT,
             verbose=True,
             llm=self.llm,
