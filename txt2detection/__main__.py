@@ -43,7 +43,7 @@ from dotenv import load_dotenv
 from .bundler import Bundler
 
 
-from .utils import load_detection_languages, parse_model
+from .utils import parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -51,6 +51,7 @@ def parse_identity(str):
 @dataclass
 class Args:
     input_file: str
+    input_text: str
     name: str
     tlp_level: str
     labels: list[str]
@@ -76,10 +77,10 @@ def parse_ref(value):
     return dict(source_name=m.group(1), external_id=m.group(2))
 
 def parse_args():
-    detection_languages = load_detection_languages()
     parser = argparse.ArgumentParser(description='Convert text file to detection format.')
-    
-    parser.add_argument('--input_file', required=True, help='The file to be converted. Must be .txt')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--input_file', help='The file to be converted. Must be .txt', type=lambda x: Path(x).read_text())
+    group.add_argument('--input_text', help='The text to be converted')
     parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
@@ -90,21 +91,15 @@ def parse_args():
             help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')
     parser.add_argument('--use_identity', type=parse_identity,
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
-    parser.add_argument('--detection_language', required=True, 
-            help='Detection rule language for the output. Check config/detection_languages.yaml for available keys.',
-            choices=detection_languages.keys(),
-        )
     parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
 
     args: Args = parser.parse_args()
-    args.detection_language = detection_languages[args.detection_language]
     
     if args.created is None:
         args.created = datetime.now()
 
-    if not os.path.isfile(args.input_file):
-        parser.error(f"The specified input file does not exist: {args.input_file}")
+    args.input_text = args.input_text or args.input_file
 
     if not args.report_id:
         args.report_id = Bundler.generate_report_id(args.use_identity.id if args.use_identity else None, args.created, args.name)
@@ -115,10 +110,9 @@ def parse_args():
     
 def main(args: Args):
     setLogFile(logging.root, Path(f"logs/log-{args.report_id}.log"))
-    input_str = Path(args.input_file).read_text()
-    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_str, args.ai_provider)
-    detections = args.ai_provider.get_detections(input_str, detection_language=args.detection_language)
-    bundler = Bundler(args.name, args.detection_language.slug, args.use_identity, args.tlp_level, input_str, 0, args.labels, report_id=args.report_id, external_refs=args.external_refs)
+    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), args.input_text, args.ai_provider)
+    detections = args.ai_provider.get_detections(args.input_text)
+    bundler = Bundler(args.name, args.use_identity, args.tlp_level, args.input_text, 0, args.labels, report_id=args.report_id, external_refs=args.external_refs)
     bundler.bundle_detections(detections)
     out = bundler.to_json()
 

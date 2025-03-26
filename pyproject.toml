@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "txt2detection"
 
 version = "0.0.1"
-authors = [
+authors = [ 
   { name="DOGESEC", email="support@dogesec.com" },
 ]
 description = "txt2detection is a tool"
