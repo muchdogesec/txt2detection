@@ -41,6 +41,7 @@ def setLogFile(logger, file: Path):
 
 from dotenv import load_dotenv
 from .bundler import Bundler
+import shutil
 
 
 from .utils import parse_model
@@ -125,9 +126,19 @@ def main(args: Args):
     # bundler = run_txt2detection(args.name, args.use_identity, args.tlp_level, args.input_text, args.confidence, args.labels, args.report_id, args.ai_provider, **kwargs)
     bundler = run_txt2detection(**kwargs)
 
-    output_path = Path("./output")/f"{bundler.bundle.id}.json"
-    data_path = output_path.with_name(f"data--{args.report_id}.json")
-    output_path.parent.mkdir(exist_ok=True)
+    output_dir = Path("./output")/str(bundler.bundle.id)
+    shutil.rmtree(output_dir, ignore_errors=True)
+    rules_dir = output_dir/"rules"
+    rules_dir.mkdir(exist_ok=True, parents=True)
+
+
+    output_path = output_dir/'bundle.json'
+    data_path = output_dir/f"data.json"
     output_path.write_text(bundler.to_json())
     data_path.write_text(bundler.detections.model_dump_json(indent=4))
+    for obj in bundler.bundle['objects']:
+        if obj['type'] != 'indicator' or obj['pattern_type'] != 'sigma':
+            continue
+        name = obj['id'].replace('indicator', 'rule') + '.yml'
+        (rules_dir/name).write_text(obj['pattern'])
     logging.info(f"Writing bundle output to `{output_path}`")
