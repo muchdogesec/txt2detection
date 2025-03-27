@@ -1,4 +1,5 @@
 import enum
+import json
 import logging
 import os
 from urllib.parse import urljoin
@@ -122,6 +123,7 @@ class Bundler:
     object_marking_refs = []
     uuid = None
     id_map = dict()
+    detections: DetectionContainer
     # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/txt2detection.json
     default_identity = Identity(**{
         "type": "identity",
@@ -273,6 +275,10 @@ class Bundler:
     def to_json(self):
         return serialize(self.bundle, indent=4)
     
+    @property
+    def bundle_dict(self):
+        return json.loads(self.to_json())
+    
     def get_attack_objects(self, attack_ids):
         if not attack_ids:
             return []
@@ -321,6 +327,7 @@ class Bundler:
         )
     
     def bundle_detections(self, container: DetectionContainer):
+        self.detections = container
         if not container.success:
             return
         for d in container.detections:

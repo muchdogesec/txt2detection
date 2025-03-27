@@ -63,7 +63,7 @@ Tactics:
 * attack.impact
 
 ##### Namespace: cve
-Only include from this section if you are positive on the existence and validity of CVE-ID
+Only include from this section, CVEs that are explicitly mentioned in input document. Do not attempt to make up any random CVE-ID
 
 Use the CVE tag from [MITRE](https://cve.mitre.org) in lower case separated by dots. Example tag: `cve.2021-44228`.
 

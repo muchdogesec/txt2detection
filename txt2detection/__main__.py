@@ -61,13 +61,14 @@ class Args:
     ai_provider: BaseAIExtractor
     report_id: uuid.UUID
     external_refs: dict[str, str]
+    confidence: int
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
     try:
-        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
+        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
     except ValueError:
-        raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.sssZ.")
+        raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.")
 
 
 def parse_ref(value):
@@ -85,6 +86,7 @@ def parse_args():
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
+    parser.add_argument('--confidence', help='report confidence', type=int, default=0)
     parser.add_argument('--labels', type=lambda s: s.split(','), 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
     parser.add_argument('--created', type=parse_created, 
@@ -107,18 +109,25 @@ def parse_args():
     return args
 
 
+def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
+    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
+    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs['external_refs'], created=kwargs['created'])
+    detections = ai_provider.get_detections(input_text)
+    bundler.bundle_detections(detections)
+    return bundler
+
     
 def main(args: Args):
+
     setLogFile(logging.root, Path(f"logs/log-{args.report_id}.log"))
-    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), args.input_text, args.ai_provider)
-    detections = args.ai_provider.get_detections(args.input_text)
-    bundler = Bundler(args.name, args.use_identity, args.tlp_level, args.input_text, 0, args.labels, report_id=args.report_id, external_refs=args.external_refs)
-    bundler.bundle_detections(detections)
-    out = bundler.to_json()
+    kwargs = args.__dict__
+    kwargs['identity'] = args.use_identity
+    # bundler = run_txt2detection(args.name, args.use_identity, args.tlp_level, args.input_text, args.confidence, args.labels, args.report_id, args.ai_provider, **kwargs)
+    bundler = run_txt2detection(**kwargs)
 
     output_path = Path("./output")/f"{bundler.bundle.id}.json"
     data_path = output_path.with_name(f"data--{args.report_id}.json")
     output_path.parent.mkdir(exist_ok=True)
-    output_path.write_text(out)
-    data_path.write_text(detections.model_dump_json(indent=4))
+    output_path.write_text(bundler.to_json())
+    data_path.write_text(bundler.detections.model_dump_json(indent=4))
     logging.info(f"Writing bundle output to `{output_path}`")
