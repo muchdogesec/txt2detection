@@ -1,5 +1,7 @@
 import io
+import json
 import logging
+import uuid
 
 import dotenv
 import textwrap
@@ -7,6 +9,8 @@ import textwrap
 from pydantic import BaseModel, Field
 from llama_index.core.output_parsers import PydanticOutputParser
 import yaml
+
+UUID_NAMESPACE = uuid.UUID('116f8cc9-4c31-490a-b26d-342627b12401')
 
 MITRE_TACTIC_MAP = {
     "initial-access": "TA0001",
@@ -32,6 +36,7 @@ class Detection(BaseModel):
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str]
+    _custom_id = None
 
     @property
     def rule(self):
@@ -40,6 +45,28 @@ class Detection(BaseModel):
             status="experimental",
             license="Apache-2.0",
             references="https://github.com/muchdogesec/txt2detection/",
+            tags=self.tags + self.labels
+        )
+        return yaml.dump(data, sort_keys=False, indent=4)
+    
+    
+    @property
+    def id(self):
+        return self._custom_id or str(
+            uuid.uuid5(UUID_NAMESPACE, f"txt2detection+{self.title}+{json.dumps(self.detection)}")
+        )
+    
+    @id.setter
+    def id(self, custom_id):
+        self._custom_id = custom_id.split('--')[-1]
+    
+    def make_rule(self, labels: list):
+        data = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
+        data.update(
+            status="experimental",
+            license="Apache-2.0",
+            references="https://github.com/muchdogesec/txt2detection/",
+            tags=self.tags + labels
         )
         return yaml.dump(data, sort_keys=False, indent=4)
 
