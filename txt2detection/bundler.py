@@ -1,3 +1,4 @@
+import contextlib
 import enum
 import json
 import logging
@@ -14,13 +15,12 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
-from txt2detection.ai_extractor.utils import Detection, DetectionContainer
+from txt2detection.ai_extractor.utils import Detection, DetectionContainer, UUID_NAMESPACE
 
 from datetime import datetime as dt
 import uuid
 
 
-UUID_NAMESPACE = uuid.UUID('116f8cc9-4c31-490a-b26d-342627b12401')
 
 logger = logging.getLogger("txt2detection.bundler")
 
@@ -228,21 +228,19 @@ class Bundler:
     def add_rule_indicator(self, detection: Detection):
         indicator = {
             "type": "indicator",
-            "id": self.indicator_id_from_value(detection.title, detection.rule),
+            "id": "indicator--"+detection.id,
             "spec_version": "2.1",
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
             "name": detection.title,
+            "labels": self.report.labels,
             "pattern_type": 'sigma',
-            "pattern": detection.rule,
+            "pattern": detection.make_rule(self.report.labels),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            # "external_references": [
-            #     dict(source_name="mitre_attack_ids", description=detection.mitre_attack_ids),
-            #     dict(source_name="cve-ids", description=detection.cve_ids),
-            # ]
+            "external_references": []
         }
         self.add_ref(indicator)
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
@@ -254,6 +252,12 @@ class Bundler:
             self.add_relation(indicator, obj, 'nvd-cve')
 
     def add_relation(self, indicator, target_object, type='mitre-attack'):
+        ext_refs = []
+
+        with contextlib.suppress(Exception):
+            indicator['external_references'].append(target_object['external_references'][0])
+            ext_refs = [target_object['external_references'][0]]
+
         rel =  Relationship(
             id="relationship--" + str(
                 uuid.uuid5(
@@ -268,6 +272,7 @@ class Bundler:
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
+            external_references=ext_refs,
             allow_custom=True,
         )
         self.add_ref(rel)
@@ -319,12 +324,6 @@ class Bundler:
             if d['page_results_count'] < d['page_size']:
                 break
         return data
-    
-    @staticmethod
-    def indicator_id_from_value(name, rule):
-        return "indicator--" + str(
-            uuid.uuid5(UUID_NAMESPACE, f"txt2detection+{name}+{rule}")
-        )
     
     def bundle_detections(self, container: DetectionContainer):
         self.detections = container
