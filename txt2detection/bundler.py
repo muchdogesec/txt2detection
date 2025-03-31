@@ -111,6 +111,8 @@ class TLP_LEVEL(enum.Enum):
     def get(cls, level):
         if isinstance(level, cls):
             return level
+        if level not in cls.levels():
+            raise Exception(f'unsupported tlp level: `{level}`')
         return cls.levels()[level]
 
     @property
@@ -240,7 +242,8 @@ class Bundler:
             "pattern": detection.make_rule(self.report.labels),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": []
+            "external_references": [],
+            "confidence": detection.confidence,
         }
         self.add_ref(indicator)
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
