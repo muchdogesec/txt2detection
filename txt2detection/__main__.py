@@ -58,11 +58,11 @@ class Args:
     labels: list[str]
     created: datetime
     use_identity: Identity
-    detection_language: str
     ai_provider: BaseAIExtractor
     report_id: uuid.UUID
     external_refs: dict[str, str]
     confidence: int
+    reference_urls: list[str]
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -96,6 +96,7 @@ def parse_args():
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
     parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
+    parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
 
     args: Args = parser.parse_args()
     
@@ -112,7 +113,7 @@ def parse_args():
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs['external_refs'], created=kwargs['created'])
+    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs['external_refs'], created=kwargs['created'], reference_urls=kwargs['reference_urls'])
     detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler

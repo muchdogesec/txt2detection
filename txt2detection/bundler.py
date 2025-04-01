@@ -182,11 +182,13 @@ class Bundler:
         created=dt.now(),
         report_id=None,
         external_refs: list=None,
+        reference_urls=None,
     ) -> None:
         self.created = created
         self.identity = identity or self.default_identity
         self.tlp_level = TLP_LEVEL.get(tlp_level)
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
+        self.reference_urls = reference_urls or []
 
         self.job_id = f"report--{self.uuid}"
         self.report = Report(
@@ -206,7 +208,7 @@ class Bundler:
                     "source_name": "description_md5_hash",
                     "external_id": hashlib.md5(description.encode()).hexdigest(),
                 },
-            ] + (external_refs or []),
+            ] + (external_refs or []) + [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls],
             confidence=confidence,
         )
         self.report.object_refs.clear()  # clear object refs
