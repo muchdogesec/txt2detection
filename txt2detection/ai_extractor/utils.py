@@ -2,10 +2,12 @@ import io
 import json
 import logging
 import uuid
+from slugify import slugify
 
 import dotenv
 import textwrap
 
+import jsonschema
 from pydantic import BaseModel, Field
 from llama_index.core.output_parsers import PydanticOutputParser
 import yaml
@@ -62,14 +64,15 @@ class Detection(BaseModel):
         self._custom_id = custom_id.split('--')[-1]
     
     def make_rule(self, labels: list):
-        data = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
-        data.update(
+        rule = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
+        rule.update(
             status="experimental",
             license="Apache-2.0",
-            references="https://github.com/muchdogesec/txt2detection/",
-            tags=self.tags + labels
+            references=["https://github.com/muchdogesec/txt2detection/"],
+            tags=self.tags + ['txt2detection.'+slugify(x) for x in labels]
         )
-        return yaml.dump(data, sort_keys=False, indent=4)
+        jsonschema.validate(rule, {'$ref': 'https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json'})
+        return yaml.dump(rule, sort_keys=False, indent=4)
 
     @property
     def mitre_attack_ids(self):

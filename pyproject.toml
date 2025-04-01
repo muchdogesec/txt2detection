@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "txt2detection"
 
-version = "0.0.2-rc3"
+version = "0.0.2-rc4"
 authors = [ 
   { name="DOGESEC", email="support@dogesec.com" },
 ]
@@ -25,6 +25,7 @@ dependencies = [
     "requests>=2.31.0; python_version >= '3.7'",
     "python-dotenv>=1.0.1",
     "pyyaml",
+    "python-slugify",
   ]
 [project.urls]
 Homepage = "https://github.com/muchdogesec/txt2detection"
