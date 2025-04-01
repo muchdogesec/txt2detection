@@ -239,7 +239,7 @@ class Bundler:
             "name": detection.title,
             "labels": self.report.labels,
             "pattern_type": 'sigma',
-            "pattern": detection.make_rule(self.report.labels, self.tlp_level.name),
+            "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": [],
