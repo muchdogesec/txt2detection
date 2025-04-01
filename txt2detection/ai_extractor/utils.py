@@ -36,6 +36,7 @@ class Detection(BaseModel):
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str]
+    confidence: int
     _custom_id = None
 
     @property

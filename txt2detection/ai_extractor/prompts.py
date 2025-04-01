@@ -23,6 +23,7 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"logsources"`: Valid sigma rule logsource
 - `"detection"`: Valid sigma rule detection
 - `"indicator_types"`: One or more STIX v2.1 indicator.indicator_types
+- `"confidence"`: Integer from 0 to 100 denoting the confidence you have in the generated rule/detection. Where 0 is unsure, 1 is very low and 100 is very high!
 
 #### **Indicator Types**
 - `"anomalous-activity"`: Unexpected, or unusual activity that may not necessarily be malicious or indicate compromise. This type of activity may include reconnaissance-like behavior such as port scans or version identification, network behavior anomalies, and asset and/or user behavioral anomalies.
