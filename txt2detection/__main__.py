@@ -87,7 +87,7 @@ def parse_args():
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
-    parser.add_argument('--confidence', help='report confidence', type=int, default=0)
+    parser.add_argument('--confidence', help='report confidence', type=int, default=None)
     parser.add_argument('--labels', type=lambda s: s.split(','), 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
     parser.add_argument('--created', type=parse_created, 
