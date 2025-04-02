@@ -50,6 +50,7 @@ python3 -m venv txt2detection-venv
 source txt2detection-venv/bin/activate
 # install requirements
 pip3 install -r requirements.txt
+pip3 install .
 ```
 
 ### Set variables
