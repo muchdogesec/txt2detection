@@ -17,7 +17,7 @@ import hashlib
 
 from txt2detection.ai_extractor.utils import Detection, DetectionContainer, UUID_NAMESPACE
 
-from datetime import datetime as dt
+from datetime import UTC, datetime as dt
 import uuid
 
 
@@ -179,16 +179,19 @@ class Bundler:
         description,
         confidence,
         labels,
-        created=dt.now(),
+        created=None,
+        modified=None,
         report_id=None,
         external_refs: list=None,
         reference_urls=None,
     ) -> None:
-        self.created = created
+        self.created = created or dt.now(UTC)
+        self.modified = modified or self.created
         self.identity = identity or self.default_identity
         self.tlp_level = TLP_LEVEL.get(tlp_level)
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
+        self.labels = labels or []
 
         self.job_id = f"report--{self.uuid}"
         self.report = Report(
@@ -201,8 +204,8 @@ class Bundler:
             ],  # won't allow creation with empty object_refs
             created=self.created,
             object_marking_refs=[self.tlp_level.value.id],
-            labels=labels,
-            published=dt.now(),
+            labels=self.labels,
+            published=self.created,
             external_references=[
                 {
                     "source_name": "description_md5_hash",
@@ -239,7 +242,7 @@ class Bundler:
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
             "name": detection.title,
-            "labels": self.report.labels,
+            "labels": self.labels,
             "pattern_type": 'sigma',
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,

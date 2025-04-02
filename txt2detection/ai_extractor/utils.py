@@ -68,13 +68,13 @@ class Detection(BaseModel):
         self._custom_id = custom_id.split('--')[-1]
     
     def make_rule(self, bundler: 'Bundler'):
-        labels = bundler.report.labels
+        labels = bundler.labels
         rule = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
         rule.update(
             author=bundler.report.created_by_ref,
             status="experimental",
             license="Apache-2.0",
-            references=["https://github.com/muchdogesec/txt2detection/"] + bundler.reference_urls,
+            references=bundler.reference_urls,
             tags=self.tags + ['txt2detection.'+slugify(x) for x in labels] + ['tlp.'+bundler.tlp_level.name.replace('_', '-')]
         )
         jsonschema.validate(rule, {'$ref': 'https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json'})
