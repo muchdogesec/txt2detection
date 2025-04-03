@@ -84,7 +84,7 @@ python3 txt2detection.py \
 python3 txt2detection.py \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Reference URLs" \
-  --reference_urls "https://www.google.com/", "https://www.facebook.com/" \
+  --reference_urls "https://www.google.com/" "https://www.facebook.com/" \
   --ai_provider openai:gpt-4o \
   --report_id a9928bf1-b0ab-4748-8ab8-47eb7a34ca80
 ```
@@ -103,9 +103,30 @@ python3 txt2detection.py \
 
 ```shell
 python3 txt2detection.py \
-  --input_text "a rule detecting suspicous logins on windows systems" \
+  --input_text "a rule detecting suspicious logins on windows systems" \
   --name "Testing input txt" \
   --ai_provider openai:gpt-4o \
-  --report_id ca20d4a1-e40d-47a9-a454-1324beff4727 \
-  --labels label1,label2
+  --report_id ca20d4a1-e40d-47a9-a454-1324beff4727
+```
+
+## Check license
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Check license" \
+  --ai_provider openai:gpt-4o \
+  --license MIT \
+  --report_id e37506ca-b3e4-45b8-8205-77b815b88d7f
+```
+
+## Check status
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Check license" \
+  --ai_provider openai:gpt-4o \
+  --status stable \
+  --report_id 738f6bd0-e0db-44ea-b880-f24529221cec
 ```
