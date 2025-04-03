@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+import re
 import typing
 import uuid
 from slugify import slugify
@@ -73,12 +74,27 @@ class Detection(BaseModel):
         rule.update(
             author=bundler.report.created_by_ref,
             status="experimental",
-            license="Apache-2.0",
+            license=bundler.license,
             references=bundler.reference_urls,
-            tags=self.tags + ['txt2detection.'+slugify(x) for x in labels] + ['tlp.'+bundler.tlp_level.name.replace('_', '-')]
+            tags=list(dict.fromkeys(['tlp.'+bundler.tlp_level.name.replace('_', '-')] + self.tags + [self.label_as_tag(label) for label in labels]))
         )
+        for k, v in list(rule.items()):
+            if not v:
+                rule.pop(k, None)
         jsonschema.validate(rule, {'$ref': 'https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json'})
         return yaml.dump(rule, sort_keys=False, indent=4)
+    
+    @staticmethod
+    def label_as_tag(label: str):
+        label = label.lower()
+        tag_pattern = re.compile(r"^[a-z0-9_-]+\.[a-z0-9._-]+$")
+        no_ns_pattern = re.compile(r"^[a-z0-9._-]+$")
+        if tag_pattern.match(label):
+            return label
+        elif no_ns_pattern.match(label):
+            return 'txt2detection.'+label
+        else:
+            return 'txt2detection.'+slugify(label)
 
     @property
     def mitre_attack_ids(self):

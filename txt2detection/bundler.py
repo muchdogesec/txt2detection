@@ -184,6 +184,7 @@ class Bundler:
         report_id=None,
         external_refs: list=None,
         reference_urls=None,
+        license=None,
     ) -> None:
         self.created = created or dt.now(UTC)
         self.modified = modified or self.created
@@ -192,6 +193,7 @@ class Bundler:
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
         self.labels = labels or []
+        self.license = license
 
         self.job_id = f"report--{self.uuid}"
         self.report = Report(
@@ -250,6 +252,10 @@ class Bundler:
             "external_references": [],
             "confidence": detection.confidence,
         }
+        logger.debug(f"===== rule {detection.id} =====")
+        logger.debug("```yaml\n"+indicator['pattern']+"\n```")
+        logger.debug(f" =================== end of rule =================== ")
+
         self.add_ref(indicator)
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
