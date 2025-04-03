@@ -44,7 +44,7 @@ from .bundler import Bundler
 import shutil
 
 
-from .utils import parse_model
+from .utils import valid_licenses, parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -97,7 +97,7 @@ def parse_args():
     parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
     parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
-    parser.add_argument("--license", help="license for the rule", default=None, metavar="[LICENSE]")
+    parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
 
     args: Args = parser.parse_args()
     
