@@ -114,7 +114,7 @@ def parse_args():
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs['external_refs'], created=kwargs['created'], reference_urls=kwargs['reference_urls'], license=kwargs['license'])
+    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs.get('external_refs'), created=kwargs.get('created'), reference_urls=kwargs.get('reference_urls', []), license=kwargs.get('license'))
     detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler

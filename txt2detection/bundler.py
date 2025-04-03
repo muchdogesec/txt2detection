@@ -205,6 +205,7 @@ class Bundler:
                 f"note--{self.uuid}"
             ],  # won't allow creation with empty object_refs
             created=self.created,
+            modified=self.modified,
             object_marking_refs=[self.tlp_level.value.id],
             labels=self.labels,
             published=self.created,
