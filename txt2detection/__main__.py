@@ -44,7 +44,7 @@ from .bundler import Bundler
 import shutil
 
 
-from .utils import valid_licenses, parse_model
+from .utils import STATUSES, valid_licenses, parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -63,6 +63,7 @@ class Args:
     external_refs: dict[str, str]
     confidence: int
     reference_urls: list[str]
+    status: str
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -98,6 +99,7 @@ def parse_args():
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
     parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
     parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
+    parser.add_argument("--status", default='experimental', help="valid status for the sigma rule", metavar="sigma status", choices=STATUSES)
 
     args: Args = parser.parse_args()
     
@@ -113,8 +115,10 @@ def parse_args():
 
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
+    status = kwargs.setdefault('status', 'experimental')
+    assert status in STATUSES, f"status must be one of {STATUSES}"
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs.get('external_refs'), created=kwargs.get('created'), reference_urls=kwargs.get('reference_urls', []), license=kwargs.get('license'))
+    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, **kwargs)
     detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler

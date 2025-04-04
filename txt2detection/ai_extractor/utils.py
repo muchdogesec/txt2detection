@@ -73,7 +73,7 @@ class Detection(BaseModel):
         rule = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
         rule.update(
             author=bundler.report.created_by_ref,
-            status="experimental",
+            status=bundler.indicator_status,
             license=bundler.license,
             references=bundler.reference_urls,
             tags=list(dict.fromkeys(['tlp.'+bundler.tlp_level.name.replace('_', '-')] + self.tags + [self.label_as_tag(label) for label in labels]))

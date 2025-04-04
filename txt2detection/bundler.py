@@ -186,6 +186,8 @@ class Bundler:
         external_refs: list=None,
         reference_urls=None,
         license=None,
+        status='experimental',
+        **kwargs,
     ) -> None:
         self.created = created or dt.now(UTC)
         self.modified = modified or self.created
@@ -195,6 +197,7 @@ class Bundler:
         self.reference_urls = reference_urls or []
         self.labels = labels or []
         self.license = license
+        self.indicator_status = status
 
         self.job_id = f"report--{self.uuid}"
         self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
@@ -252,7 +255,7 @@ class Bundler:
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": self.url_refs,
+            "external_references": self.url_refs + [dict(source_name="txt2detection-status", external_id=self.indicator_status)],
             "confidence": detection.confidence,
         }
         logger.debug(f"===== rule {detection.id} =====")

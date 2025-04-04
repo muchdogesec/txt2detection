@@ -40,3 +40,6 @@ def valid_licenses():
         resp = requests.get("https://github.com/spdx/license-list-data/raw/refs/heads/main/json/licenses.json")
         return {l['licenseId']: l['name'] for l in resp.json()['licenses']}
     return get_licenses(datetime.now().date().isoformat())
+
+
+STATUSES = ['stable', 'test', 'experimental', 'deprecated', 'unsupported']
