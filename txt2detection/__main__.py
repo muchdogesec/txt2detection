@@ -44,7 +44,7 @@ from .bundler import Bundler
 import shutil
 
 
-from .utils import parse_model
+from .utils import STATUSES, valid_licenses, parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -58,11 +58,12 @@ class Args:
     labels: list[str]
     created: datetime
     use_identity: Identity
-    detection_language: str
     ai_provider: BaseAIExtractor
     report_id: uuid.UUID
     external_refs: dict[str, str]
     confidence: int
+    reference_urls: list[str]
+    status: str
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -87,7 +88,7 @@ def parse_args():
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
-    parser.add_argument('--confidence', help='report confidence', type=int, default=0)
+    parser.add_argument('--confidence', help='report confidence', type=int, default=None)
     parser.add_argument('--labels', type=lambda s: s.split(','), 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
     parser.add_argument('--created', type=parse_created, 
@@ -96,6 +97,9 @@ def parse_args():
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
     parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
+    parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
+    parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
+    parser.add_argument("--status", default='experimental', help="valid status for the sigma rule", metavar="sigma status", choices=STATUSES)
 
     args: Args = parser.parse_args()
     
@@ -111,8 +115,10 @@ def parse_args():
 
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
+    status = kwargs.setdefault('status', 'experimental')
+    assert status in STATUSES, f"status must be one of {STATUSES}"
     validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, external_refs=kwargs['external_refs'], created=kwargs['created'])
+    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, **kwargs)
     detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler

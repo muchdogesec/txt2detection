@@ -17,8 +17,9 @@ import hashlib
 
 from txt2detection.ai_extractor.utils import Detection, DetectionContainer, UUID_NAMESPACE
 
-from datetime import datetime as dt
+from datetime import UTC, datetime as dt
 import uuid
+from stix2 import parse as parse_stix
 
 
 
@@ -179,16 +180,27 @@ class Bundler:
         description,
         confidence,
         labels,
-        created=dt.now(),
+        created=None,
+        modified=None,
         report_id=None,
         external_refs: list=None,
+        reference_urls=None,
+        license=None,
+        status='experimental',
+        **kwargs,
     ) -> None:
-        self.created = created
+        self.created = created or dt.now(UTC)
+        self.modified = modified or self.created
         self.identity = identity or self.default_identity
         self.tlp_level = TLP_LEVEL.get(tlp_level)
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
+        self.reference_urls = reference_urls or []
+        self.labels = labels or []
+        self.license = license
+        self.indicator_status = status
 
         self.job_id = f"report--{self.uuid}"
+        self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
         self.report = Report(
             created_by_ref=self.identity.id,
             name=name,
@@ -198,15 +210,16 @@ class Bundler:
                 f"note--{self.uuid}"
             ],  # won't allow creation with empty object_refs
             created=self.created,
+            modified=self.modified,
             object_marking_refs=[self.tlp_level.value.id],
-            labels=labels,
-            published=dt.now(),
+            labels=self.labels,
+            published=self.created,
             external_references=[
                 {
                     "source_name": "description_md5_hash",
                     "external_id": hashlib.md5(description.encode()).hexdigest(),
                 },
-            ] + (external_refs or []),
+            ] + (external_refs or []) + self.url_refs,
             confidence=confidence,
         )
         self.report.object_refs.clear()  # clear object refs
@@ -237,15 +250,18 @@ class Bundler:
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
             "name": detection.title,
-            "labels": self.report.labels,
+            "labels": self.labels,
             "pattern_type": 'sigma',
-            "pattern": detection.make_rule(self.report.labels),
+            "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": [],
+            "external_references": self.url_refs + [dict(source_name="txt2detection-status", external_id=self.indicator_status)],
             "confidence": detection.confidence,
         }
-        self.add_ref(indicator)
+        logger.debug(f"===== rule {detection.id} =====")
+        logger.debug("```yaml\n"+indicator['pattern']+"\n```")
+        logger.debug(f" =================== end of rule =================== ")
+
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj, 'mitre-attack')
@@ -253,6 +269,8 @@ class Bundler:
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj, 'nvd-cve')
+            
+        self.add_ref(parse_stix(indicator, allow_custom=True))
 
     def add_relation(self, indicator, target_object, type='mitre-attack'):
         ext_refs = []
