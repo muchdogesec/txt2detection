@@ -262,7 +262,6 @@ class Bundler:
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
         logger.debug(f" =================== end of rule =================== ")
 
-        self.add_ref(parse_stix(indicator, allow_custom=True))
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj, 'mitre-attack')
@@ -270,6 +269,8 @@ class Bundler:
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj, 'nvd-cve')
+            
+        self.add_ref(parse_stix(indicator, allow_custom=True))
 
     def add_relation(self, indicator, target_object, type='mitre-attack'):
         ext_refs = []
