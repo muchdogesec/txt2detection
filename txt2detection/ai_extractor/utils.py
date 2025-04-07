@@ -1,6 +1,8 @@
 import io
 import json
 import logging
+import re
+import typing
 import uuid
 from slugify import slugify
 
@@ -11,6 +13,9 @@ import jsonschema
 from pydantic import BaseModel, Field
 from llama_index.core.output_parsers import PydanticOutputParser
 import yaml
+
+if typing.TYPE_CHECKING:    
+    from txt2detection.bundler import Bundler
 
 UUID_NAMESPACE = uuid.UUID('116f8cc9-4c31-490a-b26d-342627b12401')
 
@@ -63,16 +68,33 @@ class Detection(BaseModel):
     def id(self, custom_id):
         self._custom_id = custom_id.split('--')[-1]
     
-    def make_rule(self, labels: list):
+    def make_rule(self, bundler: 'Bundler'):
+        labels = bundler.labels
         rule = dict(id=self.id, **self.model_dump(exclude=["indicator_types"]))
         rule.update(
-            status="experimental",
-            license="Apache-2.0",
-            references=["https://github.com/muchdogesec/txt2detection/"],
-            tags=self.tags + ['txt2detection.'+slugify(x) for x in labels]
+            author=bundler.report.created_by_ref,
+            status=bundler.indicator_status,
+            license=bundler.license,
+            references=bundler.reference_urls,
+            tags=list(dict.fromkeys(['tlp.'+bundler.tlp_level.name.replace('_', '-')] + self.tags + [self.label_as_tag(label) for label in labels]))
         )
+        for k, v in list(rule.items()):
+            if not v:
+                rule.pop(k, None)
         jsonschema.validate(rule, {'$ref': 'https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json'})
         return yaml.dump(rule, sort_keys=False, indent=4)
+    
+    @staticmethod
+    def label_as_tag(label: str):
+        label = label.lower()
+        tag_pattern = re.compile(r"^[a-z0-9_-]+\.[a-z0-9._-]+$")
+        no_ns_pattern = re.compile(r"^[a-z0-9._-]+$")
+        if tag_pattern.match(label):
+            return label
+        elif no_ns_pattern.match(label):
+            return 'txt2detection.'+label
+        else:
+            return 'txt2detection.'+slugify(label)
 
     @property
     def mitre_attack_ids(self):
