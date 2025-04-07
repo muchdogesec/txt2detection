@@ -24,6 +24,7 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"detection"`: Valid sigma rule detection
 - `"indicator_types"`: One or more STIX v2.1 indicator.indicator_types
 - `"confidence"`: Integer from 0 to 100 denoting the confidence you have in the generated rule/detection. Where 0 is unsure, 1 is very low and 100 is very high!
+- `"level"`: Level describes the criticality of a triggered rule. Either low, medium, high, critical, informational.
 
 ### **Indicator Types**
 - `"anomalous-activity"`: Unexpected, or unusual activity that may not necessarily be malicious or indicate compromise. This type of activity may include reconnaissance-like behavior such as port scans or version identification, network behavior anomalies, and asset and/or user behavioral anomalies.
@@ -94,6 +95,17 @@ You need to generate a structured `detection` object representing a set of **sea
   }=
 }
 ```
+
+
+### **Level**
+
+The level field contains one of five string values. It describes the criticality of a triggered rule. While low and medium level events have an informative character, events with high and critical level should lead to immediate reviews by security analysts.
+
+informational: Rule is intended for enrichment of events, e.g. by tagging them. No case or alerting should be triggered by such rules because it is expected that a huge amount of events will match these rules.
+low: Notable event but rarely an incident. Low rated events can be relevant in high numbers or combination with others. Immediate reaction shouldn't be necessary, but a regular review is recommended.
+medium: Relevant event that should be reviewed manually on a more frequent basis.
+high: Relevant event that should trigger an internal alert and requires a prompt review.
+critical: Highly relevant event that indicates an incident. Critical events should be reviewed immediately. It is used only for cases in which probability borders certainty.
 
 Make sure your response follows this format and adheres to the rules above.
 
