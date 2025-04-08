@@ -3,13 +3,12 @@ from typing import Type
 from llama_index.core.program import LLMTextCompletionProgram
 
 import textwrap
-from llama_index.core import PromptTemplate
 from llama_index.core.llms.llm import LLM
-import yaml
 
 from txt2detection.ai_extractor import prompts
 
-from .utils import DetectionContainer, ParserWithLogging, DetectionContainer
+from txt2detection.ai_extractor.utils import ParserWithLogging
+from txt2detection.models import DetectionContainer, DetectionContainer
 from llama_index.core.utils import get_tokenizer
 
 

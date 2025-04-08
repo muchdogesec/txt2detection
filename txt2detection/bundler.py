@@ -15,111 +15,18 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
-from txt2detection.ai_extractor.utils import Detection, DetectionContainer, UUID_NAMESPACE
+from txt2detection.models import Detection, DetectionContainer, UUID_NAMESPACE
 
 from datetime import UTC, datetime as dt
 import uuid
 from stix2 import parse as parse_stix
 
+from txt2detection.models import TLP_LEVEL
+from txt2detection.utils import STATUSES
+
 
 
 logger = logging.getLogger("txt2detection.bundler")
-
-
-class TLP_LEVEL(enum.Enum):
-    CLEAR = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:CLEAR",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "clear",
-            }
-        },
-    )
-    GREEN = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--bab4a63c-aed9-4cf5-a766-dfca5abac2bb",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:GREEN",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "green",
-            }
-        },
-    )
-    AMBER = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber",
-            }
-        },
-    )
-    AMBER_STRICT = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--939a9414-2ddd-4d32-a0cd-375ea402b003",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER+STRICT",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber+strict",
-            }
-        },
-    )
-    RED = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:RED",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "red",
-            }
-        },
-    )
-
-    @classmethod
-    def levels(cls):
-        return dict(
-            clear=cls.CLEAR,
-            green=cls.GREEN,
-            amber=cls.AMBER,
-            amber_strict=cls.AMBER_STRICT,
-            red=cls.RED,
-        )
-
-    @classmethod
-    def values(cls):
-        return [
-            cls.CLEAR.value,
-            cls.GREEN.value,
-            cls.AMBER.value,
-            cls.AMBER_STRICT.value,
-            cls.RED.value,
-        ]
-
-    @classmethod
-    def get(cls, level):
-        if isinstance(level, cls):
-            return level
-        if level not in cls.levels():
-            raise Exception(f'unsupported tlp level: `{level}`')
-        return cls.levels()[level]
-
-    @property
-    def name(self):
-        return super().name.lower()
-
 
 class Bundler:
     identity = None
@@ -198,6 +105,7 @@ class Bundler:
         self.labels = labels or []
         self.license = license
         self.indicator_status = status
+        assert status in STATUSES, f"status must be one of {STATUSES}"
 
         self.job_id = f"report--{self.uuid}"
         self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
@@ -241,9 +149,10 @@ class Bundler:
             self.bundle.objects.append(sdo)
 
     def add_rule_indicator(self, detection: Detection):
+        detection._bundler = self
         indicator = {
             "type": "indicator",
-            "id": "indicator--"+detection.id,
+            "id": "indicator--"+str(detection.detection_id),
             "spec_version": "2.1",
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
@@ -258,7 +167,7 @@ class Bundler:
             "external_references": self.url_refs + [dict(source_name="txt2detection-status", external_id=self.indicator_status)],
             "confidence": detection.confidence,
         }
-        logger.debug(f"===== rule {detection.id} =====")
+        logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
         logger.debug(f" =================== end of rule =================== ")
 
