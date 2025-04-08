@@ -147,19 +147,6 @@ class BaseDetection(BaseModel):
     _custom_id = None
     _bundler: 'Bundler'
     
-
-    @property
-    def rule(self):
-        data = self.model_dump(exclude=["name", "indicator_types"])
-        data.update(
-            status="experimental",
-            license="Apache-2.0",
-            references="https://github.com/muchdogesec/txt2detection/",
-            tags=self.tags + self.labels
-        )
-        return yaml.dump(data, sort_keys=False, indent=4)
-    
-    
     @property
     def detection_id(self):
         return str(self._custom_id or getattr(self, 'id', None) or uuid.uuid4())
@@ -248,7 +235,7 @@ class Detection(BaseDetection):
     
 
 
-class SigmaRule(BaseDetection):
+class SigmaRuleDetection(BaseDetection):
     title: str
     id: Optional[UUID] = None
     related: Optional[list[dict]] = None

@@ -13,7 +13,7 @@ from stix2 import Identity
 import yaml
 
 from txt2detection.ai_extractor.base import BaseAIExtractor
-from txt2detection.models import DetectionContainer, SigmaRule
+from txt2detection.models import DetectionContainer, SigmaRuleDetection
 from txt2detection.utils import validate_token_count
 
 def configureLogging():
@@ -123,7 +123,8 @@ def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels,
             identity = make_identity(detection.author)
         kwargs.setdefault('created', detection.created)
         kwargs.setdefault('modified', detection.modified)
-        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", detection.confidence, detection.labels, report_id=report_id, **kwargs)
+        kwargs['status'] = detection.status or kwargs.get('status')
+        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", detection.confidence, labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
         detections.detections.append(detection)
     else:
@@ -135,7 +136,7 @@ def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels,
 
 def get_sigma_detections(sigma: str):
     obj = yaml.safe_load(io.StringIO(sigma))
-    return SigmaRule.model_validate(obj)
+    return SigmaRuleDetection.model_validate(obj)
     
 
     
