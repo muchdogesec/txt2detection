@@ -2,18 +2,18 @@ import argparse
 from datetime import datetime
 
 from dataclasses import dataclass
-from functools import partial
-from itertools import chain
+import io
 import json
 import os
 from pathlib import Path
 import logging
 import re
-import sys
 import uuid
-from stix2 import Identity, parse as parse_stix
+from stix2 import Identity
+import yaml
 
 from txt2detection.ai_extractor.base import BaseAIExtractor
+from txt2detection.models import DetectionContainer, SigmaRule
 from txt2detection.utils import validate_token_count
 
 def configureLogging():
@@ -39,12 +39,11 @@ def setLogFile(logger, file: Path):
     logger.addHandler(handler)
     logger.info("=====================txt2stix======================")
 
-from dotenv import load_dotenv
 from .bundler import Bundler
 import shutil
 
 
-from .utils import STATUSES, valid_licenses, parse_model
+from .utils import STATUSES, make_identity, valid_licenses, parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -84,6 +83,7 @@ def parse_args():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--input_file', help='The file to be converted. Must be .txt', type=lambda x: Path(x).read_text())
     group.add_argument('--input_text', help='The text to be converted')
+    group.add_argument('--sigma_file', help='The sigma file to be converted. Must be .yml', type=lambda x: Path(x).read_text())
     parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
@@ -95,7 +95,7 @@ def parse_args():
             help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')
     parser.add_argument('--use_identity', type=parse_identity,
             help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
-    parser.add_argument("--ai_provider", required=True, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
+    parser.add_argument("--ai_provider", required=False, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
     parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
     parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
@@ -106,6 +106,8 @@ def parse_args():
     if args.created is None:
         args.created = datetime.now()
 
+    if not args.sigma_file:
+        assert args.ai_provider, "--ai_provider is required in file or txt mode"
     args.input_text = args.input_text or args.input_file
 
     if not args.report_id:
@@ -115,13 +117,26 @@ def parse_args():
 
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
-    status = kwargs.setdefault('status', 'experimental')
-    assert status in STATUSES, f"status must be one of {STATUSES}"
-    validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-    bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, **kwargs)
-    detections = ai_provider.get_detections(input_text)
+    if sigma := kwargs.get('sigma_file'):
+        detection = get_sigma_detections(sigma)
+        if detection.author:
+            identity = make_identity(detection.author)
+        kwargs.setdefault('created', detection.created)
+        kwargs.setdefault('modified', detection.modified)
+        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", detection.confidence, detection.labels, report_id=report_id, **kwargs)
+        detections = DetectionContainer(success=True, detections=[])
+        detections.detections.append(detection)
+    else:
+        validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
+        bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, **kwargs)
+        detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler
+
+def get_sigma_detections(sigma: str):
+    obj = yaml.safe_load(io.StringIO(sigma))
+    return SigmaRule.model_validate(obj)
+    
 
     
 def main(args: Args):

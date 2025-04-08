@@ -1,13 +1,18 @@
 from datetime import datetime
 from functools import lru_cache
-from pathlib import Path
 from types import SimpleNamespace
+import uuid
 import requests
-import yaml
 from .ai_extractor import ALL_AI_EXTRACTORS, BaseAIExtractor, ModelError
-from importlib import resources
-import txt2detection
 import logging
+
+import enum
+import logging
+import requests
+from stix2 import Identity
+
+from .models import UUID_NAMESPACE
+
 
 class DetectionLanguage(SimpleNamespace):
     pass
@@ -25,6 +30,9 @@ def parse_model(value: str):
     except Exception as e:
         raise ModelError(f"Unable to initialize model `{value}`") from e
 
+def make_identity(name):
+    from .bundler import Bundler
+    return Identity(id='identity--'+str(uuid.uuid5(UUID_NAMESPACE, f"txt2detection+{name}")), name=name, created_by_ref=Bundler.default_identity.id, created=datetime(2020, 1, 1), modified=datetime(2020, 1, 1))
 
 
 def validate_token_count(max_tokens, input, extractor: BaseAIExtractor):
