@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+from datetime import UTC, date, datetime
 
 from dataclasses import dataclass
 import io
@@ -67,7 +67,7 @@ class Args:
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
     try:
-        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S').replace(tzinfo=UTC)
     except ValueError:
         raise argparse.ArgumentTypeError("Invalid date format. Use YYYY-MM-DDTHH:MM:SS.")
 
@@ -115,17 +115,20 @@ def parse_args():
 
     return args
 
+def as_date(d: 'date|datetime'):
+    if isinstance(d, datetime):
+        return d.date()
+    return d
 
 def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     if sigma := kwargs.get('sigma_file'):
         detection = get_sigma_detections(sigma)
         if detection.author:
             identity = make_identity(detection.author)
-        kwargs.setdefault('created', detection.created)
-        kwargs.setdefault('modified', detection.modified)
-        reference_urls = kwargs.setdefault('reference_urls', [])
-        reference_urls.extend(detection.references or [])
-        kwargs['status'] = detection.status or kwargs.get('status')
+        detection.created = as_date(detection.created or kwargs.get('created'))
+        detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
+        detection.references += kwargs.setdefault('reference_urls', [])
+        detection.status = kwargs['status'] = detection.status or kwargs.get('status')
         bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", detection.confidence, labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
         detections.detections.append(detection)
@@ -136,7 +139,7 @@ def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels,
     bundler.bundle_detections(detections)
     return bundler
 
-def get_sigma_detections(sigma: str):
+def get_sigma_detections(sigma: str) -> SigmaRuleDetection:
     obj = yaml.safe_load(io.StringIO(sigma))
     return SigmaRuleDetection.model_validate(obj)
     

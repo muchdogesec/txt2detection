@@ -16,10 +16,10 @@ from stix2 import (
     MarkingDefinition,
 )
 
-if typing.TYPE_CHECKING:    
+if typing.TYPE_CHECKING:
     from txt2detection.bundler import Bundler
 
-UUID_NAMESPACE = uuid.UUID('116f8cc9-4c31-490a-b26d-342627b12401')
+UUID_NAMESPACE = uuid.UUID("116f8cc9-4c31-490a-b26d-342627b12401")
 
 MITRE_TACTIC_MAP = {
     "initial-access": "TA0001",
@@ -124,14 +124,12 @@ class TLP_LEVEL(enum.Enum):
         if isinstance(level, cls):
             return level
         if level not in cls.levels():
-            raise Exception(f'unsupported tlp level: `{level}`')
+            raise Exception(f"unsupported tlp level: `{level}`")
         return cls.levels()[level]
 
     @property
     def name(self):
         return super().name.lower()
-
-
 
 
 class BaseDetection(BaseModel):
@@ -145,42 +143,65 @@ class BaseDetection(BaseModel):
     confidence: int
     level: str
     _custom_id = None
-    _bundler: 'Bundler'
-    
+    _bundler: "Bundler"
+
     @property
     def detection_id(self):
-        return str(self._custom_id or getattr(self, 'id', None) or uuid.uuid4())
-    
+        return str(self._custom_id or getattr(self, "id", None) or uuid.uuid4())
+
     @detection_id.setter
     def detection_id(self, custom_id):
-        self._custom_id = custom_id.split('--')[-1]
+        self._custom_id = custom_id.split("--")[-1]
 
     @property
     def tlp_level(self):
         for tag in self.tags:
-            ns, _, level = tag.partition('.')
-            if ns != 'tlp':
+            ns, _, level = tag.partition(".")
+            if ns != "tlp":
                 continue
-            if tlp_level := TLP_LEVEL.get(level.replace('-', '_')):
+            if tlp_level := TLP_LEVEL.get(level.replace("-", "_")):
                 return tlp_level
         return None
-    
-    def make_rule(self, bundler: 'Bundler'):
+
+    def make_rule(self, bundler: "Bundler"):
         labels = bundler.labels
-        rule = dict(id=self.detection_id, **self.model_dump(exclude=["indicator_types", "id"], mode='json'))
+        rule = dict(
+            id=self.detection_id,
+            **self.model_dump(
+                exclude=["indicator_types", "id"], 
+                mode="json",
+                by_alias=True
+            ),
+        )
         rule.update(
             author=bundler.report.created_by_ref,
             status=bundler.indicator_status,
             license=bundler.license,
             references=bundler.reference_urls,
-            tags=list(dict.fromkeys(['tlp.'+bundler.tlp_level.name.replace('_', '-')] + self.tags + [self.label_as_tag(label) for label in labels]))
+            tags=list(
+                dict.fromkeys(
+                    ["tlp." + bundler.tlp_level.name.replace("_", "-")]
+                    + self.tags
+                    + [self.label_as_tag(label) for label in labels]
+                )
+            ),
         )
         for k, v in list(rule.items()):
             if not v:
                 rule.pop(k, None)
-        jsonschema.validate(rule, {'$ref': 'https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json'})
+                
+        jsonschema.validate(
+            rule,
+            {
+                "$ref": "https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json"
+            },
+        )
+        if getattr(self, 'created', 0):
+            rule.update(date=self.created)
+        if getattr(self, 'modified', 0):
+            rule.update(modified=self.modified)
         return yaml.dump(rule, sort_keys=False, indent=4)
-    
+
     @staticmethod
     def label_as_tag(label: str):
         label = label.lower()
@@ -189,10 +210,10 @@ class BaseDetection(BaseModel):
         if tag_pattern.match(label):
             return label
         elif no_ns_pattern.match(label):
-            return 'txt2detection.'+label
+            return "txt2detection." + label
         else:
-            return 'txt2detection.'+slugify(label)
-    
+            return "txt2detection." + slugify(label)
+
     @property
     def labels(self):
         labels = []
@@ -201,7 +222,7 @@ class BaseDetection(BaseModel):
             if namespace in ["attack", "cve", "tlp"]:
                 continue
             labels.append(tag)
-        return labels            
+        return labels
 
     @property
     def mitre_attack_ids(self):
@@ -221,18 +242,18 @@ class BaseDetection(BaseModel):
                 retval.append(namespace.upper() + "-" + label_id)
         return retval
 
+
 class Detection(BaseDetection):
 
-    @computed_field(alias='date')
+    @computed_field(alias="date")
     @property
     def created(self) -> date:
         return self._bundler.report.created.date()
-    
+
     @computed_field
     @property
     def modified(self) -> date:
         return self._bundler.report.modified.date()
-    
 
 
 class SigmaRuleDetection(BaseDetection):
@@ -245,9 +266,9 @@ class SigmaRuleDetection(BaseDetection):
     description: Optional[str] = None
     license: Optional[str] = None
     author: Optional[str] = None
-    references: Optional[List[str]] = None
-    created: Optional['date'] = Field(alias='date', default=None)
-    modified: Optional['date'] = None
+    references: Optional[List[str]] = Field(default_factory=list)
+    created: Optional["date"] = Field(alias="date", default=None)
+    modified: Optional["date"] = None
     logsource: dict
     detection: dict
     fields: Optional[List[str]] = None
@@ -256,18 +277,15 @@ class SigmaRuleDetection(BaseDetection):
     tags: Optional[List[str]] = None
     scope: Optional[List[str]] = None
 
-
     def model_post_init(self, __context):
         if self.id:
             sigma_id = self.id
             self.related = self.related or []
-            self.related.append(dict(id=sigma_id, type='derived'))
+            self.related.append(dict(id=sigma_id, type="derived"))
             self.id = None
         return super().model_post_init(__context)
-
 
 
 class DetectionContainer(BaseModel):
     success: bool
     detections: list[Detection]
-
