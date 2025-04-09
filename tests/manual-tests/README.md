@@ -1,4 +1,4 @@
-# Tests
+# AI Rule Gen Tests
 
 ## Check TLP
 
@@ -130,3 +130,16 @@ python3 txt2detection.py \
   --status stable \
   --report_id 738f6bd0-e0db-44ea-b880-f24529221cec
 ```
+
+# Manual Rule Gen
+
+## No extra properties
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/demo-sigma-rule.yml \
+  --name "Manual Rule Gen" \
+  --confidence 99 \
+  --report_id 2f1bbc98-52ce-4380-a069-031e12a838be
+```
+

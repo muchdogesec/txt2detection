@@ -68,10 +68,14 @@ To see more information about how to set the variables, and what they do, read t
 ### Run
 
 ```shell
-python3 txt2detection.py \
-  --input_file FILE.txt \
-  ...
+python3 txt2detection.py
 ```
+
+There are 2 ways in which you can use txt2detection, either starting with a text file / text string or with an existing Sigma Rule.
+
+#### File / Text Input
+
+Use this mode to generate a set of rules from an input text file;
 
 * `--input_file` (required, if not using `--input_text`): the file to be converted. Must be `.txt`
 * `--input_text` (required, if not using `--input_file`): a text string that will be analysed to create a rule by the AI if you don't want to use a file.
@@ -92,6 +96,13 @@ python3 txt2detection.py \
     * Provider (env var required `ANTHROPIC_API_KEY`): `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
     * Provider (env var required `GOOGLE_API_KEY`): `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
     * Provider (env var required `DEEPSEEK_API_KEY`): `deepseek:`, models `deepseek-chat` ([More here](https://api-docs.deepseek.com/quick_start/pricing))
+
+#### Sigma rule input
+
+Use this mode to turn a Sigma Rule into a STIX bundle;
+
+
+## Examples
 
 See `tests/manual-tests/README.md` for some example commands.
 
