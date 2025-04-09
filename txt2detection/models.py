@@ -140,7 +140,6 @@ class BaseDetection(BaseModel):
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str] = Field(default_factory=list)
-    confidence: int
     level: str
     _custom_id = None
     _bundler: "Bundler"
