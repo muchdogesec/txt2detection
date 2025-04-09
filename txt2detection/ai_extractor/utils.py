@@ -44,6 +44,7 @@ class Detection(BaseModel):
     tags: list[str]
     indicator_types: list[str]
     confidence: int
+    level: str
     _custom_id = None
 
     @property
