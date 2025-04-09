@@ -130,6 +130,7 @@ class Bundler:
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
+        self.all_objects = set()
 
     def set_defaults(self):
         # self.value.extend(TLP_LEVEL.values()) # adds all tlp levels
@@ -142,9 +143,12 @@ class Bundler:
 
     def add_ref(self, sdo):
         sdo_id = sdo["id"]
-        if sdo_id not in self.report.object_refs:
+        if sdo_id in self.all_objects:
+            return
+        self.bundle.objects.append(sdo)
+        if sdo_id not in self.report.object_refs and sdo.get('type') == 'indicator':
             self.report.object_refs.append(sdo_id)
-            self.bundle.objects.append(sdo)
+        self.all_objects.add(sdo_id)
 
     def add_rule_indicator(self, detection: Detection):
         detection._bundler = self
