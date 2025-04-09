@@ -127,7 +127,7 @@ def run_txt2detection(name, identity, tlp_level, input_text, labels, report_id, 
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
         detection.references += kwargs.setdefault('reference_urls', [])
         detection.status = kwargs['status'] = detection.status or kwargs.get('status')
-        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", labels, report_id=report_id, **kwargs)
+        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", (labels or [])+detection.labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
         detections.detections.append(detection)
     else:
