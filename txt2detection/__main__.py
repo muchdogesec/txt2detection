@@ -60,7 +60,6 @@ class Args:
     ai_provider: BaseAIExtractor
     report_id: uuid.UUID
     external_refs: dict[str, str]
-    confidence: int
     reference_urls: list[str]
     status: str
 
@@ -88,7 +87,6 @@ def parse_args():
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
-    parser.add_argument('--confidence', help='report confidence', type=int, default=None)
     parser.add_argument('--labels', type=lambda s: s.split(','), 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
     parser.add_argument('--created', type=parse_created, 
@@ -120,7 +118,7 @@ def as_date(d: 'date|datetime'):
         return d.date()
     return d
 
-def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
+def run_txt2detection(name, identity, tlp_level, input_text, labels, report_id, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     if sigma := kwargs.get('sigma_file'):
         detection = get_sigma_detections(sigma)
         if detection.author:
@@ -129,12 +127,12 @@ def run_txt2detection(name, identity, tlp_level, input_text, confidence, labels,
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
         detection.references += kwargs.setdefault('reference_urls', [])
         detection.status = kwargs['status'] = detection.status or kwargs.get('status')
-        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", confidence, labels, report_id=report_id, **kwargs)
+        bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
         detections.detections.append(detection)
     else:
         validate_token_count(int(os.getenv('INPUT_TOKEN_LIMIT', 0)), input_text, ai_provider)
-        bundler = Bundler(name, identity, tlp_level, input_text, confidence, labels, report_id=report_id, **kwargs)
+        bundler = Bundler(name, identity, tlp_level, input_text, labels, report_id=report_id, **kwargs)
         detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
     return bundler
@@ -150,7 +148,6 @@ def main(args: Args):
     setLogFile(logging.root, Path(f"logs/log-{args.report_id}.log"))
     kwargs = args.__dict__
     kwargs['identity'] = args.use_identity
-    # bundler = run_txt2detection(args.name, args.use_identity, args.tlp_level, args.input_text, args.confidence, args.labels, args.report_id, args.ai_provider, **kwargs)
     bundler = run_txt2detection(**kwargs)
 
     output_dir = Path("./output")/str(bundler.bundle.id)

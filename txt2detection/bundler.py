@@ -85,7 +85,6 @@ class Bundler:
         identity,
         tlp_level,
         description,
-        confidence,
         labels,
         created=None,
         modified=None,
@@ -128,7 +127,6 @@ class Bundler:
                     "external_id": hashlib.md5(description.encode()).hexdigest(),
                 },
             ] + (external_refs or []) + self.url_refs,
-            confidence=confidence,
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
