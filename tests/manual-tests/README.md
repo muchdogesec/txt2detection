@@ -44,29 +44,6 @@ python3 txt2detection.py \
   --report_id 17ea21d3-a73d-44ec-bb12-eb1d34890027
 ```
 
-## Check confidence score
-
-No confidence in report
-
-```shell
-python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-56520.txt \
-  --name "No confidence in report" \
-  --ai_provider openai:gpt-4o \
-  --report_id 90403840-4ea8-4ef0-9ce5-0aa8195cf501
-```
-
-confidence in report
-
-```shell
-python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-56520.txt \
-  --name "confidence in report" \
-  --confidence 99 \
-  --ai_provider openai:gpt-4o \
-  --report_id 5ab62152-3d0b-49c3-a8bc-2e8c059bf2c4
-```
-
 ## External references
 
 ```shell
@@ -125,7 +102,7 @@ python3 txt2detection.py \
 ```shell
 python3 txt2detection.py \
   --input_file tests/files/CVE-2024-56520.txt \
-  --name "Check license" \
+  --name "Check status" \
   --ai_provider openai:gpt-4o \
   --status stable \
   --report_id 738f6bd0-e0db-44ea-b880-f24529221cec
@@ -133,13 +110,12 @@ python3 txt2detection.py \
 
 # Manual Rule Gen
 
-## No extra properties
+## Check that derived-from is created
 
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/demo-sigma-rule.yml \
   --name "Manual Rule Gen" \
-  --confidence 99 \
   --report_id 2f1bbc98-52ce-4380-a069-031e12a838be
 ```
 

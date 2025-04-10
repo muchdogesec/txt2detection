@@ -201,7 +201,7 @@ class Bundler:
             target_ref=target_object['id'],
             relationship_type=type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} is linked to  {target_object['external_references'][0]['external_id']} ({target_object['name']})",
+            description=f"{indicator['name']} detects  {target_object['external_references'][0]['external_id']} ({target_object['name']})",
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,

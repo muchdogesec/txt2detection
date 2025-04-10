@@ -77,20 +77,19 @@ There are 2 ways in which you can use txt2detection, either starting with a text
 
 Use this mode to generate a set of rules from an input text file;
 
-* `--input_file` (required, if not using `--input_text`): the file to be converted. Must be `.txt`
-* `--input_text` (required, if not using `--input_file`): a text string that will be analysed to create a rule by the AI if you don't want to use a file.
+* `--input_file` (required, if not using `--input_text`, file path): the file to be converted. Must be `.txt`
+* `--input_text` (required, if not using `--input_file`, string): a text string that will be analysed to create a rule by the AI if you don't want to use a file.
 * `--name` (required): name of file, max 72 chars. Will be used in the STIX Report Object created.
 * `--report_id` (optional, default random uuidv4): Sometimes it is required to control the id of the `report` object generated. You can therefore pass a valid UUIDv4 in this field to be assigned to the report. e.g. passing `2611965-930e-43db-8b95-30a1e119d7e2` would create a STIX object id `report--2611965-930e-43db-8b95-30a1e119d7e2`. If this argument is not passed, the UUID will be randomly generated.
 * `--tlp_level` (optional, default `clear`): Options are `clear`, `green`, `amber`, `amber_strict`, `red`.
-* `--labels` (optional): comma seperated list of labels. Case-insensitive (will all be converted to lower-case). Allowed `a-z`, `0-9`. e.g.`"label1","label_2"` would create 2 labels.
+* `--labels` (optional): comma seperated list of labels. Case-insensitive (will all be converted to lower-case). Allowed `a-z`, `0-9`. e.g.`"label1","label_2"` would create 2 labels. Added to both report and indicator objects created.
 * `--created` (optional): by default all object `created` times will take the time the script was run. If you want to explicitly set these times you can do so using this flag. Pass the value in the format `YYYY-MM-DDTHH:MM:SS.sssZ` e.g. `2020-01-01T00:00:00.000Z`
 * `--use_identity` (optional, default txt2detection identity): can pass a full STIX 2.1 identity object (make sure to properly escape). Will be validated by the STIX2 library. The ID is used to create the Indicator and Report STIX objects, and is used as the `author` property in the Sigma Rule.
-* `--confidence` (optional): value between `0` (unsure), `1` lowest and `100` (highest) that is added to the report object as `confidence` value. Note, the confidence of Indicators (rules) is assigned by AI. Default if not passed is null.
 * `--license` (optional): [License of the rule according the SPDX ID specification](https://spdx.org/licenses/). Will be added to the rule.
 * `--reference_urls` (optional): A list of URLs to be added as `references` in the Sigma Rule property and in the `external_references` property of the Indicator and Report STIX object created. e.g `"https://www.google.com/" "https://www.facebook.com/"`
 * `--status` (optional, default `experimental`): either `stable`, `test`, `experimental`, `deprecated`, `unsupported`
 * `--external_refs` (optional): txt2detection will automatically populate the `external_references` of the report object it creates for the input. You can use this value to add additional objects to `external_references`. Note, you can only add `source_name` and `external_id` values currently. Pass as `source_name=external_id`. e.g. `--external_refs txt2stix=demo1 source=id` would create the following objects under the `external_references` property: `{"source_name":"txt2stix","external_id":"demo1"},{"source_name":"source","external_id":"id"}`
-* `ai_provider` (required): defines the `provider:model` to be used. Select one option. Currently supports:
+* `ai_provider` (required): defines the `provider:model` to be used to generate the rule. Select one option. Currently supports:
     * Provider (env var required `OPENROUTER_API_KEY`): `openrouter:`, providers/models `openai/gpt-4o`, `deepseek/deepseek-chat` ([More here](https://openrouter.ai/models))
     * Provider (env var required `OPENAI_API_KEY`): `openai:`, models e.g.: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-4` ([More here](https://platform.openai.com/docs/models))
     * Provider (env var required `ANTHROPIC_API_KEY`): `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
@@ -99,8 +98,34 @@ Use this mode to generate a set of rules from an input text file;
 
 #### Sigma rule input
 
-Use this mode to turn a Sigma Rule into a STIX bundle;
+Use this mode to turn a Sigma Rule into a STIX bundle and get it enriched with ATT&CK and Vulmatch.
 
+Note, in this mode you should be aware of a few things;
+
+
+* `--sigma_file` (required, file path): the sigma rule .yml you want to be processed. Must be a `.yml` or `.yaml` file. Does not currently support correlation rules.
+
+You can enter any of the following values, not
+
+### Output
+
+The output of each run is structured as follows;
+
+
+```txt
+.
+├── logs
+│   ├── log-<REPORT UUID>.log
+│   ├── log-<REPORT UUID>.log
+│   └── log-<REPORT UUID>.log
+└── output
+    └── bundle--<REPORT UUID>
+        ├── rules
+        │   ├── rule--<UUID>.yml
+        │   └── rule--<UUID>.yml
+        ├── data.json # AI output, useful for debugging
+        └── bundle.json # final STIX bundle with all objects
+```
 
 ## Examples
 
