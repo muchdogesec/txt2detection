@@ -22,6 +22,15 @@ python3 txt2detection.py \
   --report_id 139d8b41-c5c8-48fa-aa25-39a54dfa1227
 ```
 
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Check labels" \
+  --ai_provider openai:gpt-4o \
+  --labels "namespace.label1","namespace.label_2" \
+  --report_id a3731edf-e834-43d2-95b8-e03f37bde9ba
+```
+
 ## Check custom identity
 
 ```shell
