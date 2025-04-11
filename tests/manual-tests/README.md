@@ -119,12 +119,41 @@ python3 txt2detection.py \
 
 # Manual Rule Gen
 
+## No title
+
+Should fail
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/bad-sigma-rule-no-title.yml \
+  --name "No title"
+```
+
 ## Check that derived-from is created
 
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/demo-sigma-rule.yml \
-  --name "Manual Rule Gen" \
-  --report_id 2f1bbc98-52ce-4380-a069-031e12a838be
+  --name "Manual Rule Gen"
+```
+
+## Append related
+
+`related` property exist, check append is correct
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-existing-related.yml \
+  --name "Append related"
+```
+
+## Check dates
+
+No `date` or `modified`
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-no-date.yml \
+  --name "No date or modified"
 ```
 

@@ -280,7 +280,7 @@ class SigmaRuleDetection(BaseDetection):
         if self.id:
             sigma_id = self.id
             self.related = self.related or []
-            self.related.append(dict(id=sigma_id, type="derived"))
+            self.related.append(dict(id=sigma_id, type="renamed"))
             self.id = None
         return super().model_post_init(__context)
 
