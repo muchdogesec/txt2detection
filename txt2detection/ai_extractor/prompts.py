@@ -100,7 +100,7 @@ Make sure your response follows this format and adheres to the rules above.
 
 ## **Additional Instructions**  
 - Ensure the `"tags"` field includes relevant ATT&CK and CVE references based on the report content.  
-- Return a **valid JSON output** without YAML formatting for seamless processing.  
+- Return a **valid JSON output** without YAML formatting for seamless processing.
 """),
     ChatMessage.from_str("Taking the entire input of my next message, analyze and return appropriate response", MessageRole.USER),
     ChatMessage.from_str("{document}", MessageRole.USER),

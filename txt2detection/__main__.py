@@ -123,7 +123,7 @@ def run_txt2detection(name, identity, tlp_level, input_text, labels, report_id, 
         detection = get_sigma_detections(sigma)
         if detection.author:
             identity = make_identity(detection.author)
-        detection.created = as_date(detection.created or kwargs.get('created'))
+        detection.date = as_date(detection.date or kwargs.get('created'))
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
         detection.references += kwargs.setdefault('reference_urls', [])
         detection.status = kwargs['status'] = detection.status or kwargs.get('status')

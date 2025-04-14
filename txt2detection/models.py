@@ -4,7 +4,7 @@ import re
 import typing
 import uuid
 from slugify import slugify
-from datetime import date
+from datetime import date as dt_date
 from typing import List, Optional
 from uuid import UUID
 
@@ -195,8 +195,8 @@ class BaseDetection(BaseModel):
                 "$ref": "https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json"
             },
         )
-        if getattr(self, 'created', 0):
-            rule.update(date=self.created)
+        if getattr(self, 'date', 0):
+            rule.update(date=self.date)
         if getattr(self, 'modified', 0):
             rule.update(modified=self.modified)
         return yaml.dump(rule, sort_keys=False, indent=4)
@@ -246,12 +246,12 @@ class Detection(BaseDetection):
 
     @computed_field(alias="date")
     @property
-    def created(self) -> date:
+    def date(self) -> dt_date:
         return self._bundler.report.created.date()
 
     @computed_field
     @property
-    def modified(self) -> date:
+    def modified(self) -> dt_date:
         return self._bundler.report.modified.date()
 
 
@@ -266,8 +266,8 @@ class SigmaRuleDetection(BaseDetection):
     license: Optional[str] = None
     author: Optional[str] = None
     references: Optional[List[str]] = Field(default_factory=list)
-    created: Optional["date"] = Field(alias="date", default=None)
-    modified: Optional["date"] = None
+    date: Optional["dt_date"] = Field(alias="date", default=None)
+    modified: Optional["dt_date"] = None
     logsource: dict
     detection: dict
     fields: Optional[List[str]] = None
