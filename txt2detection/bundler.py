@@ -166,7 +166,7 @@ class Bundler:
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": self.url_refs + [dict(source_name="txt2detection-status", external_id=self.indicator_status)],
+            "external_references": self.url_refs + detection.external_references,
         }
         if detection.level:
             indicator.setdefault('labels', []).append(f'level-{detection.level}')

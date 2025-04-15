@@ -137,6 +137,7 @@ class BaseDetection(BaseModel):
     description: str
     detection: dict
     logsource: dict
+    status: str
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str] = Field(default_factory=list)
@@ -222,6 +223,14 @@ class BaseDetection(BaseModel):
                 continue
             labels.append(tag)
         return labels
+    
+    @property
+    def external_references(self):
+        refs = []
+        for attr in ['level', 'status', 'license']:
+            if attr_val := getattr(self, attr, 0):
+                refs.append(dict(source_name=f'sigma-{attr}', description=attr_val))
+        return refs
 
     @property
     def mitre_attack_ids(self):
