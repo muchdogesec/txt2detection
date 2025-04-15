@@ -9,7 +9,7 @@ from typing import List, Optional
 from uuid import UUID
 
 import jsonschema
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 import yaml
 
 from stix2 import (
@@ -292,6 +292,17 @@ class SigmaRuleDetection(BaseDetection):
             self.related.append(dict(id=sigma_id, type="renamed"))
             self.id = None
         return super().model_post_init(__context)
+    
+    @field_validator('tags', mode='after')
+    @classmethod
+    def validate_tlp(cls, tags: list[str]):
+        tlps = []
+        for tag in tags:
+            if tag.startswith('tlp.'):
+                tlps.append(tag)
+        if len(tlps) > 1:
+            raise ValueError(f'tag must not contain more than one tag in tlp namespace. Got {tlps}')
+        return tags
 
 
 class DetectionContainer(BaseModel):
