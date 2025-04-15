@@ -176,15 +176,15 @@ class Bundler:
 
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
-            self.add_relation(indicator, obj, 'mitre-attack')
+            self.add_relation(indicator, obj)
 
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
-            self.add_relation(indicator, obj, 'nvd-cve')
+            self.add_relation(indicator, obj)
             
         self.add_ref(parse_stix(indicator, allow_custom=True))
 
-    def add_relation(self, indicator, target_object, type='mitre-attack'):
+    def add_relation(self, indicator, target_object, relationship_type='detects'):
         ext_refs = []
 
         with contextlib.suppress(Exception):
@@ -194,14 +194,14 @@ class Bundler:
         rel =  Relationship(
             id="relationship--" + str(
                 uuid.uuid5(
-                    UUID_NAMESPACE, f"{type}+{indicator['id']}+{target_object['id']}"
+                    UUID_NAMESPACE, f"{relationship_type}+{indicator['id']}+{target_object['id']}"
                 )
             ),
             source_ref=indicator['id'],
             target_ref=target_object['id'],
-            relationship_type=type,
+            relationship_type=relationship_type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} detects  {target_object['external_references'][0]['external_id']} ({target_object['name']})",
+            description=f"{indicator['name']} {relationship_type} {target_object['external_references'][0]['external_id']} ({target_object['name']})",
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
