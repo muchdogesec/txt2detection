@@ -194,7 +194,7 @@ class Bundler:
         rel =  Relationship(
             id="relationship--" + str(
                 uuid.uuid5(
-                    UUID_NAMESPACE, f"{relationship_type}+{indicator['id']}+{target_object['id']}"
+                    UUID_NAMESPACE, f"{indicator['id']}+{target_object['id']}"
                 )
             ),
             source_ref=indicator['id'],
