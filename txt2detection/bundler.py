@@ -161,6 +161,7 @@ class Bundler:
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
             "name": detection.title,
+            "description": detection.description,
             "labels": self.labels,
             "pattern_type": 'sigma',
             "pattern": detection.make_rule(self),
@@ -168,7 +169,7 @@ class Bundler:
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": self.url_refs + detection.external_references,
         }
-        
+
         logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
         logger.debug(f" =================== end of rule =================== ")
