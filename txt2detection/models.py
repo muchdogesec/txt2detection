@@ -131,13 +131,19 @@ class TLP_LEVEL(enum.Enum):
     def name(self):
         return super().name.lower()
 
+class Statuses(enum.StrEnum):
+    stable = enum.auto()
+    test = enum.auto()
+    experimental = enum.auto()
+    deprecated = enum.auto()
+    unsupported = enum.auto()
 
 class BaseDetection(BaseModel):
     title: str
     description: str
     detection: dict
     logsource: dict
-    status: str
+    status: Statuses
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str] = Field(default_factory=list)
@@ -175,7 +181,6 @@ class BaseDetection(BaseModel):
         )
         rule.update(
             author=bundler.report.created_by_ref,
-            status=bundler.indicator_status,
             license=bundler.license,
             references=bundler.reference_urls,
             tags=list(
@@ -270,7 +275,7 @@ class SigmaRuleDetection(BaseDetection):
     related: Optional[list[dict]] = None
     name: Optional[str] = None
     taxonomy: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[Statuses] = None
     description: Optional[str] = None
     license: Optional[str] = None
     author: Optional[str] = None

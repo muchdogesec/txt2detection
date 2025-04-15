@@ -61,7 +61,6 @@ class Args:
     report_id: uuid.UUID
     external_refs: dict[str, str]
     reference_urls: list[str]
-    status: str
 
 def parse_created(value):
     """Convert the created timestamp to a datetime object."""
@@ -97,7 +96,6 @@ def parse_args():
     parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
     parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
     parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
-    parser.add_argument("--status", default='experimental', help="valid status for the sigma rule", metavar="sigma status", choices=STATUSES)
 
     args: Args = parser.parse_args()
     
@@ -126,7 +124,6 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
         detection.date = as_date(detection.date or kwargs.get('created'))
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
         detection.references += kwargs.setdefault('reference_urls', [])
-        detection.status = kwargs['status'] = detection.status or kwargs.get('status')
         detection.detection_id = str(report_id).removeprefix('report--')
         bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", (labels or [])+detection.labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])

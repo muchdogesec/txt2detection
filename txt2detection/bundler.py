@@ -92,7 +92,6 @@ class Bundler:
         external_refs: list=None,
         reference_urls=None,
         license=None,
-        status='experimental',
         **kwargs,
     ) -> None:
         self.created = created or dt.now(UTC)
@@ -103,8 +102,6 @@ class Bundler:
         self.reference_urls = reference_urls or []
         self.labels = labels or []
         self.license = license
-        self.indicator_status = status
-        assert status in STATUSES, f"status must be one of {STATUSES}"
 
         self.job_id = f"report--{self.uuid}"
         self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
