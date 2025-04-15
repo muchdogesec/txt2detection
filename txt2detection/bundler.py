@@ -168,8 +168,7 @@ class Bundler:
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": self.url_refs + detection.external_references,
         }
-        if detection.level:
-            indicator.setdefault('labels', []).append(f'level-{detection.level}')
+        
         logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
         logger.debug(f" =================== end of rule =================== ")
