@@ -13,14 +13,18 @@ python3 txt2detection.py \
 
 ## Check labels
 
+Should fail because no namespace
+
 ```shell
 python3 txt2detection.py \
   --input_file tests/files/CVE-2024-56520.txt \
-  --name "Check labels" \
+  --name "Check bad labels" \
   --ai_provider openai:gpt-4o \
   --labels "label1","label_2" \
   --report_id 139d8b41-c5c8-48fa-aa25-39a54dfa1227
 ```
+
+Should pass
 
 ```shell
 python3 txt2detection.py \
@@ -30,6 +34,42 @@ python3 txt2detection.py \
   --labels "namespace.label1","namespace.label_2" \
   --report_id a3731edf-e834-43d2-95b8-e03f37bde9ba
 ```
+
+## Check special labels
+
+Should fail because disallowed tag
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Disallowed tag" \
+  --ai_provider openai:gpt-4o \
+  --labels "tlp.red" \
+  --report_id a6f2aaff-4e33-4280-bb01-ab1bd3b95362
+```
+
+Should have cve tag and matching vulnerability object
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Disallowed tag" \
+  --ai_provider openai:gpt-4o \
+  --labels "cve.2025-3593" \
+  --report_id fab3707e-00fc-4f35-9d6d-e72dc0b6ba08
+```
+
+Should have attack tags and matching attack pattern and x-mitre-tactic objects
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Disallowed tag" \
+  --ai_provider openai:gpt-4o \
+  --labels "attack.t1071.001","attack.command_and_control" \
+  --report_id 940e8807-381e-41df-a27e-08914bafd93c
+```
+
 
 ## Check custom identity
 
@@ -123,7 +163,16 @@ python3 txt2detection.py \
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/demo-sigma-rule.yml \
-  --name "Manual Rule Gen"
+  --name "Manual Rule Gen" \
+  --report_id 80fc4d1c-f02c-4bff-80bf-d97490a04542
+```
+
+## Random ID
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/demo-sigma-rule.yml \
+  --name "Random ID"
 ```
 
 ## Append related
@@ -133,7 +182,8 @@ python3 txt2detection.py \
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/sigma-rule-existing-related.yml \
-  --name "Append related"
+  --name "Append related" \
+  --report_id 655f0689-5209-4ad5-a6de-3f198c696060
 ```
 
 ## Check dates
@@ -143,15 +193,26 @@ No `date` or `modified`
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/sigma-rule-no-date.yml \
-  --name "No date or modified"
+  --name "No date or modified" \
+  --report_id 38e0a255-66c1-48b1-a5e2-ace0b6ede336
 ```
 
-Date exists
+Only `date` no `modified`
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-one-date.yml \
+  --name "One date" \
+  --report_id 0b9a4d60-9020-4abb-8754-5a19bd7aaeb5
+```
+
+`date` and `modified` exists
 
 ```shell
 python3 txt2detection.py \
   --sigma_file tests/files/demo-sigma-rule.yml \
-  --name "Date exists"
+  --name "Date and modified exists" \
+  --report_id e9b31ad2-44fb-450c-97f8-e3ecc653730f
 ```
 
 
