@@ -13,7 +13,7 @@ from stix2 import Identity
 import yaml
 
 from txt2detection.ai_extractor.base import BaseAIExtractor
-from txt2detection.models import DetectionContainer, SigmaRuleDetection
+from txt2detection.models import TAG_PATTERN, DetectionContainer, SigmaRuleDetection
 from txt2detection.utils import validate_token_count
 
 def configureLogging():
@@ -76,6 +76,14 @@ def parse_ref(value):
         raise argparse.ArgumentTypeError("must be in format key=value")
     return dict(source_name=m.group(1), external_id=m.group(2))
 
+def parse_label(label: str):
+    if not TAG_PATTERN.match(label):
+        raise argparse.ArgumentTypeError("Invalid label format. Must follow sigma tag format {namespace}.{label}")
+    namespace, _, _ = label.partition('.')
+    if namespace in ['cve', 'tlp', 'attack']:
+        raise argparse.ArgumentTypeError(f"Unsupported tag namespace `{namespace}`")
+    return label
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert text file to detection format.')
     group = parser.add_mutually_exclusive_group(required=True)
@@ -86,7 +94,7 @@ def parse_args():
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
     parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
-    parser.add_argument('--labels', type=lambda s: s.split(','), 
+    parser.add_argument('--labels', type=parse_label, action="extend", nargs='+', 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
     parser.add_argument('--created', type=parse_created, 
             help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')

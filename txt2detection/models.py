@@ -21,6 +21,8 @@ if typing.TYPE_CHECKING:
 
 UUID_NAMESPACE = uuid.UUID("116f8cc9-4c31-490a-b26d-342627b12401")
 
+TAG_PATTERN = re.compile(r"^[a-z0-9_-]+\.[a-z0-9._-]+$")
+
 MITRE_TACTIC_MAP = {
     "initial-access": "TA0001",
     "execution": "TA0002",
@@ -210,9 +212,8 @@ class BaseDetection(BaseModel):
     @staticmethod
     def label_as_tag(label: str):
         label = label.lower()
-        tag_pattern = re.compile(r"^[a-z0-9_-]+\.[a-z0-9._-]+$")
         no_ns_pattern = re.compile(r"^[a-z0-9._-]+$")
-        if tag_pattern.match(label):
+        if TAG_PATTERN.match(label):
             return label
         elif no_ns_pattern.match(label):
             return "txt2detection." + label
