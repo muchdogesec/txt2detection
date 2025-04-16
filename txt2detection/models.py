@@ -19,7 +19,7 @@ from stix2 import (
 if typing.TYPE_CHECKING:
     from txt2detection.bundler import Bundler
 
-UUID_NAMESPACE = uuid.UUID("116f8cc9-4c31-490a-b26d-342627b12401")
+UUID_NAMESPACE = uuid.UUID("a4d70b75-6f4a-5d19-9137-da863edd33d7")
 
 TAG_PATTERN = re.compile(r"^[a-z0-9_-]+\.[a-z0-9._-]+$")
 
