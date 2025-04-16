@@ -106,17 +106,6 @@ python3 txt2detection.py \
   --report_id e37506ca-b3e4-45b8-8205-77b815b88d7f
 ```
 
-## Check status
-
-```shell
-python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-56520.txt \
-  --name "Check status" \
-  --ai_provider openai:gpt-4o \
-  --status stable \
-  --report_id 738f6bd0-e0db-44ea-b880-f24529221cec
-```
-
 # Manual Rule Gen
 
 ## No title
@@ -156,4 +145,14 @@ python3 txt2detection.py \
   --sigma_file tests/files/sigma-rule-no-date.yml \
   --name "No date or modified"
 ```
+
+Date exists
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/demo-sigma-rule.yml \
+  --name "Date exists"
+```
+
+
 
