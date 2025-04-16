@@ -233,7 +233,7 @@ class BaseDetection(BaseModel):
     def external_references(self):
         refs = []
         for attr in ['level', 'status', 'license']:
-            if attr_val := getattr(self, attr, 0):
+            if attr_val := getattr(self, attr, self._bundler.license):
                 refs.append(dict(source_name=f'sigma-{attr}', description=attr_val))
         return refs
 
