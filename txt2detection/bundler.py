@@ -25,7 +25,6 @@ from txt2detection.models import TLP_LEVEL
 from txt2detection.utils import STATUSES
 
 
-
 logger = logging.getLogger("txt2detection.bundler")
 
 class Bundler:
@@ -118,18 +117,20 @@ class Bundler:
             object_marking_refs=[self.tlp_level.value.id],
             labels=self.labels,
             published=self.created,
-            external_references=(external_refs or []) + self.url_refs,
+            external_references=[
+                dict(
+                    source_name="description_md5_hash",
+                    external_id=hashlib.md5(description.encode()).hexdigest(),
+                )
+            ]
+            + (external_refs or [])
+            + self.url_refs,
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
         self.all_objects = set()
-        if description:
-            self.report.external_references.append(
-                dict(
-                    source_name="description_md5_hash",
-                    external_id=hashlib.md5(description.encode()).hexdigest()
-                )
-            )
+        if not description:
+            self.report.external_references.pop(0)
 
     def set_defaults(self):
         # self.value.extend(TLP_LEVEL.values()) # adds all tlp levels
@@ -138,7 +139,6 @@ class Bundler:
         self.bundle.objects.extend([self.default_marking, self.identity, self.report])
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
-
 
     def add_ref(self, sdo):
         sdo_id = sdo["id"]
@@ -168,6 +168,12 @@ class Bundler:
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": self.url_refs + detection.external_references,
         }
+        indicator['external_references'].append(
+            {
+            "source_name": "rule_md5_hash",
+            "external_id": hashlib.md5(indicator['pattern'].encode()).hexdigest()
+            }
+        )
 
         logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
@@ -180,7 +186,7 @@ class Bundler:
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj)
-            
+
         self.add_ref(parse_stix(indicator, allow_custom=True))
 
     def add_relation(self, indicator, target_object, relationship_type='detects'):
@@ -211,11 +217,11 @@ class Bundler:
 
     def to_json(self):
         return serialize(self.bundle, indent=4)
-    
+
     @property
     def bundle_dict(self):
         return json.loads(self.to_json())
-    
+
     def get_attack_objects(self, attack_ids):
         if not attack_ids:
             return []
@@ -227,8 +233,7 @@ class Bundler:
             headers['API-KEY'] = api_key
 
         return self._get_objects(endpoint, headers)
-    
-        
+
     def get_cve_objects(self, cve_ids):
         if not cve_ids:
             return []
@@ -239,8 +244,7 @@ class Bundler:
             headers['API-KEY'] = api_key
 
         return self._get_objects(endpoint, headers)
-    
-    
+
     def _get_objects(self, endpoint, headers):
         data = []
         page = 1
@@ -256,7 +260,7 @@ class Bundler:
             if d['page_results_count'] < d['page_size']:
                 break
         return data
-    
+
     def bundle_detections(self, container: DetectionContainer):
         self.detections = container
         if not container.success:
