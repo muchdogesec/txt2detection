@@ -118,16 +118,18 @@ class Bundler:
             object_marking_refs=[self.tlp_level.value.id],
             labels=self.labels,
             published=self.created,
-            external_references=[
-                {
-                    "source_name": "description_md5_hash",
-                    "external_id": hashlib.md5(description.encode()).hexdigest(),
-                },
-            ] + (external_refs or []) + self.url_refs,
+            external_references=(external_refs or []) + self.url_refs,
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
         self.all_objects = set()
+        if description:
+            self.report.external_references.append(
+                dict(
+                    source_name="description_md5_hash",
+                    external_id=hashlib.md5(description.encode()).hexdigest()
+                )
+            )
 
     def set_defaults(self):
         # self.value.extend(TLP_LEVEL.values()) # adds all tlp levels
