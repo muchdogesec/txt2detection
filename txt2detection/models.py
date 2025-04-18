@@ -170,9 +170,18 @@ class BaseDetection(BaseModel):
             if tlp_level := TLP_LEVEL.get(level.replace("-", "_")):
                 return tlp_level
         return None
+    
+    @tlp_level.setter
+    def tlp_level(self, level):
+        level = str(level)
+        for i, tag in enumerate(self.tags):
+            if tag.startswith('tlp.'):
+                self.tags.remove(tag)
+        self.tags.append('tlp.'+level.replace("_", "-"))
 
     def make_rule(self, bundler: "Bundler"):
         labels = bundler.labels
+        self.tlp_level = bundler.tlp_level.name
         rule = dict(
             id=self.detection_id,
             **self.model_dump(
@@ -187,8 +196,7 @@ class BaseDetection(BaseModel):
             references=bundler.reference_urls,
             tags=list(
                 dict.fromkeys(
-                    ["tlp." + bundler.tlp_level.name.replace("_", "-")]
-                    + self.tags
+                    self.tags
                     + [self.label_as_tag(label) for label in labels]
                 )
             ),
