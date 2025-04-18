@@ -129,9 +129,14 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
         detection = get_sigma_detections(sigma)
         if not identity and detection.author:
             identity = make_identity(detection.author)
+        kwargs.update(
+            created=detection.date,
+            modified=detection.modified,
+            references=kwargs.setdefault('reference_urls', [])+detection.references
+        )
         detection.date = as_date(detection.date or kwargs.get('created'))
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
-        detection.references += kwargs.setdefault('reference_urls', [])
+        detection.references = kwargs['references']
         detection.detection_id = str(report_id).removeprefix('report--')
         bundler = Bundler(name, identity, detection.tlp_level or tlp_level or 'clear', detection.description or "<SIGMA RULE>", (labels or [])+detection.labels, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
