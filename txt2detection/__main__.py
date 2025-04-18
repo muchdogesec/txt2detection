@@ -80,7 +80,7 @@ def parse_label(label: str):
     if not TAG_PATTERN.match(label):
         raise argparse.ArgumentTypeError("Invalid label format. Must follow sigma tag format {namespace}.{label}")
     namespace, _, _ = label.partition('.')
-    if namespace in ['cve', 'tlp', 'attack']:
+    if namespace in ['tlp']:
         raise argparse.ArgumentTypeError(f"Unsupported tag namespace `{namespace}`")
     return label
 
