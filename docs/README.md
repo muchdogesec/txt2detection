@@ -376,7 +376,7 @@ If Sigma upload mode;
         "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
     ],
     "labels": [
-        "<LABELS ADDED BY USER AT CLI>"
+        "<LABELS ADDED BY USER AT CLI>",
         "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
     ],
     "external_references": [

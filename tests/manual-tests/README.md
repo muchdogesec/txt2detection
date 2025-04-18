@@ -147,7 +147,7 @@ python3 txt2detection.py \
 
 # Manual Rule Gen
 
-## No title
+## Title
 
 Should fail
 
@@ -155,6 +155,24 @@ Should fail
 python3 txt2detection.py \
   --sigma_file tests/files/sigma-rule-no-title.yml \
   --name "No title"
+```
+
+Title, but report name is override by CLI input
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "A new title" \
+  --report_id 272daf95-2790-4fd5-9ca6-ee8cef08315d
+```
+
+## No description
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-no-description.yml \
+  --name "No description" \
+  --report_id fd38cd23-93af-41ad-ab43-a6fa0ca69bf5
 ```
 
 ## Check that derived-from is created
@@ -289,9 +307,30 @@ No TLP
 
 ```shell
 python3 txt2detection.py \
-  --sigma_file tests/files/sigma-rule-master.yml \
+  --sigma_file tests/files/sigma-rule-no-tags.yml \
   --name "No TLP" \
   --report_id d9047840-fcb8-486c-bdf6-9bdca0e38c11
+```
+
+## Append tags
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Author exists" \
+  --labels "namespace.label1" "namespace.label2" \
+  --report_id 9bed8a97-fe24-4552-9976-75b7e6c42851
+```
+
+## Custom labels in tag
+
+Check Indicator + Report inherits custom tag (but not cve, attack, tlp)
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-custom-tags.yml \
+  --name "Check Indicator inherits tag" \
+  --report_id 4af65c32-8f6c-4a0f-9c9d-dae3cde73aa2
 ```
 
 
