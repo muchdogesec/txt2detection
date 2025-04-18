@@ -127,7 +127,7 @@ def as_date(d: 'date|datetime'):
 def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[str], report_id: str|uuid.UUID, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     if sigma := kwargs.get('sigma_file'):
         detection = get_sigma_detections(sigma)
-        if detection.author:
+        if not identity and detection.author:
             identity = make_identity(detection.author)
         detection.date = as_date(detection.date or kwargs.get('created'))
         detection.modified = as_date(kwargs.setdefault('modified', detection.modified))
