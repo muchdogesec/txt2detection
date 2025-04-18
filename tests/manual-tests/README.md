@@ -265,3 +265,34 @@ python3 txt2detection.py \
 ```
 
 ## Check tags in rule
+
+Attack (Tactic and Technique), CVE and TLP (Red) all exist
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Attack, CVE and TLP (Red) all exist" \
+  --report_id 572832e4-a8a5-435b-9945-b27097f092f5
+```
+
+Overwrite TLP
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Overwrite TLP" \
+  --tlp_level amber_strict \
+  --report_id 599f43dc-ecaf-421c-ae01-ba8b2d705756
+```
+
+No TLP
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "No TLP" \
+  --report_id d9047840-fcb8-486c-bdf6-9bdca0e38c11
+```
+
+
+

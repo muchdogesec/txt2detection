@@ -369,7 +369,7 @@ If Sigma upload mode;
     "created": "<DATE IN RULE OR ITEM INGEST DATE OR DATE SET AT UPLOAD>",
     "modified": "<MODIFIED IN RULE OR ITEM INGEST DATE OR DATE SET AT UPLOAD>",
     "name": "<TITLE OF SIGMA RULE>",
-    "description": "<ENTIRE RULE>",
+    "description": "<DESCRIPTION OF RULE, IF DOES NOT EXIST IS OMITTED>",
     "published": "<SAME AS CREATED>",
     "object_marking_refs": [
         "marking-definition--<TLP LEVEL IN RULE OR SET IN CLI>",
