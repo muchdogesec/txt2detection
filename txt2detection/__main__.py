@@ -92,7 +92,7 @@ def parse_args():
     group.add_argument('--sigma_file', help='The sigma file to be converted. Must be .yml', type=lambda x: Path(x).read_text())
     parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
     parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
-    parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], default='clear', 
+    parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], 
             help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
     parser.add_argument('--labels', type=parse_label, action="extend", nargs='+', 
             help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')

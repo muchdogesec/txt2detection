@@ -153,6 +153,10 @@ class BaseDetection(BaseModel):
     _custom_id = None
     _bundler: "Bundler"
 
+    def model_post_init(self, __context):
+        self.tags = self.tags or []
+        return super().model_post_init(__context)
+
     @property
     def detection_id(self):
         return str(self._custom_id or getattr(self, "id", None) or uuid.uuid4())

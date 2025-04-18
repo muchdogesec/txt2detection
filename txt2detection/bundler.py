@@ -97,7 +97,7 @@ class Bundler:
         self.created = created or dt.now(UTC)
         self.modified = modified or self.created
         self.identity = identity or self.default_identity
-        self.tlp_level = TLP_LEVEL.get(tlp_level)
+        self.tlp_level = TLP_LEVEL.get(tlp_level or 'clear')
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
         self.labels = labels or []
