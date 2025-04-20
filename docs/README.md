@@ -32,7 +32,7 @@ If AI mode;
         "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
     ],
     "labels": [
-        "<LABELS ADDED BY USER AT CLI>"
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
     ],
     "external_references": [
         {
@@ -69,11 +69,11 @@ For each detection rule produced by the AI (there could be more than one) an Ind
     "pattern_type": "sigma",
     "pattern": "<DETECTION_RULE>",
     "labels": [
-        "<LABELS ADDED BY USER VIA CLI>"
+        "<LABELS ADDED BY USER VIA CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
     ],
     "external_references": [
         {
-            "ANY REFERENCE URLS"
+            "ANY EXTERNAL REFS SET AT CLI / ANY REFERENCE URLS"
         },
         {
             "description": "rule_md5_hash",
@@ -380,7 +380,7 @@ If Sigma upload mode;
         "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
     ],
     "labels": [
-        "<LABELS ADDED BY USER AT CLI>",
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>",
         "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
     ],
     "external_references": [
@@ -418,7 +418,7 @@ For the detection rule produced an Indicator object is created as follows;
     "pattern_type": "sigma",
     "pattern": "<DETECTION_RULE>",
     "labels": [
-        "<LABELS ADDED BY USER AT CLI>"
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
         "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
     ],
     "external_references": [
