@@ -335,3 +335,41 @@ python3 txt2detection.py \
 
 
 
+
+
+
+## External references
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "External references" \
+  --external_refs txt2stix=demo1 source=id \
+  --report_id 59950523-7516-4f9d-b485-7386d3886408
+```
+
+## Reference URLs
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Reference URLs" \
+  --reference_urls "https://www.google.com/" "https://www.facebook.com/" \
+  --ai_provider openai:gpt-4o \
+  --report_id a9928bf1-b0ab-4748-8ab8-47eb7a34ca80
+```
+
+## Check license
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Check license" \
+  --ai_provider openai:gpt-4o \
+  --license MIT \
+  --report_id e37506ca-b3e4-45b8-8205-77b815b88d7f
+```
+
+
+
+

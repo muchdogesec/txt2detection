@@ -73,7 +73,11 @@ For each detection rule produced by the AI (there could be more than one) an Ind
     ],
     "external_references": [
         {
-            "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
+            "ANY REFERENCE URLS"
+        },
+        {
+            "description": "rule_md5_hash",
+            "external_id": "<MD5 HASH OF PATTERN FIELD>"
         },
         {
             "source_name": "sigma-level",
@@ -382,7 +386,7 @@ If Sigma upload mode;
     "external_references": [
         {
             "description": "description_md5_hash",
-            "external_id": "<MD5 HASH OF DESCRIPTION FIELD>"
+            "external_id": "<MD5 HASH OF DESCRIPTION FIELD, ID EXIST>"
         },
         {
             "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
@@ -420,6 +424,10 @@ For the detection rule produced an Indicator object is created as follows;
     "external_references": [
         {
             "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
+        },
+        {
+            "description": "rule_md5_hash",
+            "external_id": "<MD5 HASH OF PATTERN FIELD>"
         },
         {
             "source_name": "sigma-old-id",
