@@ -99,7 +99,7 @@ class Bundler:
         self.tlp_level = TLP_LEVEL.get(tlp_level or 'clear')
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
-        self.labels = remove_rule_specific_tags(labels or [])
+        self.labels = labels or []
         self.license = license
 
         self.job_id = f"report--{self.uuid}"
@@ -116,7 +116,7 @@ class Bundler:
             created=self.created,
             modified=self.modified,
             object_marking_refs=[self.tlp_level.value.id],
-            labels=self.labels,
+            labels=remove_rule_specific_tags(self.labels),
             published=self.created,
             external_references=[
                 dict(
@@ -160,7 +160,7 @@ class Bundler:
             "indicator_types": detection.indicator_types,
             "name": detection.title,
             "description": detection.description,
-            "labels": self.labels,
+            "labels": remove_rule_specific_tags(self.labels),
             "pattern_type": 'sigma',
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
