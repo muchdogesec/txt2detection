@@ -137,7 +137,7 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
         detection.modified = as_date(kwargs.get('modified'))
         detection.references = kwargs['references']
         detection.detection_id = str(report_id).removeprefix('report--')
-        bundler = Bundler(name, identity, tlp_level or detection.tlp_level or 'clear', detection.description or '', (labels or [])+detection.tags, report_id=report_id, **kwargs)
+        bundler = Bundler(name, identity, tlp_level or detection.tlp_level or 'clear', detection.description, (labels or [])+detection.tags, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
         detections.detections.append(detection)
     else:

@@ -120,7 +120,7 @@ class Bundler:
             external_references=[
                 dict(
                     source_name="description_md5_hash",
-                    external_id=hashlib.md5(description.encode()).hexdigest(),
+                    external_id=hashlib.md5((description or "").encode()).hexdigest(),
                 )
             ]
             + (external_refs or [])
