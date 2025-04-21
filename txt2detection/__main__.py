@@ -126,7 +126,7 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
         detection = get_sigma_detections(sigma)
         if not identity and detection.author:
             identity = make_identity(detection.author)
-        kwargs.update(references=kwargs.setdefault('reference_urls', [])+detection.references)
+        kwargs.update(reference_urls=kwargs.setdefault('reference_urls', [])+detection.references)
         if not kwargs.get('created'):
             #only consider rule.date and rule.modified if user does not pass --created
             kwargs.update(
@@ -135,7 +135,7 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
             )
         detection.date = as_date(kwargs.get('created'))
         detection.modified = as_date(kwargs.get('modified'))
-        detection.references = kwargs['references']
+        detection.references = kwargs['reference_urls']
         detection.detection_id = str(report_id).removeprefix('report--')
         bundler = Bundler(name, identity, tlp_level or detection.tlp_level or 'clear', detection.description, (labels or [])+detection.tags, report_id=report_id, **kwargs)
         detections = DetectionContainer(success=True, detections=[])
