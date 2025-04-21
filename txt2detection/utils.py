@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from functools import lru_cache
 from types import SimpleNamespace
 import uuid
@@ -72,5 +72,10 @@ def remove_rule_specific_tags(tags):
         labels.append(tag)
     return labels
 
+
+def as_date(d: 'date|datetime'):
+    if isinstance(d, datetime):
+        return d.date()
+    return d
 
 STATUSES = ['stable', 'test', 'experimental', 'deprecated', 'unsupported']

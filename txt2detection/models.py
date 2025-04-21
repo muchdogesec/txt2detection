@@ -187,6 +187,9 @@ class BaseDetection(BaseModel):
         self.tags.append('tlp.'+level.replace("_", "-"))
 
     def make_rule(self, bundler: "Bundler"):
+        if not self.date:
+            from .utils import as_date
+            self.date = as_date(bundler.created)
         self.set_labels(bundler.labels)
         self.tlp_level = bundler.tlp_level.name
         rule = dict(
