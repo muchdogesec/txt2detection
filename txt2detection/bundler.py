@@ -22,7 +22,7 @@ import uuid
 from stix2 import parse as parse_stix
 
 from txt2detection.models import TLP_LEVEL
-from txt2detection.utils import STATUSES
+from txt2detection.utils import STATUSES, remove_rule_specific_tags
 
 
 logger = logging.getLogger("txt2detection.bundler")
@@ -99,7 +99,7 @@ class Bundler:
         self.tlp_level = TLP_LEVEL.get(tlp_level or 'clear')
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
-        self.labels = labels or []
+        self.labels = remove_rule_specific_tags(labels or [])
         self.license = license
 
         self.job_id = f"report--{self.uuid}"

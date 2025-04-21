@@ -63,4 +63,14 @@ def valid_licenses():
     return get_licenses(datetime.now().date().isoformat())
 
 
+def remove_rule_specific_tags(tags):
+    labels = []
+    for tag in tags:
+        namespace, _, label = tag.partition(".")
+        if namespace in ["attack", "cve", "tlp"]:
+            continue
+        labels.append(tag)
+    return labels
+
+
 STATUSES = ['stable', 'test', 'experimental', 'deprecated', 'unsupported']

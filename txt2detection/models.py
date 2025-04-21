@@ -175,6 +175,9 @@ class BaseDetection(BaseModel):
                 return tlp_level
         return None
     
+    def set_labels(self, labels):
+        self.tags.extend(labels)
+    
     @tlp_level.setter
     def tlp_level(self, level):
         level = str(level)
@@ -184,7 +187,7 @@ class BaseDetection(BaseModel):
         self.tags.append('tlp.'+level.replace("_", "-"))
 
     def make_rule(self, bundler: "Bundler"):
-        labels = bundler.labels
+        self.set_labels(bundler.labels)
         self.tlp_level = bundler.tlp_level.name
         rule = dict(
             id=self.detection_id,
@@ -198,12 +201,7 @@ class BaseDetection(BaseModel):
             author=bundler.report.created_by_ref,
             license=bundler.license,
             references=bundler.reference_urls,
-            tags=list(
-                dict.fromkeys(
-                    self.tags
-                    + [self.label_as_tag(label) for label in labels]
-                )
-            ),
+            tags=list(dict.fromkeys(self.tags)),
         )
         for k, v in list(rule.items()):
             if not v:
@@ -220,27 +218,6 @@ class BaseDetection(BaseModel):
         if getattr(self, 'modified', 0):
             rule.update(modified=self.modified)
         return yaml.dump(rule, sort_keys=False, indent=4)
-
-    @staticmethod
-    def label_as_tag(label: str):
-        label = label.lower()
-        no_ns_pattern = re.compile(r"^[a-z0-9._-]+$")
-        if TAG_PATTERN.match(label):
-            return label
-        elif no_ns_pattern.match(label):
-            return "txt2detection." + label
-        else:
-            return "txt2detection." + slugify(label)
-
-    @property
-    def labels(self):
-        labels = []
-        for tag in self.tags:
-            namespace, _, label = tag.partition(".")
-            if namespace in ["attack", "cve", "tlp"]:
-                continue
-            labels.append(tag)
-        return labels
     
     @property
     def external_references(self):
