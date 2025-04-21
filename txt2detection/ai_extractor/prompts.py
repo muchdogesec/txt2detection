@@ -23,9 +23,20 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"logsources"`: Valid sigma rule logsource
 - `"detection"`: Valid sigma rule detection
 - `"indicator_types"`: One or more STIX v2.1 indicator.indicator_types
-- `"confidence"`: Integer from 0 to 100 denoting the confidence you have in the generated rule/detection. Where 0 is unsure, 1 is very low and 100 is very high!
-- `"level"`: Level describes the criticality of a triggered rule. Either low, medium, high, critical, informational.
+- `"status"`: select one of stable, test, experimental, deprecated, unsupported. that best describe the generated rule
+- `"level"`: select SIGMA level for the rule
 
+                         
+### **Status**
+Declares the status of the rule:
+
+- `stable`: the rule is considered as stable and may be used in production systems or dashboards.
+- `test`: a mostly stable rule that could require some slight adjustments depending on the environement.
+- `experimental`: an experimental rule that could lead to false positives results or be noisy, but could also identify interesting
+  events.
+- `deprecated`: the rule is replaced or covered by another one. The link is established by the `related` field.
+- `unsupported`: the rule cannot be use in its current state (old correlation format, custom fields)
+                         
 ### **Indicator Types**
 - `"anomalous-activity"`: Unexpected, or unusual activity that may not necessarily be malicious or indicate compromise. This type of activity may include reconnaissance-like behavior such as port scans or version identification, network behavior anomalies, and asset and/or user behavioral anomalies.
 - `"anonymization"`: Suspected anonymization tools or infrastructure (proxy, TOR, VPN, etc.).
@@ -34,6 +45,14 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"malicious-activity"`: Patterns of suspected malicious objects and/or activity.
 - `"attribution"`: Patterns of behavior that indicate attribution to a particular Threat Actor or Campaign.
 - `"unknown"`: There is not enough information available to determine the type of indicator.
+
+### **Level**
+The level field contains one of five string values. It describes the criticality of a triggered rule. While low and medium level events have an informative character, events with high and critical level should lead to immediate reviews by security analysts.
+- informational: Rule is intended for enrichment of events, e.g. by tagging them. No case or alerting should be triggered by such rules because it is expected that a huge amount of events will match these rules.
+- low: Notable event but rarely an incident. Low rated events can be relevant in high numbers or combination with others. Immediate reaction shouldn't be necessary, but a regular review is recommended.
+- medium: Relevant event that should be reviewed manually on a more frequent basis.
+- high: Relevant event that should trigger an internal alert and requires a prompt review.
+- critical: Highly relevant event that indicates an incident. Critical events should be reviewed immediately. It is used only for cases in which probability borders certainty.
 
 
 ### **Tags***
@@ -96,23 +115,12 @@ You need to generate a structured `detection` object representing a set of **sea
 }
 ```
 
-
-### **Level**
-
-The level field contains one of five string values. It describes the criticality of a triggered rule. While low and medium level events have an informative character, events with high and critical level should lead to immediate reviews by security analysts.
-
-informational: Rule is intended for enrichment of events, e.g. by tagging them. No case or alerting should be triggered by such rules because it is expected that a huge amount of events will match these rules.
-low: Notable event but rarely an incident. Low rated events can be relevant in high numbers or combination with others. Immediate reaction shouldn't be necessary, but a regular review is recommended.
-medium: Relevant event that should be reviewed manually on a more frequent basis.
-high: Relevant event that should trigger an internal alert and requires a prompt review.
-critical: Highly relevant event that indicates an incident. Critical events should be reviewed immediately. It is used only for cases in which probability borders certainty.
-
 Make sure your response follows this format and adheres to the rules above.
 
 
 ## **Additional Instructions**  
 - Ensure the `"tags"` field includes relevant ATT&CK and CVE references based on the report content.  
-- Return a **valid JSON output** without YAML formatting for seamless processing.  
+- Return a **valid JSON output** without YAML formatting for seamless processing.
 """),
     ChatMessage.from_str("Taking the entire input of my next message, analyze and return appropriate response", MessageRole.USER),
     ChatMessage.from_str("{document}", MessageRole.USER),

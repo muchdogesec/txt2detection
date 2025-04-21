@@ -15,111 +15,17 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
-from txt2detection.ai_extractor.utils import Detection, DetectionContainer, UUID_NAMESPACE
+from txt2detection.models import Detection, DetectionContainer, UUID_NAMESPACE
 
 from datetime import UTC, datetime as dt
 import uuid
 from stix2 import parse as parse_stix
 
+from txt2detection.models import TLP_LEVEL
+from txt2detection.utils import STATUSES, remove_rule_specific_tags
 
 
 logger = logging.getLogger("txt2detection.bundler")
-
-
-class TLP_LEVEL(enum.Enum):
-    CLEAR = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:CLEAR",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "clear",
-            }
-        },
-    )
-    GREEN = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--bab4a63c-aed9-4cf5-a766-dfca5abac2bb",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:GREEN",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "green",
-            }
-        },
-    )
-    AMBER = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber",
-            }
-        },
-    )
-    AMBER_STRICT = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--939a9414-2ddd-4d32-a0cd-375ea402b003",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER+STRICT",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber+strict",
-            }
-        },
-    )
-    RED = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:RED",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "red",
-            }
-        },
-    )
-
-    @classmethod
-    def levels(cls):
-        return dict(
-            clear=cls.CLEAR,
-            green=cls.GREEN,
-            amber=cls.AMBER,
-            amber_strict=cls.AMBER_STRICT,
-            red=cls.RED,
-        )
-
-    @classmethod
-    def values(cls):
-        return [
-            cls.CLEAR.value,
-            cls.GREEN.value,
-            cls.AMBER.value,
-            cls.AMBER_STRICT.value,
-            cls.RED.value,
-        ]
-
-    @classmethod
-    def get(cls, level):
-        if isinstance(level, cls):
-            return level
-        if level not in cls.levels():
-            raise Exception(f'unsupported tlp level: `{level}`')
-        return cls.levels()[level]
-
-    @property
-    def name(self):
-        return super().name.lower()
-
 
 class Bundler:
     identity = None
@@ -178,7 +84,6 @@ class Bundler:
         identity,
         tlp_level,
         description,
-        confidence,
         labels,
         created=None,
         modified=None,
@@ -186,21 +91,20 @@ class Bundler:
         external_refs: list=None,
         reference_urls=None,
         license=None,
-        status='experimental',
         **kwargs,
     ) -> None:
         self.created = created or dt.now(UTC)
         self.modified = modified or self.created
         self.identity = identity or self.default_identity
-        self.tlp_level = TLP_LEVEL.get(tlp_level)
+        self.tlp_level = TLP_LEVEL.get(tlp_level or 'clear')
         self.uuid = report_id or self.generate_report_id(self.identity.id, self.created, name)
         self.reference_urls = reference_urls or []
         self.labels = labels or []
         self.license = license
-        self.indicator_status = status
 
         self.job_id = f"report--{self.uuid}"
-        self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
+        self.external_refs = (external_refs or []) + [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
+        
         self.report = Report(
             created_by_ref=self.identity.id,
             name=name,
@@ -212,18 +116,20 @@ class Bundler:
             created=self.created,
             modified=self.modified,
             object_marking_refs=[self.tlp_level.value.id],
-            labels=self.labels,
+            labels=remove_rule_specific_tags(self.labels),
             published=self.created,
             external_references=[
-                {
-                    "source_name": "description_md5_hash",
-                    "external_id": hashlib.md5(description.encode()).hexdigest(),
-                },
-            ] + (external_refs or []) + self.url_refs,
-            confidence=confidence,
+                dict(
+                    source_name="description_md5_hash",
+                    external_id=hashlib.md5((description or "").encode()).hexdigest(),
+                )
+            ] + self.external_refs,
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
+        self.all_objects = set()
+        if not description:
+            self.report.external_references.pop(0)
 
     def set_defaults(self):
         # self.value.extend(TLP_LEVEL.values()) # adds all tlp levels
@@ -233,46 +139,56 @@ class Bundler:
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
 
-
     def add_ref(self, sdo):
         sdo_id = sdo["id"]
-        if sdo_id not in self.report.object_refs:
+        if sdo_id in self.all_objects:
+            return
+        self.bundle.objects.append(sdo)
+        if sdo_id not in self.report.object_refs and sdo.get('type') == 'indicator':
             self.report.object_refs.append(sdo_id)
-            self.bundle.objects.append(sdo)
+        self.all_objects.add(sdo_id)
 
     def add_rule_indicator(self, detection: Detection):
+        detection._bundler = self
         indicator = {
             "type": "indicator",
-            "id": "indicator--"+detection.id,
+            "id": "indicator--"+str(detection.detection_id),
             "spec_version": "2.1",
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
             "modified": self.report.modified,
             "indicator_types": detection.indicator_types,
             "name": detection.title,
-            "labels": self.labels,
+            "description": detection.description,
+            "labels": remove_rule_specific_tags(self.labels),
             "pattern_type": 'sigma',
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": self.url_refs + [dict(source_name="txt2detection-status", external_id=self.indicator_status)],
-            "confidence": detection.confidence,
+            "external_references": self.external_refs + detection.external_references,
         }
-        logger.debug(f"===== rule {detection.id} =====")
+        indicator['external_references'].append(
+            {
+            "source_name": "rule_md5_hash",
+            "external_id": hashlib.md5(indicator['pattern'].encode()).hexdigest()
+            }
+        )
+
+        logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
         logger.debug(f" =================== end of rule =================== ")
 
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
-            self.add_relation(indicator, obj, 'mitre-attack')
+            self.add_relation(indicator, obj)
 
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
-            self.add_relation(indicator, obj, 'nvd-cve')
-            
+            self.add_relation(indicator, obj)
+
         self.add_ref(parse_stix(indicator, allow_custom=True))
 
-    def add_relation(self, indicator, target_object, type='mitre-attack'):
+    def add_relation(self, indicator, target_object, relationship_type='detects'):
         ext_refs = []
 
         with contextlib.suppress(Exception):
@@ -282,14 +198,14 @@ class Bundler:
         rel =  Relationship(
             id="relationship--" + str(
                 uuid.uuid5(
-                    UUID_NAMESPACE, f"{type}+{indicator['id']}+{target_object['id']}"
+                    UUID_NAMESPACE, f"{indicator['id']}+{target_object['id']}"
                 )
             ),
             source_ref=indicator['id'],
             target_ref=target_object['id'],
-            relationship_type=type,
+            relationship_type=relationship_type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} is linked to  {target_object['external_references'][0]['external_id']} ({target_object['name']})",
+            description=f"{indicator['name']} {relationship_type} {target_object['external_references'][0]['external_id']} ({target_object['name']})",
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
@@ -300,11 +216,11 @@ class Bundler:
 
     def to_json(self):
         return serialize(self.bundle, indent=4)
-    
+
     @property
     def bundle_dict(self):
         return json.loads(self.to_json())
-    
+
     def get_attack_objects(self, attack_ids):
         if not attack_ids:
             return []
@@ -316,8 +232,7 @@ class Bundler:
             headers['API-KEY'] = api_key
 
         return self._get_objects(endpoint, headers)
-    
-        
+
     def get_cve_objects(self, cve_ids):
         if not cve_ids:
             return []
@@ -328,8 +243,7 @@ class Bundler:
             headers['API-KEY'] = api_key
 
         return self._get_objects(endpoint, headers)
-    
-    
+
     def _get_objects(self, endpoint, headers):
         data = []
         page = 1
@@ -345,7 +259,7 @@ class Bundler:
             if d['page_results_count'] < d['page_size']:
                 break
         return data
-    
+
     def bundle_detections(self, container: DetectionContainer):
         self.detections = container
         if not container.success:

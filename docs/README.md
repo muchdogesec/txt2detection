@@ -1,200 +1,55 @@
-## AI Prompts
-
-### Prompt structure
-
-```txt
-<context>
-You are a threat intelligence analyst tasked with converting cyber security threat intelligence into detection rules that can identify the behaviour described in the intelligence.
-
-Your threat intelligence will be provided in the form of threat reports that describes the indicators of compromise, techniques, tactics or procedures of an adversary. This threat intelligence will be provided to you in the `<context>` tags as your input.
-
-You need to comprehensively understand the threat intelligence provided, identifying the indicators of compromise, techniques, tactics or procedures of an adversary.
-
-Using this understanding you should best determine the log sources that can be searched to identify what is being described. It is possible that the search spans multiple log sources, but at least one log source must be defined.
-
-By combining intelligence and log sources identified, create a <detection rule name> in markdown format. If you need help refer to the <detection rule name> documentation here <docs url>.
-
-It is possible that you create zero or more detection rules.
-
-You need to document each detection rule clearly, outlining its purpose (as its name) and the logic and the specific TTP it addresses (as its description). You should also classify each rule with one or more indicator_types from the following list; 
-
-* anomalous-activity
-* anonymization
-* benign
-* compromised
-* malicious-activity
-* attribution
-* unknown
-
-Also, when relevant, you should add a list of MITRE ATT&CK Tactics, Techniques, or Sub-Techniques detected by this rule. You should print the ATT&CK IDs in the property `mitre_attack_ids`.
-</context>
-
-<requirement>
-
-The output should be a JSON file with this information as follows:
-
-{
-    "rules": [
-        {
-            "name": "NAME",
-            "description": "DESCRIPTION",
-            "log_sources": [
-                "LOG SOURCE N"
-            ]
-            "rule": "RULE",
-            "indicator_types": [
-                "TYPES"
-            ],
-            "mitre_attack_ids": [
-                "TYPES"
-            ]
-        },
-        {
-            "name": "NAME",
-            "description": "DESCRIPTION",
-            "log_sources": [
-                "LOG SOURCE N"
-            ]
-            "rule": "RULE",
-            "indicator_types": [
-                "TYPES"
-            ],
-            "mitre_attack_ids": [
-                "TYPES"
-            ]
-        }
-    ]
-}
-
-Think about your answer first before you respond.
-
-Print only the JSON content in the response.
-
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-</requirement>
-```
-
 ## STIX conversion
 
 The inputs and outputs are all coded into STIX 2.1 objects as follows...
 
-### Default STIX objects
+### txt2detection marking definition
 
-#### TLPs
+The following marking defintion ID is added to all `object_marking_refs` of STIX objects created by txt2detection.
 
-```python
-class TLP_LEVEL(enum.Enum):
-    CLEAR = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:CLEAR",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "clear",
-            }
-        },
-    )
-    GREEN = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--bab4a63c-aed9-4cf5-a766-dfca5abac2bb",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:GREEN",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "green",
-            }
-        },
-    )
-    AMBER = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber",
-            }
-        },
-    )
-    AMBER_STRICT = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--939a9414-2ddd-4d32-a0cd-375ea402b003",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:AMBER+STRICT",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "amber+strict",
-            }
-        },
-    )
-    RED = MarkingDefinition(
-        spec_version="2.1",
-        id="marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
-        created="2022-10-01T00:00:00.000Z",
-        definition_type="TLP:RED",
-        extensions={
-            "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
-                "extension_type": "property-extension",
-                "tlp_2_0": "red",
-            }
-        },
-    )
-```
+https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/txt2detection.json
 
-Only the tlp set is imported to final bundle.
+### AI creation mode
 
-#### SIEM Rules Identity
-
-https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/siemrules.json
-
-Only imported if user does not specify their own identity
-
-#### SIEM Rules Marking Definition
-
-https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/siemrules.json
-
-Always imported to bundle
-
-### Report SDO (`report`)
+#### Report SDO (`report`)
 
 All files uploaded are represented as a unique [STIX Report SDO](https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_n8bjzg1ysgdq) that take the following structure;
+
+If AI mode;
 
 ```json
 {
     "type": "report",
     "spec_version": "2.1",
     "id": "report--<UUID V4 GENERATED BY STIX2 LIBRARY OR USER ENTERED AT INPUT>",
-    "created_by_ref": "identity--<IDENTITY OBJECT USED AT UPLOAD>",
+    "created_by_ref": "identity--<IDENTITY OBJECT USED AT UPLOAD OR TXT2DETECTION IDENTIFY IF NON SET>",
     "created": "<ITEM INGEST DATE OR DATE SET AT UPLOAD>",
     "modified": "<ITEM INGEST DATE OR DATE SET AT UPLOAD>",
     "name": "<NAME ENTERED ON UPLOAD>",
     "description": "<FULL BODY OF TEXT FILE>",
     "published": "<ITEM INGEST DATE OR DATE SET AT UPLOAD>",
     "object_marking_refs": [
-        "marking-definition--<TLP LEVEL SET AT UPLOAD>",
-        "marking-definition--8ef05850-cb0d-51f7-80be-50e4376dbe63"
+        "marking-definition--<TLP LEVEL SET IN CLI>",
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
     ],
     "labels": [
-        "<LABELS ADDED BY USER>"
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
     ],
     "external_references": [
         {
             "description": "description_md5_hash",
             "external_id": "<MD5 HASH OF DESCRIPTION FIELD>"
-        }   
+        },
+        {
+            "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
+        }
     ],
     "object_refs": [
-        "<LIST OF ALL OBJECTS CREATED>"
+        "<LIST OF ALL INDICATOR OBJECTS CREATED>"
     ]
 }
 ```
 
-### Indicator SDO (`indicator`)
+#### Indicator SDO (`indicator`)
 
 For each detection rule produced by the AI (there could be more than one) an Indicator object is created as follows;
 
@@ -210,42 +65,181 @@ For each detection rule produced by the AI (there could be more than one) an Ind
         "<AI TYPES>"
     ],
     "name": "<AI NAME>",
-    "pattern_type": "<detection_rule_lang>",
+    "description": "<AI DESCRIPTION>",
+    "pattern_type": "sigma",
     "pattern": "<DETECTION_RULE>",
+    "labels": [
+        "<LABELS ADDED BY USER VIA CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
+    ],
+    "external_references": [
+        {
+            "ANY EXTERNAL REFS SET AT CLI / ANY REFERENCE URLS"
+        },
+        {
+            "description": "rule_md5_hash",
+            "external_id": "<MD5 HASH OF PATTERN FIELD>"
+        },
+        {
+            "source_name": "sigma-level",
+            "description": "<LEVEL>"
+        },
+        {
+            "source_name": "sigma-status",
+            "description": "<STATUS>"
+        },
+        {
+            "source_name": "sigma-license",
+            "description": "<LICENSE, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/techniques/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/tactics/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "cve",
+            "url": "https://nvd.nist.gov/vuln/detail/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        }
+    ],
     "valid_from": "<REPORT CREATED PROPERTY VALUE>",
     "object_marking_refs": [
-        "marking-definition--<TLP LEVEL SET>",
-        "marking-definition--8ef05850-cb0d-51f7-80be-50e4376dbe63"
+        "marking-definition--<TLP LEVEL SET AT CLI>",
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
     ]
 }
 ```
 
-### MITRE ATT&CK lookup 
+The actual rule generated and placed inside the `pattern` property is structured as follows;
 
-Where MITRE ATT&CK Enterprise tactics/techniques detected, they are added to the bundle and joined to the Indicator object containing the detection;
+```yml
+id: <GENERATED BY TXT2DETECTION -- USED IN INDICATOR>
+title: <GENERATED BY AI>
+description: <GENERATED BY AI>
+date: <SAME AS REPORT OBJECT CREATED VALUE>
+modified: <SAME AS REPORT OBJECT MODIFIED VALUE>
+author: <SAME AS REPORT IDENTITY ID>
+falsepositives: 
+    - <GENERATED BY AI>
+status: <GENERATED BY AI>
+level: <GENERATED BY AI>
+license: <ADDED BY USER AT CLI, OR BLNAK>
+tags:
+- tlp.<HUMAN READABLE TLP, SAME AS STIX OBJECTS>
+- attack.<TECHNIQUE ID GENERATED BY AI>
+- attack.<TACTIC ID GENERATED BY AI>
+- cve.<CVE ID GENERATED BY AI>
+- <LABELS ADDED BY USER AT CLI>
+references:
+    - <reference_urls ENTERED BY USER AT CLI>
+detection: <GENERATED BY AI>
+logsource: <GENERATED BY AI>
+```
+
+#### MITRE ATT&CK lookup 
+
+Where MITRE ATT&CK Enterprise tactics/techniques detected, they are added to the bundle and joined to the Indicator object containing the detection.
+
+For techniques;
 
 ```json
 {
     "type": "relationship",
     "spec_version": "2.1",
-    "id": "relationship--<GENERATED BY STIX2 LIBRARY>",
+    "id": "relationship--<UUIDv5>",
     "created_by_ref": "<SAME AS REPORT OBJECT IDENTITY VALUE>",
     "created": "<SAME AS REPORT OBJECT CREATED VALUE>",
     "modified": "<SAME AS REPORT MODIFIED CREATED VALUE>",
-    "relationship_type": "mitre-attack",
-    "description": "<INDICATOR NAME> is linked to <ATT&CK NAME>",
+    "relationship_type": "detects",
+    "description": "<INDICATOR NAME> detects <ATT&CK NAME>",
     "source_ref": "indicator--<ID>",
-    "target_ref": "<MITRE ATT&CK OBJECT>",
+    "target_ref": "attack-pattern--<MITRE ATT&CK OBJECT ID>",
     "object_marking_refs": [
-        "marking-definition--<TLP LEVEL SET>"
-        "marking-definition--8ef05850-cb0d-51f7-80be-50e4376dbe63"
+        "marking-definition--<TLP LEVEL SET IN CLI>"
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ],
+    "external_references": [
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/techniques/<ID>",
+            "external_id": "<ID>"
+        }
     ]
 }
 ```
 
-The objects themselves are imported from [CTI Butler](https://github.com/muchdogesec/ctibutler) defined in the `.env` file.
+For tactics;
 
-## Bundle (script output)
+```json
+{
+    "type": "relationship",
+    "spec_version": "2.1",
+    "id": "relationship--<UUIDv5>",
+    "created_by_ref": "<SAME AS REPORT OBJECT IDENTITY VALUE>",
+    "created": "<SAME AS REPORT OBJECT CREATED VALUE>",
+    "modified": "<SAME AS REPORT MODIFIED CREATED VALUE>",
+    "relationship_type": "detects",
+    "description": "<INDICATOR NAME> detects <ATT&CK NAME>",
+    "source_ref": "indicator--<ID>",
+    "target_ref": "x-mitre-tactic--<MITRE ATT&CK OBJECT ID>",
+    "object_marking_refs": [
+        "marking-definition--<TLP LEVEL SET IN CLI>"
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ],
+    "external_references": [
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/tactics/<ID>",
+            "external_id": "<ID>"
+        }
+    ]
+}
+```
+
+`UUIDv5` is generated using namespace `a4d70b75-6f4a-5d19-9137-da863edd33d7` and `source_ref+target_ref`
+
+The objects themselves are imported from CTI Butler defined in the `.env` file.
+
+#### CVE lookup 
+
+Where CVE IDs are detected, they are added to the bundle and joined to the Indicator object containing the detection;
+
+```json
+{
+    "type": "relationship",
+    "spec_version": "2.1",
+    "id": "relationship--<UUIDv5>",
+    "created_by_ref": "<SAME AS REPORT OBJECT IDENTITY VALUE>",
+    "created": "<SAME AS REPORT OBJECT CREATED VALUE>",
+    "modified": "<SAME AS REPORT MODIFIED CREATED VALUE>",
+    "relationship_type": "detects",
+    "description": "<INDICATOR NAME> detects <CVE ID>",
+    "source_ref": "indicator--<ID>",
+    "target_ref": "vulnerability--<ID>",
+    "object_marking_refs": [
+        "marking-definition--<TLP LEVEL SET IN CLI>"
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ],
+    "external_references": [
+        {
+            "source_name": "cve",
+            "url": "https://nvd.nist.gov/vuln/detail/<ID>",
+            "external_id": "<ID>"
+        }
+    ]
+}
+```
+
+`UUIDv5` is generated using namespace `a4d70b75-6f4a-5d19-9137-da863edd33d7` and `source_ref+target_ref`
+
+The objects themselves are imported from Vulmatch defined in the `.env` file.
+
+#### Bundle (script output)
 
 The output of txt2stix is a STIX bundle file.
 
@@ -254,7 +248,7 @@ This bundle takes the format;
 ```json
 {
     "type": "bundle",
-    "id": "bundle--<SAME AS REPORT UUID PART>",
+    "id": "bundle--<SAME AS REPORT UUID>",
     "objects": [
         "<ALL STIX JSON DEFAULT AND EXTRACTED OBJECTS>"
     ]
@@ -264,3 +258,217 @@ This bundle takes the format;
 The objects include all SROs generated for the input.
 
 The output filename of the bundle takes the format: `bundle--<ID>.json`
+
+### Sigma upload mode
+
+This does the reverse of AI mode and maps a rule to STIX objects
+
+```yml
+id: <SEE LOGIC BELOW>
+related: <FROM RULE>
+title: <FROM RULE, OVERWRITTEN BY CLI INPUT>
+description: <FROM RULE, ELSE NOT INCLUDED>
+date: <FROM RULE, IF BLANK OVERWRITTEN BY CURRENT TIME OR CLI INPUT>
+modified: <FROM RULE, IF BLANK OVERWRITTEN BY CURRENT TIME OR CLI INPUT>
+author: <SEE LOGIC BELOW>
+falsepositives: 
+    - <FROM RULE, ELSE NOT INCLUDED>
+status: <FROM RULE, ELSE NOT INCLUDED>
+level: <FROM RULE, ELSE NOT INCLUDED>
+license: <FROM RULE, OVERWRITTEN BY CLI INPUT>
+tags:
+    - <FROM RULE, APPENDED BY CLI INPUT, SEE LOGIC BELOW>
+references:
+    - <FROM RULE, APPENDED BY CLI INPUT>
+taxonomy: <FROM RULE>
+scope: <FROM RULE>
+detection: <FROM RULE>
+logsource: <FROM RULE>
+```
+
+`<FROM RULE, OVERWRITTEN BY CLI INPUT>` means if this value is passed via the CLI, any values in the rule for this field are completely overwritten. Generally it is better to not better pass any CLI arguements when uploading Sigma rule files, and editing the rule directly before processing.
+
+`<FROM RULE, APPENDED BY CLI INPUT>` means any old items will remain, but new values added by user via command line will also be appended to the list.
+
+The Sigma specification does support arbitrary custom fields. These will be included like-for-like in the output.
+
+#### id logic
+
+Note, input rules don't always have an `id` it is not required by the Sigma spec
+
+As such;
+
+1. if no ID in rule, one will be autogenerated using a random UUIDv4 and added to the rule
+2. if ID passed in rule or via CLI, the following logic will apply...
+
+To reduce the risk of future collisions, the rule is renamed with a new ID, and the following is written into the rule;
+
+```
+id: <REPORT ID IN CLI, ELSE NEW RANDOMLY GENERATED UUID V4>
+related:
+  - id: <OLD ID>
+    type: renamed
+```
+
+This ensures the original ID of the rule can retrieved if needed.
+
+**Important**
+
+Some rules will already have a `related` property.
+
+The values created here will be appended to the existing `related` list.
+
+#### author logic
+
+`author` values in Sigma rules are free-text.
+
+`author: dogesec @dogesec`
+
+txt2detection supports `author` values as STIX Identity objects.
+
+As such, one of three things things will happen with the following precedence;
+
+1. if `use_identity` passed at CLI, the author value will be replaced with this ID and the STIX identity object will be included in the bundle, else,
+2. if `author` value exists an `identity` object will be generated (see template below), else
+3. if no `author` property present, the default txt2detection identity will be used and Identity object included in bundle
+
+```json
+{
+    "type": "identity",
+    "spec_version": "2.1",
+    "id": "identity--<UUID V5>",
+    "created_by_ref": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+    "created": "2020-01-01T00:00:00.000Z",
+    "modified": "2020-01-01T00:00:00.000Z",
+    "name": "<AUTHOR VALUE IN SIGMA RULE>",
+    "object_marking_refs": [
+        "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487"
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ]
+}
+```
+
+UUIDv5 uses namespace `a4d70b75-6f4a-5d19-9137-da863edd33d7` and value `name` to generate the UUIDv5. This ensure consistency of IDs between authors.
+
+#### tags logic
+
+In AI mode any `tags` relating to TLP (`tlp.`), ATT&CK (`attack.`), or CVE (`cve.`) are handled in a specical way. This also is reflected in manual mode. If the rule input contains one of these tags, it is handled as follows;
+
+* `tlp.`: only one value should exist in rule, else error. The TLP is translated to STIX TLP, and then assigned to all created objects
+* `attack.`: any technique or tactic tags are looked up using CTI Butler and ATT&CK relationships created as described
+* `cve.`: any CVE tags are looked up using Vulmatch and CVE relationships created as described
+
+#### Report SDO (`report`)
+
+All files uploaded are represented as a unique [STIX Report SDO](https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_n8bjzg1ysgdq) that take the following structure;
+
+If Sigma upload mode;
+
+```json
+{
+    "type": "report",
+    "spec_version": "2.1",
+    "id": "report--<UUID OF RULE>",
+    "created_by_ref": "identity--<IDENTITY OBJECT USED AT UPLOAD OR TXT2DETECTION IDENTIFY IF NON SET>",
+    "created": "<DATE IN RULE OR ITEM INGEST DATE OR DATE SET AT UPLOAD>",
+    "modified": "<MODIFIED IN RULE OR ITEM INGEST DATE OR DATE SET AT UPLOAD>",
+    "name": "<TITLE OF SIGMA RULE>",
+    "description": "<DESCRIPTION OF RULE, IF DOES NOT EXIST IS OMITTED>",
+    "published": "<SAME AS CREATED>",
+    "object_marking_refs": [
+        "marking-definition--<TLP LEVEL IN RULE OR SET IN CLI>",
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ],
+    "labels": [
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>",
+        "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
+    ],
+    "external_references": [
+        {
+            "description": "description_md5_hash",
+            "external_id": "<MD5 HASH OF DESCRIPTION FIELD, ID EXIST>"
+        },
+        {
+            "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
+        }
+    ],
+    "object_refs": [
+        "<INDICATOR OBJECT CREATED>"
+    ]
+}
+```
+
+#### Indicator SDO (`indicator`)
+
+For the detection rule produced an Indicator object is created as follows;
+
+```json
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--<SAME AS RULE>",
+    "created_by_ref": "<SAME AS REPORT OBJECT>",
+    "created": "<SAME AS REPORT OBJECT>",
+    "modified": "<SAME AS REPORT OBJECT>",
+    "indicator_types": [
+        "<AI TYPES>"
+    ],
+    "name": "<TITLE OF RULE>",
+    "description": "<DESCRIPTION OF RULE, IF DOES NOT EXIST IS OMITTED>",
+    "pattern_type": "sigma",
+    "pattern": "<DETECTION_RULE>",
+    "labels": [
+        "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
+        "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
+    ],
+    "external_references": [
+        {
+            "ANY EXTERNAL REFS SET AT CLI / REFERENCE URLS"
+        },
+        {
+            "description": "rule_md5_hash",
+            "external_id": "<MD5 HASH OF PATTERN FIELD>"
+        },
+        {
+            "source_name": "sigma-old-id",
+            "description": "<SIGMA ID REPLACED, ELSE BLANK>"
+        },
+        {
+            "source_name": "sigma-level",
+            "description": "<LEVEL, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "sigma-status",
+            "description": "<STATUS, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "sigma-license",
+            "description": "<LICENSE, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/techniques/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "mitre-attack",
+            "url": "https://attack.mitre.org/tactics/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        },
+        {
+            "source_name": "cve",
+            "url": "https://nvd.nist.gov/vuln/detail/<ID, IF DOES NOT EXIST IS OMITTED>",
+            "external_id": "<ID, IF DOES NOT EXIST IS OMITTED>"
+        }
+    ],
+    "valid_from": "<REPORT CREATED PROPERTY VALUE>",
+    "object_marking_refs": [
+        "marking-definition--<TLP LEVEL IN RULE OR SET IN CLI>",
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ]
+}
+```
+
+#### ATT&CK, CVE, Bundle
+
+Same logic as AI mode.
