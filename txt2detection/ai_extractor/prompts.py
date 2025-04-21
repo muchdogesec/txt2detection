@@ -24,6 +24,7 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"detection"`: Valid sigma rule detection
 - `"indicator_types"`: One or more STIX v2.1 indicator.indicator_types
 - `"status"`: select one of stable, test, experimental, deprecated, unsupported. that best describe the generated rule
+- `"level"`: select SIGMA level for the rule
 
                          
 ### **Status**
@@ -44,6 +45,14 @@ Declares the status of the rule:
 - `"malicious-activity"`: Patterns of suspected malicious objects and/or activity.
 - `"attribution"`: Patterns of behavior that indicate attribution to a particular Threat Actor or Campaign.
 - `"unknown"`: There is not enough information available to determine the type of indicator.
+
+### **Level**
+The level field contains one of five string values. It describes the criticality of a triggered rule. While low and medium level events have an informative character, events with high and critical level should lead to immediate reviews by security analysts.
+- informational: Rule is intended for enrichment of events, e.g. by tagging them. No case or alerting should be triggered by such rules because it is expected that a huge amount of events will match these rules.
+- low: Notable event but rarely an incident. Low rated events can be relevant in high numbers or combination with others. Immediate reaction shouldn't be necessary, but a regular review is recommended.
+- medium: Relevant event that should be reviewed manually on a more frequent basis.
+- high: Relevant event that should trigger an internal alert and requires a prompt review.
+- critical: Highly relevant event that indicates an incident. Critical events should be reviewed immediately. It is used only for cases in which probability borders certainty.
 
 
 ### **Tags***
