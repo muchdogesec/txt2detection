@@ -103,7 +103,8 @@ class Bundler:
         self.license = license
 
         self.job_id = f"report--{self.uuid}"
-        self.url_refs = [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
+        self.external_refs = (external_refs or []) + [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
+        
         self.report = Report(
             created_by_ref=self.identity.id,
             name=name,
@@ -122,9 +123,7 @@ class Bundler:
                     source_name="description_md5_hash",
                     external_id=hashlib.md5((description or "").encode()).hexdigest(),
                 )
-            ]
-            + (external_refs or [])
-            + self.url_refs,
+            ] + self.external_refs,
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
@@ -166,7 +165,7 @@ class Bundler:
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": self.url_refs + detection.external_references,
+            "external_references": self.external_refs + detection.external_references,
         }
         indicator['external_references'].append(
             {
