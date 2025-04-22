@@ -239,6 +239,66 @@ Where CVE IDs are detected, they are added to the bundle and joined to the Indic
 
 The objects themselves are imported from Vulmatch defined in the `.env` file.
 
+#### Observable creation
+
+If an observable is detected in the `detection` part of the rule, then it should be turned into a STIX SCO and joined to the Indicator object of the rule the SCO is found in.
+
+The logic for detection an observable type should be powered by the AI 
+
+The AI should be prompted to produce the rule, but also put the Observables into a structure output. e.g.
+
+If any of the following cyber threat intelligence STIX observable types are used in the detection part of the rule
+
+* `ipv4-addr`
+* `ipv6-addr`
+* `email-addr`
+* `url`
+* `directory`
+* `domain-name`
+* `hostname`
+* `file.hashes.MD5`
+* `file.hashes.SHA-1`
+* `file.hashes.SHA-256`
+* `file.hashes.SHA-512`
+* `file.hashes.SSDEEP`
+* `mac-addr`
+* `user-account`
+* `windows-registry-key`
+* `x509-certificate`
+
+
+In the following text, report them in a structured json output as follows;
+
+```json
+{
+    "type": "TYPE",
+    "value": "VALUE"
+}
+```
+
+The value should then be turned to an SCO object. The logic will be similar to txt2stix, HOWEVER, no Indicator will be created. Instead SCO object(s) created are linked to the rule indicator as follows;
+
+```json
+{
+    "type": "relationship",
+    "spec_version": "2.1",
+    "id": "relationship--<UUIDv5>",
+    "created_by_ref": "<SAME AS REPORT OBJECT IDENTITY VALUE>",
+    "created": "<SAME AS REPORT OBJECT CREATED VALUE>",
+    "modified": "<SAME AS REPORT MODIFIED CREATED VALUE>",
+    "relationship_type": "detects",
+    "description": "<INDICATOR NAME> detects <SCO VALUE>",
+    "source_ref": "indicator--<ID>",
+    "target_ref": "<SCO ID>",
+    "object_marking_refs": [
+        "marking-definition--<TLP LEVEL SET IN CLI>"
+        "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
+    ]
+}
+```
+
+`UUIDv5` is generated using namespace `a4d70b75-6f4a-5d19-9137-da863edd33d7` and `source_ref+target_ref`
+
 #### Bundle (script output)
 
 The output of txt2stix is a STIX bundle file.
@@ -472,3 +532,7 @@ For the detection rule produced an Indicator object is created as follows;
 #### ATT&CK, CVE, Bundle
 
 Same logic as AI mode.
+
+#### Observable creation
+
+Same logic as AI mode, except if no AI model (optional) passed in CLI, then this part will not be run (to save tokens).
