@@ -243,29 +243,21 @@ The objects themselves are imported from Vulmatch defined in the `.env` file.
 
 If an observable is detected in the `detection` part of the rule, then it should be turned into a STIX SCO and joined to the Indicator object of the rule the SCO is found in.
 
-The logic for detection an observable type should be powered by the AI 
+The logic for detection an observable type should be powered by regex. The following types are supported.
 
-The AI should be prompted to produce the rule, but also put the Observables into a structure output. e.g.
-
-If any of the following cyber threat intelligence STIX observable types are used in the detection part of the rule
-
-* `ipv4-addr`
-* `ipv6-addr`
-* `email-addr`
+* `ipv4-addr` (support CIDR and port)
+* `ipv6-addr` (support CIDR and port)
+* `email-addr` (no need to check TLD, just )
 * `url`
 * `directory`
-* `domain-name`
-* `hostname`
+* `domain-name` (needs TLD validation)
+* `hostname` (needs TLD invalidation)
+* `file.name` (needs file extension validation)
 * `file.hashes.MD5`
 * `file.hashes.SHA-1`
 * `file.hashes.SHA-256`
 * `file.hashes.SHA-512`
 * `file.hashes.SSDEEP`
-* `mac-addr`
-* `user-account`
-* `windows-registry-key`
-* `x509-certificate`
-
 
 In the following text, report them in a structured json output as follows;
 
@@ -535,4 +527,4 @@ Same logic as AI mode.
 
 #### Observable creation
 
-Same logic as AI mode, except if no AI model (optional) passed in CLI, then this part will not be run (to save tokens).
+Same logic as AI mode.
