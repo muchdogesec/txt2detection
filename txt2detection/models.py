@@ -5,11 +5,12 @@ import typing
 import uuid
 from slugify import slugify
 from datetime import date as dt_date
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 
 import jsonschema
 from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic_core import PydanticCustomError, core_schema
 import yaml
 
 from stix2 import (
@@ -139,6 +140,33 @@ class Statuses(enum.StrEnum):
     experimental = enum.auto()
     deprecated = enum.auto()
     unsupported = enum.auto()
+
+class SigmaTag(str):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        _source: type[Any],
+        _handler,
+    ) -> core_schema.CoreSchema:
+        return core_schema.no_info_after_validator_function(cls._validate, core_schema.str_schema())
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, core_schema: core_schema.CoreSchema, handler
+    ):
+        field_schema = handler(core_schema)
+        field_schema.update(type='string', pattern=TAG_PATTERN.pattern, format='sigma-tag')
+        return field_schema
+
+    @classmethod
+    def _validate(cls, input_value: str, /) -> str:
+        if not TAG_PATTERN.match(input_value):
+            raise PydanticCustomError(
+            'value_error',
+            'value is not a valid SIGMA tag: {reason}',
+            {'reason': f'Must be in format namespace.value and match pattern {TAG_PATTERN.pattern}'},
+        )
+        return input_value
 
 class BaseDetection(BaseModel):
     title: str
@@ -280,7 +308,7 @@ class SigmaRuleDetection(BaseDetection):
     fields: Optional[List[str]] = None
     falsepositives: Optional[List[str]] = None
     level: Optional[str] = None
-    tags: Optional[List[str]] = None
+    tags: Optional[List[SigmaTag]] = None
     scope: Optional[List[str]] = None
 
     def model_post_init(self, __context):

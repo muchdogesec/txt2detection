@@ -43,7 +43,7 @@ from .bundler import Bundler
 import shutil
 
 
-from .utils import STATUSES, make_identity, valid_licenses, parse_model
+from .utils import STATUSES, as_date, make_identity, valid_licenses, parse_model
 
 def parse_identity(str):
     return Identity(**json.loads(str))
@@ -116,10 +116,6 @@ def parse_args():
 
     return args
 
-def as_date(d: 'date|datetime'):
-    if isinstance(d, datetime):
-        return d.date()
-    return d
 
 def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[str], report_id: str|uuid.UUID, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:
     if sigma := kwargs.get('sigma_file'):
