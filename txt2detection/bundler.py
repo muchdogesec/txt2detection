@@ -15,6 +15,7 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
+from txt2detection import observables
 from txt2detection.models import Detection, DetectionContainer, UUID_NAMESPACE
 
 from datetime import UTC, datetime as dt
@@ -139,12 +140,12 @@ class Bundler:
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
 
-    def add_ref(self, sdo):
+    def add_ref(self, sdo, append_report=False):
         sdo_id = sdo["id"]
         if sdo_id in self.all_objects:
             return
         self.bundle.objects.append(sdo)
-        if sdo_id not in self.report.object_refs and sdo.get('type') == 'indicator':
+        if sdo_id not in self.report.object_refs and append_report:
             self.report.object_refs.append(sdo_id)
         self.all_objects.add(sdo_id)
 
@@ -186,7 +187,16 @@ class Bundler:
             self.add_ref(obj)
             self.add_relation(indicator, obj)
 
-        self.add_ref(parse_stix(indicator, allow_custom=True))
+        self.add_ref(parse_stix(indicator, allow_custom=True), append_report=True)
+
+        for ob_type, ob_value in observables.find_stix_observables(detection.detection):
+            try:
+                obj = observables.to_stix_object(ob_type, ob_value)
+                self.add_ref(obj, append_report=True)
+                self.add_relation(indicator, obj)
+            except:
+                logger.exception(f"failed to process observable {ob_type}/{ob_value}")
+
 
     def add_relation(self, indicator, target_object, relationship_type='detects'):
         ext_refs = []
