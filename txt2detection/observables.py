@@ -98,8 +98,7 @@ def find_stix_observables(detection: Any, matches: List[str] = None) -> List[str
 
     if isinstance(detection, dict):
         for key, value in detection.items():
-            for stix_type in STIX_PATTERNS_VALUES.keys():
-                key_pattern = STIX_PATTERNS_KEYS[stix_type]
+            for stix_type, key_pattern in STIX_PATTERNS_KEYS.items():
                 value_patterns = STIX_PATTERNS_VALUES.get(stix_type, [])
                 if re.search(key_pattern, key, re.IGNORECASE):
                     for pattern in value_patterns:
@@ -108,15 +107,17 @@ def find_stix_observables(detection: Any, matches: List[str] = None) -> List[str
                         ):
                             if filter_out(stix_type, value):
                                 matches.append((stix_type, value))
-                elif isinstance(value, str):
-                    for pattern in value_patterns:
-                        if re.search(pattern, value, re.IGNORECASE):
-                            if filter_out(stix_type, value):
-                                matches.append((stix_type, value))
+                find_stix_observables(value, matches)
             find_stix_observables(value, matches)
     elif isinstance(detection, list):
         for item in detection:
             find_stix_observables(item, matches)
+    elif isinstance(detection, str):
+        for stix_type, value_patterns in STIX_PATTERNS_VALUES.items():
+            for pattern in value_patterns:
+                if re.search(pattern, detection, re.IGNORECASE):
+                    if filter_out(stix_type, detection):
+                        matches.append((stix_type, detection))
     return matches
 
 

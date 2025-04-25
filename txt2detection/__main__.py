@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import logging
 import re
+import sys
 import uuid
 from stix2 import Identity
 import yaml
@@ -156,6 +157,7 @@ def get_sigma_detections(sigma: str) -> SigmaRuleDetection:
 def main(args: Args):
 
     setLogFile(logging.root, Path(f"logs/log-{args.report_id}.log"))
+    logging.info(f"starting argument: {json.dumps(sys.argv[1:])}")
     kwargs = args.__dict__
     kwargs['identity'] = args.use_identity
     bundler = run_txt2detection(**kwargs)

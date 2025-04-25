@@ -189,21 +189,23 @@ class Bundler:
 
         self.add_ref(parse_stix(indicator, allow_custom=True), append_report=True)
 
-        for ob_type, ob_value in observables.find_stix_observables(detection.detection):
+        for ob_type, ob_value in set(observables.find_stix_observables(detection.detection)):
             try:
                 obj = observables.to_stix_object(ob_type, ob_value)
                 self.add_ref(obj, append_report=True)
-                self.add_relation(indicator, obj)
+                self.add_relation(indicator, obj, 'observes', target_name=ob_value)
             except:
                 logger.exception(f"failed to process observable {ob_type}/{ob_value}")
 
 
-    def add_relation(self, indicator, target_object, relationship_type='detects'):
+    def add_relation(self, indicator, target_object, relationship_type='detects', target_name=None):
         ext_refs = []
 
         with contextlib.suppress(Exception):
             indicator['external_references'].append(target_object['external_references'][0])
             ext_refs = [target_object['external_references'][0]]
+
+        target_name = target_name or f"{target_object['external_references'][0]['external_id']} ({target_object['name']})"
 
         rel =  Relationship(
             id="relationship--" + str(
@@ -215,7 +217,7 @@ class Bundler:
             target_ref=target_object['id'],
             relationship_type=relationship_type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} {relationship_type} {target_object['external_references'][0]['external_id']} ({target_object['name']})",
+            description=f"{indicator['name']} {relationship_type} {target_name}",
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
