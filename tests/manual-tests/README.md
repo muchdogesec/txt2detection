@@ -145,16 +145,13 @@ python3 txt2detection.py \
   --report_id e37506ca-b3e4-45b8-8205-77b815b88d7f
 ```
 
-## Check observable
-
-observables.txt
+## Check observable extraction
 
 ```shell
 python3 txt2detection.py \
-  --input_file tests/files/CVE-2024-56520.txt \
+  --input_file tests/files/observables.txt \
   --name "Check observables" \
   --ai_provider openai:gpt-4o \
-  --license MIT \
   --report_id 4aa5924b-2081-42ed-9934-ebf200427302
 ```
 
@@ -388,3 +385,12 @@ python3 txt2detection.py \
   --report_id d9fc533f-bc07-4295-b4f5-f09c41b9941d
 ```
 
+## Check observable extraction
+
+```shell
+python3 txt2detection.py \
+  --sigma_file tests/files/sigma-rule-observables.yml \
+  --name "Check observable extraction" \
+  --ai_provider openai:gpt-4o \
+  --report_id 1e71046f-2c8f-4617-908e-23f7463d350b
+```
