@@ -391,6 +391,5 @@ python3 txt2detection.py \
 python3 txt2detection.py \
   --sigma_file tests/files/sigma-rule-observables.yml \
   --name "Check observable extraction" \
-  --ai_provider openai:gpt-4o \
   --report_id 1e71046f-2c8f-4617-908e-23f7463d350b
 ```
