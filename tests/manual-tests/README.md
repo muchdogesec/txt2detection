@@ -145,6 +145,19 @@ python3 txt2detection.py \
   --report_id e37506ca-b3e4-45b8-8205-77b815b88d7f
 ```
 
+## Check observable
+
+observables.txt
+
+```shell
+python3 txt2detection.py \
+  --input_file tests/files/CVE-2024-56520.txt \
+  --name "Check observables" \
+  --ai_provider openai:gpt-4o \
+  --license MIT \
+  --report_id 4aa5924b-2081-42ed-9934-ebf200427302
+```
+
 # Manual Rule Gen
 
 ## Title
@@ -374,3 +387,4 @@ python3 txt2detection.py \
   --license MIT   \
   --report_id d9fc533f-bc07-4295-b4f5-f09c41b9941d
 ```
+
