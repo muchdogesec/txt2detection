@@ -116,6 +116,12 @@ Note, in this mode you should be aware of a few things;
 * `--reference_urls` (optional): A list of URLs to be added as `references` in the Sigma Rule property and in the `external_references` property of the Indicator and Report STIX object created. e.g `"https://www.google.com/" "https://www.facebook.com/"`. Will appended to any existing `references` in the rule.
 * `--external_refs` (optional): txt2detection will automatically populate the `external_references` of the report object it creates for the input. You can use this value to add additional objects to `external_references`. Note, you can only add `source_name` and `external_id` values currently. Pass as `source_name=external_id`. e.g. `--external_refs txt2stix=demo1 source=id` would create the following objects under the `external_references` property: `{"source_name":"txt2stix","external_id":"demo1"},{"source_name":"source","external_id":"id"}`
 
+### A note on observable extraction
+
+txt2detection will automatically attempt to extract any observables (aka indicators of compromise) that are found in the created or imported rules to turn them into STIX objects joined to the STIX Indicator object of the Rule.
+
+In `txt2detection/observables.py` you will find the observable types (and regexs used detection) currently supported.
+
 ### Output
 
 The output of each run is structured as follows;

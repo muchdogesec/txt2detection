@@ -1,0 +1,23 @@
+Actor is observed using the following observables during the incident:
+
+* 1.1.1.1
+* 1.1.1.1/24
+* 1.1.1.1:80
+* 2001:db8:3333:4444:CCCC:DDDD:EEEE:FFFF
+* 2001:0db8:85a3:0000:0000:8a2e:0370:7334/32
+* [2001:0db8:85a3:0000:0000:8a2e:0370:7334]:80
+* google.com
+* igvmwp3544wpnd6u.onion
+* subdomain.microsoft.com
+* http://3.3.3.3
+* https://fortinet.com/
+* http://igvmwp3544wpnd6u.onion
+* https://amazon.co.uk/path/index.html
+* https://sub.fortinet.com/blog.html
+* example@example.com
+* test+1@google.com
+* C:\Windows\System64
+* \path\to\file.exe
+* /downloads/directory
+* /a/file/path/file.sh
+* 4ec503be252d765ea37621a629afdaa6
