@@ -193,7 +193,7 @@ class Bundler:
             try:
                 obj = observables.to_stix_object(ob_type, ob_value)
                 self.add_ref(obj, append_report=True)
-                self.add_relation(indicator, obj, 'observes', target_name=ob_value)
+                self.add_relation(indicator, obj, 'detects', target_name=ob_value)
             except:
                 logger.exception(f"failed to process observable {ob_type}/{ob_value}")
 
