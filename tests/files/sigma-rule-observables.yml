@@ -19,8 +19,8 @@ logsource:
 detection:
     selection:
         - 1.1.1.1
-        - 1.1.1.1/24
-        - 1.1.1.1:80
+        - example@example.com
+        - google.com
     condition: selection
 falsepositives:
     - Okta Policies being modified or deleted may be performed by a system administrator.
