@@ -1,5 +1,5 @@
 import argparse
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 
 from dataclasses import dataclass
 import io
@@ -14,7 +14,7 @@ from stix2 import Identity
 import yaml
 
 from txt2detection.ai_extractor.base import BaseAIExtractor
-from txt2detection.models import TAG_PATTERN, DetectionContainer, SigmaRuleDetection
+from txt2detection.models import TAG_PATTERN, DetectionContainer, Level, SigmaRuleDetection
 from txt2detection.utils import validate_token_count
 
 def configureLogging():
@@ -87,31 +87,42 @@ def parse_label(label: str):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert text file to detection format.')
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--input_file', help='The file to be converted. Must be .txt', type=lambda x: Path(x).read_text())
-    group.add_argument('--input_text', help='The text to be converted')
-    group.add_argument('--sigma_file', help='The sigma file to be converted. Must be .yml', type=lambda x: Path(x).read_text())
-    parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
-    parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
-    parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'], 
-            help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
-    parser.add_argument('--labels', type=parse_label, action="extend", nargs='+', 
-            help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
-    parser.add_argument('--created', type=parse_created, 
-            help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')
-    parser.add_argument('--use_identity', type=parse_identity,
-            help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
-    parser.add_argument("--ai_provider", required=False, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
-    parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
-    parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
-    parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
+    mode = parser.add_subparsers(title='process-mode', dest='mode', description="mode to use")
+    file = mode.add_parser('file', help="process a file input using ai")
+    text = mode.add_parser('text', help="process a text argument using ai")
+    sigma = mode.add_parser('sigma', help="process a sigma file without ai")
+
+    for mode_parser in [file, text, sigma]:
+        mode_parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
+        mode_parser.add_argument('--name', required=True, help='Name of file, max 72 chars. Will be used in the STIX Report Object created.')
+        mode_parser.add_argument('--tlp_level', choices=['clear', 'green', 'amber', 'amber_strict', 'red'],
+                help='Options are clear, green, amber, amber_strict, red. Default is clear if not passed.')
+        mode_parser.add_argument('--labels', type=parse_label, action="extend", nargs='+',
+                help='Comma-separated list of labels. Case-insensitive (will be converted to lower-case). Allowed a-z, 0-9.')
+        mode_parser.add_argument('--created', type=parse_created,
+                help='Explicitly set created time in format YYYY-MM-DDTHH:MM:SS.sssZ. Default is current time.')
+        mode_parser.add_argument('--use_identity', type=parse_identity,
+                help='Pass a full STIX 2.1 identity object (properly escaped). Validated by the STIX2 library. Default is SIEM Rules identity.')
+        mode_parser.add_argument("--ai_provider", required=False, type=parse_model, help="(required): defines the `provider:model` to be used. Select one option.", metavar="provider[:model]")
+        mode_parser.add_argument("--external_refs", type=parse_ref, help="pass additional `external_references` entry (or entries) to the report object created. e.g --external_ref author=dogesec link=https://dkjjadhdaj.net", default=[], metavar="{source_name}={external_id}", action="extend", nargs='+')
+        mode_parser.add_argument("--reference_urls", help="pass additional `external_references` url entry (or entries) to the report object created.", default=[], metavar="{url}", action="extend", nargs='+')
+        mode_parser.add_argument("--license", help="Valid SPDX license for the rule", default=None, metavar="[LICENSE]", choices=valid_licenses())
+
+    file.add_argument('--input_file', help='The file to be converted. Must be .txt', type=lambda x: Path(x).read_text())
+    text.add_argument('--input_text', help='The text to be converted')
+    sigma.add_argument('--sigma_file', help='The sigma file to be converted. Must be .yml', type=lambda x: Path(x).read_text())
+    sigma.add_argument('--status', help="If passed, will overwrite any existing `status` recorded in the rule", choices=STATUSES)
+    sigma.add_argument('--level', help="If passed, will overwrite any existing `level` recorded in the rule", choices=Level._member_names_)
 
     args: Args = parser.parse_args()
+    print(args)
 
-    if not args.sigma_file:
+    if args.mode != 'sigma':
         assert args.ai_provider, "--ai_provider is required in file or txt mode"
-    args.input_text = args.input_text or args.input_file
+    if args.mode == 'file':
+        args.input_text = args.input_file
 
+    args.input_text = getattr(args, 'input_text', "")
     if not args.report_id:
         args.report_id = Bundler.generate_report_id(args.use_identity.id if args.use_identity else None, args.created, args.name)
 
@@ -130,6 +141,8 @@ def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[s
                 created=detection.date,
                 modified=detection.modified,
             )
+        detection.level = kwargs.get('level', detection.level)
+        detection.status = kwargs.get('status', detection.status)
         detection.date = as_date(kwargs.get('created'))
         detection.modified = as_date(kwargs.get('modified'))
         detection.references = kwargs['reference_urls']
