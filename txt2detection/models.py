@@ -173,7 +173,7 @@ class BaseDetection(BaseModel):
     description: str
     detection: dict
     logsource: dict
-    status: Statuses
+    status: Statuses = Statuses.experimental
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str] = Field(default_factory=list)
