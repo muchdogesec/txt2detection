@@ -26,6 +26,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pyyaml",
     "python-slugify",
+    "validators>=0.34.0",
   ]
 [project.urls]
 Homepage = "https://github.com/muchdogesec/txt2detection"
