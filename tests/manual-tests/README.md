@@ -418,12 +418,21 @@ python3 txt2detection.py sigma \
 
 ## Check status
 
-No status in rule
+No status in rule, not included
 
 ```shell
 python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-status.yml \
   --name "No status in rule" \
+  --report_id 6a4c842a-986f-43f0-8f3f-d98cdd36e01e
+```
+
+No status in rule should be added
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-no-status.yml \
+  --name "No status in rule but should be added" \
   --status unsupported \
   --report_id c5f83c63-8a83-409b-8c43-a237987afb0f
 ```
