@@ -3,7 +3,7 @@
 ## Check TLP
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check TLP" \
   --ai_provider openai:gpt-4o \
@@ -16,7 +16,7 @@ python3 txt2detection.py \
 Should fail because no namespace
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check bad labels" \
   --ai_provider openai:gpt-4o \
@@ -27,7 +27,7 @@ python3 txt2detection.py \
 Should pass
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check labels" \
   --ai_provider openai:gpt-4o \
@@ -40,7 +40,7 @@ python3 txt2detection.py \
 Should fail because disallowed tag
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Disallowed tag" \
   --ai_provider openai:gpt-4o \
@@ -51,7 +51,7 @@ python3 txt2detection.py \
 Should have cve tag and matching vulnerability object
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "CVE tags" \
   --ai_provider openai:gpt-4o \
@@ -62,7 +62,7 @@ python3 txt2detection.py \
 Should have attack tags and matching attack pattern and x-mitre-tactic objects
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "ATT&CK tags tag" \
   --ai_provider openai:gpt-4o \
@@ -73,7 +73,7 @@ python3 txt2detection.py \
 ## Check custom identity
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check custom identity" \
   --ai_provider openai:gpt-4o \
@@ -84,7 +84,7 @@ python3 txt2detection.py \
 ## Check created by time
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check created by time" \
   --ai_provider openai:gpt-4o \
@@ -95,7 +95,7 @@ python3 txt2detection.py \
 ## External references
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "External references" \
   --external_refs txt2stix=demo1 source=id \
@@ -106,7 +106,7 @@ python3 txt2detection.py \
 ## Reference URLs
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Reference URLs" \
   --reference_urls "https://www.google.com/" "https://www.facebook.com/" \
@@ -117,7 +117,7 @@ python3 txt2detection.py \
 ## Check Vulmatch / CTI Butler
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check Vulmatch / CTI Butler" \
   --ai_provider openai:gpt-4o \
@@ -127,7 +127,7 @@ python3 txt2detection.py \
 ## Testing input txt
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py text \
   --input_text "a rule detecting suspicious logins on windows systems" \
   --name "Testing input txt" \
   --ai_provider openai:gpt-4o \
@@ -137,7 +137,7 @@ python3 txt2detection.py \
 ## Check license
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/CVE-2024-56520.txt \
   --name "Check license" \
   --ai_provider openai:gpt-4o \
@@ -148,7 +148,7 @@ python3 txt2detection.py \
 ## Check observable extraction
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py file \
   --input_file tests/files/observables.txt \
   --name "Check observables" \
   --ai_provider openai:gpt-4o \
@@ -162,7 +162,7 @@ python3 txt2detection.py \
 Should fail
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-title.yml \
   --name "No title"
 ```
@@ -170,7 +170,7 @@ python3 txt2detection.py \
 Title, but report name is override by CLI input
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "A new title" \
   --report_id 272daf95-2790-4fd5-9ca6-ee8cef08315d
@@ -179,7 +179,7 @@ python3 txt2detection.py \
 ## No description
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-description.yml \
   --name "No description" \
   --report_id fd38cd23-93af-41ad-ab43-a6fa0ca69bf5
@@ -188,7 +188,7 @@ python3 txt2detection.py \
 ## Check that derived-from is created
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Manual Rule Gen" \
   --report_id 80fc4d1c-f02c-4bff-80bf-d97490a04542
@@ -197,7 +197,7 @@ python3 txt2detection.py \
 ## Random ID
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Random ID"
 ```
@@ -207,7 +207,7 @@ python3 txt2detection.py \
 `related` property exist, check append is correct
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-existing-related.yml \
   --name "Append related" \
   --report_id 655f0689-5209-4ad5-a6de-3f198c696060
@@ -218,7 +218,7 @@ python3 txt2detection.py \
 No `date` or `modified` (expect script run time used in rule AND STIX objects)
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-date.yml \
   --name "No date or modified" \
   --report_id 38e0a255-66c1-48b1-a5e2-ace0b6ede336
@@ -227,7 +227,7 @@ python3 txt2detection.py \
 Only `date` no `modified` (expect no modified in rule, STIX objects use date for mod and created)
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-one-date.yml \
   --name "One date" \
   --report_id 0b9a4d60-9020-4abb-8754-5a19bd7aaeb5
@@ -236,7 +236,7 @@ python3 txt2detection.py \
 `date` and `modified` exists (expect STIX objects to use time in rule)
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Date and modified exists" \
   --report_id e9b31ad2-44fb-450c-97f8-e3ecc653730f
@@ -245,7 +245,7 @@ python3 txt2detection.py \
 `date` and `modified` exists but are both overwritten by cli (expect rule and STIX objects to use created/modified time passed by CLI)
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Date and modified exists but are both overwritten by cli" \
   --created 2000-01-01T23:59:59 \
@@ -257,7 +257,7 @@ python3 txt2detection.py \
 No author, should be autogenerated
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-author.yml \
   --name "No author, should be autogenerated" \
   --report_id 9fd32226-0b52-4a54-9fab-eb44320ec483
@@ -266,7 +266,7 @@ python3 txt2detection.py \
 Author exists, should create STIX Identity applied to Indicator, Report, and SROs
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Author exists" \
   --report_id 1a7de563-ff45-46f3-b5d1-e930a5eae99c
@@ -275,7 +275,7 @@ python3 txt2detection.py \
 Author exists, but overwritten by cli
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Author exists, overwritten by cli" \
   --use_identity '{"type":"identity","spec_version":"2.1","id":"identity--8ef05850-cb0d-51f7-80be-50e4376dbe99","created_by_ref":"identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5","created":"2020-01-01T00:00:00.000Z","modified":"2020-01-01T00:00:00.000Z","name":"siemrules demo","description":"https://github.com/muchdogesec/siemrules","identity_class":"system","sectors":["technology"],"contact_information":"https://www.dogesec.com/contact/","object_marking_refs":["marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487","marking-definition--97ba4e8b-04f6-57e8-8f6e-3a0f0a7dc0fb"]}' \
@@ -285,7 +285,7 @@ python3 txt2detection.py \
 No author exists created by cli
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-author.yml \
   --name "No author exists created by cli" \
   --use_identity '{"type":"identity","spec_version":"2.1","id":"identity--8ef05850-cb0d-51f7-80be-50e4376dbe99","created_by_ref":"identity--9779a2db-f98c-5f4b-8d08-8ee04e02dbb5","created":"2020-01-01T00:00:00.000Z","modified":"2020-01-01T00:00:00.000Z","name":"siemrules demo","description":"https://github.com/muchdogesec/siemrules","identity_class":"system","sectors":["technology"],"contact_information":"https://www.dogesec.com/contact/","object_marking_refs":["marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487","marking-definition--97ba4e8b-04f6-57e8-8f6e-3a0f0a7dc0fb"]}' \
@@ -297,7 +297,7 @@ python3 txt2detection.py \
 Attack (Tactic and Technique), CVE and TLP (Red) all exist
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Attack, CVE and TLP (Red) all exist" \
   --report_id 572832e4-a8a5-435b-9945-b27097f092f5
@@ -306,7 +306,7 @@ python3 txt2detection.py \
 Overwrite TLP
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Overwrite TLP" \
   --tlp_level amber_strict \
@@ -316,7 +316,7 @@ python3 txt2detection.py \
 No TLP
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-tags.yml \
   --name "No TLP" \
   --report_id d9047840-fcb8-486c-bdf6-9bdca0e38c11
@@ -325,7 +325,7 @@ python3 txt2detection.py \
 ## Append tags
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Author exists" \
   --labels "namespace.label1" "namespace.label2" \
@@ -337,7 +337,7 @@ python3 txt2detection.py \
 Check Indicator + Report inherits custom tag (but not cve, attack, tlp)
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-custom-tags.yml \
   --name "Check Indicator inherits tag" \
   --report_id 4af65c32-8f6c-4a0f-9c9d-dae3cde73aa2
@@ -346,7 +346,7 @@ python3 txt2detection.py \
 ## External references
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "External references" \
   --external_refs txt2stix=demo1 source=id \
@@ -356,7 +356,7 @@ python3 txt2detection.py \
 ## Reference URLs
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Reference URLs" \
   --reference_urls "https://www.google.com/" "https://www.facebook.com/" \
@@ -368,7 +368,7 @@ python3 txt2detection.py \
 Should overwrite
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Check license" \
   --license BSD-3-Clause   \
@@ -378,7 +378,7 @@ python3 txt2detection.py \
 Should create
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-no-license.yml \
   --name "Check license" \
   --license MIT   \
@@ -388,7 +388,7 @@ python3 txt2detection.py \
 ## Check observable extraction
 
 ```shell
-python3 txt2detection.py \
+python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-observables.yml \
   --name "Check observable extraction" \
   --report_id 1e71046f-2c8f-4617-908e-23f7463d350b
