@@ -16,7 +16,7 @@ from stix2.serialization import serialize
 import hashlib
 
 from txt2detection import observables
-from txt2detection.models import Detection, DetectionContainer, UUID_NAMESPACE
+from txt2detection.models import AIDetection, DetectionContainer, UUID_NAMESPACE
 
 from datetime import UTC, datetime as dt
 import uuid
@@ -149,7 +149,7 @@ class Bundler:
             self.report.object_refs.append(sdo_id)
         self.all_objects.add(sdo_id)
 
-    def add_rule_indicator(self, detection: Detection):
+    def add_rule_indicator(self, detection: AIDetection):
         detection._bundler = self
         indicator = {
             "type": "indicator",
@@ -158,7 +158,7 @@ class Bundler:
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
             "modified": self.report.modified,
-            "indicator_types": detection.indicator_types,
+            "indicator_types": getattr(detection, 'indicator_types', None),
             "name": detection.title,
             "description": detection.description,
             "labels": remove_rule_specific_tags(self.labels),
