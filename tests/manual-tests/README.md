@@ -393,3 +393,47 @@ python3 txt2detection.py sigma \
   --name "Check observable extraction" \
   --report_id 1e71046f-2c8f-4617-908e-23f7463d350b
 ```
+
+## Check level
+
+No level in rule
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-no-level.yml \
+  --name "No level in rule" \
+  --level high \
+  --report_id 7443a482-f7f2-4844-966b-288b1d8ad425
+```
+
+Overwrite level
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Overwrite level" \
+  --level high \
+  --report_id c7730a33-759c-4eb0-ba38-7b1370df9ce9
+```
+
+## Check status
+
+No status in rule
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-no-status.yml \
+  --name "No status in rule" \
+  --status unsupported \
+  --report_id c5f83c63-8a83-409b-8c43-a237987afb0f
+```
+
+Overwrite status
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Overwrite status" \
+  --status unsupported \
+  --report_id d2d01afa-dc55-4a80-8d62-15d154450112
+```

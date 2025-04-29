@@ -68,12 +68,17 @@ To see more information about how to set the variables, and what they do, read t
 ### Run
 
 ```shell
-python3 txt2detection.py
+python3 txt2detection.py MODE \
+  ARGUEMENTS
 ```
 
-There are 2 ways in which you can use txt2detection, either starting with a text file / text string or with an existing Sigma Rule.
+There are 3 modes in which you can use txt2detection:
 
-#### File / Text Input
+* `file`: A text file, usually a threat report you want to create rules from the intel held within
+* `text`: A text prompt that describes the rule you want to create
+* `sigma`: An existing Sigma Rule you want to convert into a STIX bundle
+
+#### File (`file`) / Text Input (`text`)
 
 Use this mode to generate a set of rules from an input text file;
 
@@ -102,7 +107,7 @@ Note, in this mode, the following values will be automatically assigned to the r
 * `level`: the AI will be prompted to assign, either `informational`, `low`, `medium`, `high`, `critical`
 * `status`: will always be `experimental` in this mode
 
-#### Sigma rule input
+#### Sigma rule input (`sigma`)
 
 Use this mode to turn a Sigma Rule into a STIX bundle and get it enriched with ATT&CK and Vulmatch.
 
