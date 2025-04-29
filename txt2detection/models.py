@@ -141,6 +141,13 @@ class Statuses(enum.StrEnum):
     deprecated = enum.auto()
     unsupported = enum.auto()
 
+class Level(enum.StrEnum):
+    informational = enum.auto()
+    low = enum.auto()
+    medium = enum.auto()
+    high = enum.auto()
+    critical = enum.auto()
+
 class SigmaTag(str):
     @classmethod
     def __get_pydantic_core_schema__(
@@ -173,11 +180,11 @@ class BaseDetection(BaseModel):
     description: str
     detection: dict
     logsource: dict
-    status: Statuses
+    status: Statuses = Statuses.experimental
     falsepositives: list[str]
     tags: list[str]
     indicator_types: list[str] = Field(default_factory=list)
-    level: str
+    level: Level
     _custom_id = None
     _bundler: "Bundler"
 
@@ -307,7 +314,7 @@ class SigmaRuleDetection(BaseDetection):
     detection: dict
     fields: Optional[List[str]] = None
     falsepositives: Optional[List[str]] = None
-    level: Optional[str] = None
+    level: Optional[Level] = None
     tags: Optional[List[SigmaTag]] = None
     scope: Optional[List[str]] = None
 

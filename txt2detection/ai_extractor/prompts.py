@@ -23,19 +23,8 @@ Return the result as a **JSON output**, ensuring that each dictionary represents
 - `"logsources"`: Valid sigma rule logsource
 - `"detection"`: Valid sigma rule detection
 - `"indicator_types"`: One or more STIX v2.1 indicator.indicator_types
-- `"status"`: select one of stable, test, experimental, deprecated, unsupported. that best describe the generated rule
 - `"level"`: select SIGMA level for the rule
 
-                         
-### **Status**
-Declares the status of the rule:
-
-- `stable`: the rule is considered as stable and may be used in production systems or dashboards.
-- `test`: a mostly stable rule that could require some slight adjustments depending on the environement.
-- `experimental`: an experimental rule that could lead to false positives results or be noisy, but could also identify interesting
-  events.
-- `deprecated`: the rule is replaced or covered by another one. The link is established by the `related` field.
-- `unsupported`: the rule cannot be use in its current state (old correlation format, custom fields)
                          
 ### **Indicator Types**
 - `"anomalous-activity"`: Unexpected, or unusual activity that may not necessarily be malicious or indicate compromise. This type of activity may include reconnaissance-like behavior such as port scans or version identification, network behavior anomalies, and asset and/or user behavioral anomalies.
