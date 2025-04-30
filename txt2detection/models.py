@@ -5,7 +5,7 @@ import typing
 import uuid
 from slugify import slugify
 from datetime import date as dt_date
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 import jsonschema
@@ -183,7 +183,6 @@ class BaseDetection(BaseModel):
     status: Statuses = Statuses.experimental
     falsepositives: list[str]
     tags: list[str]
-    indicator_types: list[str] = Field(default_factory=list)
     level: Level
     _custom_id = None
     _bundler: "Bundler"
@@ -284,7 +283,8 @@ class BaseDetection(BaseModel):
         return retval
 
 
-class Detection(BaseDetection):
+class AIDetection(BaseDetection):
+    indicator_types: list[str] = Field(default_factory=list)
 
     @computed_field(alias="date")
     @property
@@ -296,6 +296,7 @@ class Detection(BaseDetection):
     def modified(self) -> dt_date:
         return self._bundler.report.modified.date()
 
+Detection = AIDetection
 
 class SigmaRuleDetection(BaseDetection):
     title: str
@@ -340,4 +341,4 @@ class SigmaRuleDetection(BaseDetection):
 
 class DetectionContainer(BaseModel):
     success: bool
-    detections: list[Detection]
+    detections: list[Union[BaseDetection , AIDetection, SigmaRuleDetection]]
