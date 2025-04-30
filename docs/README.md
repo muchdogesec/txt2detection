@@ -462,9 +462,6 @@ For the detection rule produced an Indicator object is created as follows;
     "created_by_ref": "<SAME AS REPORT OBJECT>",
     "created": "<SAME AS REPORT OBJECT>",
     "modified": "<SAME AS REPORT OBJECT>",
-    "indicator_types": [
-        "<AI TYPES>"
-    ],
     "name": "<TITLE OF RULE>",
     "description": "<DESCRIPTION OF RULE, IF DOES NOT EXIST IS OMITTED>",
     "pattern_type": "sigma",
