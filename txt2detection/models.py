@@ -186,9 +186,11 @@ class BaseDetection(BaseModel):
     level: Level
     _custom_id = None
     _bundler: "Bundler"
+    _extra_data: dict
 
     def model_post_init(self, __context):
         self.tags = self.tags or []
+        self._extra_data = dict()
         return super().model_post_init(__context)
 
     @property
@@ -209,14 +211,28 @@ class BaseDetection(BaseModel):
     
     def set_labels(self, labels):
         self.tags.extend(labels)
-    
 
-    def make_rule(self, bundler: "Bundler"):
+    def set_extra_data_from_bundler(self, bundler: "Bundler"):
+        if not bundler:
+            return
+        
         if not self.date:
             from .utils import as_date
             self.date = as_date(bundler.created)
+    
+
         self.set_labels(bundler.labels)
         self.tlp_level = bundler.tlp_level.name
+        self._extra_data = dict(
+            author=bundler.report.created_by_ref,
+            license=bundler.license,
+            references=bundler.reference_urls,
+        )
+
+
+    def make_rule(self, bundler: "Bundler"):
+        self.set_extra_data_from_bundler(bundler)
+
         rule = dict(
             id=self.detection_id,
             **self.model_dump(
@@ -226,10 +242,8 @@ class BaseDetection(BaseModel):
             ),
         )
         rule.update(
-            author=bundler.report.created_by_ref,
-            license=bundler.license,
-            references=bundler.reference_urls,
             tags=list(dict.fromkeys(self.tags)),
+            **self._extra_data,
         )
         for k, v in list(rule.items()):
             if not v:
@@ -251,7 +265,7 @@ class BaseDetection(BaseModel):
     def external_references(self):
         refs = []
         for attr in ['level', 'status', 'license']:
-            if attr_val := getattr(self, attr, self._bundler.license):
+            if attr_val := getattr(self, attr, None):
                 refs.append(dict(source_name=f'sigma-{attr}', description=attr_val))
         return refs
 
