@@ -201,24 +201,15 @@ class BaseDetection(BaseModel):
 
     @property
     def tlp_level(self):
-        for tag in self.tags:
-            ns, _, level = tag.partition(".")
-            if ns != "tlp":
-                continue
-            if tlp_level := TLP_LEVEL.get(level.replace("-", "_")):
-                return tlp_level
-        return None
+        return tlp_from_tags(self.tags)
+    
+    @tlp_level.setter
+    def tlp_level(self, level):
+        set_tlp_level_in_tags(self.tags, level)
     
     def set_labels(self, labels):
         self.tags.extend(labels)
     
-    @tlp_level.setter
-    def tlp_level(self, level):
-        level = str(level)
-        for i, tag in enumerate(self.tags):
-            if tag.startswith('tlp.'):
-                self.tags.remove(tag)
-        self.tags.append('tlp.'+level.replace("_", "-"))
 
     def make_rule(self, bundler: "Bundler"):
         if not self.date:
@@ -337,8 +328,33 @@ class SigmaRuleDetection(BaseDetection):
         if len(tlps) > 1:
             raise ValueError(f'tag must not contain more than one tag in tlp namespace. Got {tlps}')
         return tags
-
+    
+    @field_validator('modified', mode='after')
+    @classmethod
+    def validate_modified(cls, modified, info):
+        if info.data.get('date') == modified:
+            return None
+        return modified
 
 class DetectionContainer(BaseModel):
     success: bool
     detections: list[Union[BaseDetection , AIDetection, SigmaRuleDetection]]
+
+
+
+def tlp_from_tags(tags: list[SigmaTag]):
+    for tag in tags:
+        ns, _, level = tag.partition(".")
+        if ns != "tlp":
+            continue
+        if tlp_level := TLP_LEVEL.get(level.replace("-", "_")):
+            return tlp_level
+    return None
+
+def set_tlp_level_in_tags(tags: list[SigmaTag], level):
+    level = str(level)
+    for i, tag in enumerate(tags):
+        if tag.startswith('tlp.'):
+            tags.remove(tag)
+    tags.append('tlp.'+level.replace("_", "-"))
+    return tags
