@@ -123,9 +123,11 @@ class TLP_LEVEL(enum.Enum):
         ]
 
     @classmethod
-    def get(cls, level):
+    def get(cls, level: 'str|TLP_LEVEL'):
         if isinstance(level, cls):
             return level
+        level = level.lower()
+        level = level.replace('+', '_').replace('-', '_')
         if level not in cls.levels():
             raise Exception(f"unsupported tlp level: `{level}`")
         return cls.levels()[level]
