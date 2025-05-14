@@ -16,7 +16,7 @@ from stix2.serialization import serialize
 import hashlib
 
 from txt2detection import observables
-from txt2detection.models import AIDetection, DetectionContainer, UUID_NAMESPACE
+from txt2detection.models import AIDetection, BaseDetection, DetectionContainer, UUID_NAMESPACE, SigmaRuleDetection
 
 from datetime import UTC, datetime as dt
 import uuid
@@ -149,8 +149,10 @@ class Bundler:
             self.report.object_refs.append(sdo_id)
         self.all_objects.add(sdo_id)
 
-    def add_rule_indicator(self, detection: AIDetection):
-        detection._bundler = self
+    def add_rule_indicator(self, detection: SigmaRuleDetection):
+        if isinstance(detection, AIDetection):
+            detection = detection.to_sigma_rule_detection(self)
+        assert isinstance(detection, SigmaRuleDetection), f"detection of type {type(detection)} not supported"
         indicator = {
             "type": "indicator",
             "id": "indicator--"+str(detection.detection_id),

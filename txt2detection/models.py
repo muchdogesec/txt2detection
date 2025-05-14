@@ -5,7 +5,7 @@ import typing
 import uuid
 from slugify import slugify
 from datetime import date as dt_date
-from typing import Any, List, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 from uuid import UUID
 
 import jsonschema
@@ -176,6 +176,12 @@ class SigmaTag(str):
             {'reason': f'Must be in format namespace.value and match pattern {TAG_PATTERN.pattern}'},
         )
         return input_value
+    
+class RelatedRule(BaseModel):
+    id: UUID
+    type: Literal[
+        "derived", "obsolete", "merged", "renamed", "similar"
+    ]
 
 class BaseDetection(BaseModel):
     title: str
@@ -187,7 +193,6 @@ class BaseDetection(BaseModel):
     tags: list[str]
     level: Level
     _custom_id = None
-    _bundler: "Bundler"
     _extra_data: dict
 
     def model_post_init(self, __context):
@@ -215,25 +220,12 @@ class BaseDetection(BaseModel):
         self.tags.extend(labels)
 
     def set_extra_data_from_bundler(self, bundler: "Bundler"):
-        if not bundler:
-            return
-        
-        if not self.date:
-            from .utils import as_date
-            self.date = as_date(bundler.created)
-    
-
-        self.set_labels(bundler.labels)
-        self.tlp_level = bundler.tlp_level.name
-        self._extra_data = dict(
-            author=bundler.report.created_by_ref,
-            license=bundler.license,
-            references=bundler.reference_urls,
-        )
+        raise NotImplementedError('this class should no longer be in use')
 
 
     def make_rule(self, bundler: "Bundler"):
         self.set_extra_data_from_bundler(bundler)
+        self.tags = list(dict.fromkeys(self.tags))
 
         rule = dict(
             id=self.detection_id,
@@ -243,25 +235,24 @@ class BaseDetection(BaseModel):
                 by_alias=True
             ),
         )
-        rule.update(
-            tags=list(dict.fromkeys(self.tags)),
-            **self._extra_data,
-        )
         for k, v in list(rule.items()):
             if not v:
                 rule.pop(k, None)
                 
+        self.validate_rule_with_json_schema(rule)
+        if getattr(self, 'date', 0):
+            rule.update(date=self.date)
+        if getattr(self, 'modified', 0):
+            rule.update(modified=self.modified)
+        return yaml.dump(rule, sort_keys=False, indent=4)
+
+    def validate_rule_with_json_schema(self, rule):
         jsonschema.validate(
             rule,
             {
                 "$ref": "https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json"
             },
         )
-        if getattr(self, 'date', 0):
-            rule.update(date=self.date)
-        if getattr(self, 'modified', 0):
-            rule.update(modified=self.modified)
-        return yaml.dump(rule, sort_keys=False, indent=4)
     
     @property
     def external_references(self):
@@ -292,23 +283,18 @@ class BaseDetection(BaseModel):
 
 class AIDetection(BaseDetection):
     indicator_types: list[str] = Field(default_factory=list)
-
-    @computed_field(alias="date")
-    @property
-    def date(self) -> dt_date:
-        return self._bundler.report.created.date()
-
-    @computed_field
-    @property
-    def modified(self) -> dt_date:
-        return self._bundler.report.modified.date()
-
-Detection = AIDetection
+    
+    def to_sigma_rule_detection(self, bundler):
+        rule = SigmaRuleDetection.model_validate({
+            **self.model_dump(exclude=['indicator_types']),
+            **dict(date=bundler.report.created.date(), modified=bundler.report.modified.date())
+        })
+        return rule
 
 class SigmaRuleDetection(BaseDetection):
     title: str
     id: Optional[UUID] = None
-    related: Optional[list[dict]] = None
+    related: Optional[list[RelatedRule]] = None
     name: Optional[str] = None
     taxonomy: Optional[str] = None
     status: Optional[Statuses] = None
@@ -351,6 +337,20 @@ class SigmaRuleDetection(BaseDetection):
         if info.data.get('date') == modified:
             return None
         return modified
+    
+    def set_extra_data_from_bundler(self, bundler: "Bundler"):
+        if not bundler:
+            return
+        
+        if not self.date:
+            from .utils import as_date
+            self.date = as_date(bundler.created)
+    
+        self.set_labels(bundler.labels)
+        self.tlp_level = bundler.tlp_level.name
+        self.author = bundler.report.created_by_ref
+        self.license = bundler.license
+        self.references = bundler.reference_urls
 
 class DetectionContainer(BaseModel):
     success: bool
