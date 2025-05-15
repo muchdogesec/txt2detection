@@ -312,13 +312,16 @@ class SigmaRuleDetection(BaseDetection):
     tags: Optional[List[SigmaTag]] = None
     scope: Optional[List[str]] = None
 
-    def model_post_init(self, __context):
-        if self.id:
-            sigma_id = self.id
+    @property
+    def detection_id(self):
+        return self.id
+    
+    @detection_id.setter
+    def detection_id(self, new_id):
+        if str(self.id) != str(new_id):
             self.related = self.related or []
-            self.related.append(dict(id=sigma_id, type="renamed"))
-            self.id = None
-        return super().model_post_init(__context)
+            self.related.append(RelatedRule(id=self.id, type="renamed"))
+        self.id = new_id
     
     @field_validator('tags', mode='after')
     @classmethod
