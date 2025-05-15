@@ -321,7 +321,7 @@ class SigmaRuleDetection(BaseDetection):
     
     @detection_id.setter
     def detection_id(self, new_id):
-        if str(self.id) != str(new_id):
+        if self.id and str(self.id) != str(new_id):
             self.related = self.related or []
             self.related.append(RelatedRule(id=self.id, type="renamed"))
         self.id = new_id
