@@ -285,11 +285,14 @@ class AIDetection(BaseDetection):
     indicator_types: list[str] = Field(default_factory=list)
     
     def to_sigma_rule_detection(self, bundler):
-        rule = SigmaRuleDetection.model_validate({
+        rule_dict = {
             **self.model_dump(exclude=['indicator_types']),
-            **dict(date=bundler.report.created.date(), modified=bundler.report.modified.date())
-        })
-        return rule
+            **dict(date=bundler.report.created.date(), modified=bundler.report.modified.date(), id=uuid.uuid4())
+        }
+        try:
+            return SigmaRuleDetection.model_validate(rule_dict)
+        except Exception as e:
+            raise ValueError(dict(message='validate ai output failed', error=e, content=rule_dict))
 
 class SigmaRuleDetection(BaseDetection):
     title: str
@@ -309,12 +312,12 @@ class SigmaRuleDetection(BaseDetection):
     fields: Optional[List[str]] = None
     falsepositives: Optional[List[str]] = None
     level: Optional[Level] = None
-    tags: Optional[List[SigmaTag]] = None
+    tags: Optional[List[SigmaTag]] = Field(default_factory=[])
     scope: Optional[List[str]] = None
 
     @property
     def detection_id(self):
-        return self.id
+        return str(self.id)
     
     @detection_id.setter
     def detection_id(self, new_id):
