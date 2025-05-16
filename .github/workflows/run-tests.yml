@@ -1,0 +1,39 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    environment: txt2detection_tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+    
+          
+      - name: Set .env testing purpose
+        run: |
+            echo > .env
+            echo "INPUT_TOKEN_LIMIT=1000"  >> .env
+
+      - name: test all
+        id: test-endpoints
+        run: |
+          set -a; 
+          source .env;
+          set +a;
+          pip install -r tests/src/requirements.txt .
+
+          pytest tests/src/
