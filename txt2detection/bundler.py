@@ -150,6 +150,7 @@ class Bundler:
         self.all_objects.add(sdo_id)
 
     def add_rule_indicator(self, detection: SigmaRuleDetection):
+        indicator_types = getattr(detection, 'indicator_types', None)
         if isinstance(detection, AIDetection):
             detection = detection.to_sigma_rule_detection(self)
         assert isinstance(detection, SigmaRuleDetection), f"detection of type {type(detection)} not supported"
@@ -160,7 +161,7 @@ class Bundler:
             "created_by_ref": self.report.created_by_ref,
             "created": self.report.created,
             "modified": self.report.modified,
-            "indicator_types": getattr(detection, 'indicator_types', None),
+            "indicator_types": indicator_types,
             "name": detection.title,
             "description": detection.description,
             "labels": remove_rule_specific_tags(self.labels),
