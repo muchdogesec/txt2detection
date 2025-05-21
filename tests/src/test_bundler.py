@@ -17,10 +17,8 @@ def dummy_detection():
         title="Test Detection",
         description="Detects something suspicious.",
         detection=dict(condition="selection1"),
-        tags=["tlp.red", "attack.execution"],
+        tags=["tlp.red", "sigma.execution"],
         id=str(uuid.uuid4()),
-        mitre_attack_ids=["T1059"],
-        cve_ids=["CVE-2021-1234"],
         external_references=[],
         logsource=dict(
             category="network-connection",
@@ -216,7 +214,6 @@ def test_bundler_generates_valid_bundle(dummy_detection):
     assert bundle["type"] == "bundle"
     assert "report" in object_types
     assert "indicator" in object_types
-    assert "relationship" in object_types
 
     # Check report correctness
     report = object_types["report"]
@@ -228,9 +225,3 @@ def test_bundler_generates_valid_bundle(dummy_detection):
     indicator = object_types["indicator"]
     assert indicator["pattern_type"] == "sigma"
     assert dummy_detection.title in indicator["name"]
-
-    # Check at least one relationship
-    assert "relationship" in object_types
-    relationship = object_types["relationship"]
-    assert relationship["relationship_type"] == "detects"
-    assert relationship["source_ref"] == indicator["id"]

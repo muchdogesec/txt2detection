@@ -27,7 +27,6 @@ jobs:
         run: |
             echo > .env
             echo "INPUT_TOKEN_LIMIT=1000"  >> .env
-
       - name: test all
         id: test-endpoints
         run: |
