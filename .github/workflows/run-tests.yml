@@ -27,6 +27,8 @@ jobs:
         run: |
             echo > .env
             echo "INPUT_TOKEN_LIMIT=1000"  >> .env
+            echo "CTIBUTLER_BASE_URL=${{ secrets.CTIBUTLER_BASE_URL }}" >> .env
+            echo "CTIBUTLER_API_KEY=${{ secrets.CTIBUTLER_API_KEY }}" >> .env
 
       - name: test all
         id: test-endpoints
