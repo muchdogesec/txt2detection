@@ -314,10 +314,19 @@ class SigmaRuleDetection(BaseDetection):
     level: Optional[Level] = None
     tags: Optional[List[SigmaTag]] = Field(default_factory=[])
     scope: Optional[List[str]] = None
+    _indicator_types: list = None
 
     @property
     def detection_id(self):
         return str(self.id)
+    
+    @property
+    def indicator_types(self):
+        return self._indicator_types
+    
+    @indicator_types.setter
+    def indicator_types(self, types):
+        self._indicator_types = types
     
     @detection_id.setter
     def detection_id(self, new_id):
