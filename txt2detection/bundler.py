@@ -244,7 +244,7 @@ class Bundler:
 
         headers = {}
         if api_key := os.environ.get('CTIBUTLER_API_KEY'):
-            headers['API-KEY'] = api_key
+            headers['Authorization'] = "Bearer " + api_key
 
         return self._get_objects(endpoint, headers)
 
@@ -255,7 +255,7 @@ class Bundler:
         endpoint = urljoin(os.environ['VULMATCH_BASE_URL'] + '/', f"v1/cve/objects/?cve_id="+','.join(cve_ids))
         headers = {}
         if api_key := os.environ.get('VULMATCH_API_KEY'):
-            headers['API-KEY'] = api_key
+            headers['Authorization'] = "Bearer " + api_key
 
         return self._get_objects(endpoint, headers)
 
