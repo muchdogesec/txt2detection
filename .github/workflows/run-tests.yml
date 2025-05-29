@@ -33,6 +33,7 @@ jobs:
           set -a; 
           source .env;
           set +a;
-          pip install -r tests/src/requirements.txt .[llms]
+          pip install -r tests/src/requirements.txt 
+          pip install -e .[llms]
 
           pytest tests/src/
