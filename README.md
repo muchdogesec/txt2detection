@@ -1,5 +1,7 @@
 # txt2detection
 
+[![codecov](https://codecov.io/gh/muchdogesec/txt2detection/graph/badge.svg?token=S0U7OC216R)](https://codecov.io/gh/muchdogesec/txt2detection)
+
 ## Overview
 
 ![txt2detection](docs/txt2detection.png)
