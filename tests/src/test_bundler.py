@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import stix2
 from txt2detection.bundler import Bundler
-from txt2detection.models import SigmaRuleDetection
+from txt2detection.models import DetectionContainer, SigmaRuleDetection
 from datetime import datetime, timezone
 from stix2 import Relationship
 
@@ -16,7 +16,7 @@ def dummy_detection():
     detection = SigmaRuleDetection(
         title="Test Detection",
         description="Detects something suspicious.",
-        detection=dict(condition="selection1"),
+        detection=dict(condition="selection1", selection1=dict(ip='1.1.1.1')),
         tags=["tlp.red", "sigma.execution"],
         id=str(uuid.uuid4()),
         external_references=[],
@@ -108,10 +108,10 @@ def test_add_rule_indicator_basic(
         obj for obj in bundler_instance.bundle.objects if obj.get("type") == "indicator"
     ]
     assert len(indicators) == 1
-    mock_cve.assert_called_once()
-    mock_attack.assert_called_once()
-    mock_observables.assert_called_once()
-    mock_make_rule.assert_called_once()
+    mock_cve.assert_called_once_with(dummy_detection.cve_ids)
+    mock_attack.assert_called_once_with(dummy_detection.mitre_attack_ids)
+    mock_observables.assert_called_once_with(dummy_detection.detection)
+    mock_make_rule.assert_called_once_with(bundler_instance)
     indicator = indicators[0]
     assert dummy_detection.title == indicator["name"]
     assert indicator["pattern"] == mock_make_rule.return_value
@@ -225,3 +225,16 @@ def test_bundler_generates_valid_bundle(dummy_detection):
     indicator = object_types["indicator"]
     assert indicator["pattern_type"] == "sigma"
     assert dummy_detection.title in indicator["name"]
+
+
+def test_bundle_detections(dummy_detection, bundler_instance):
+    container = DetectionContainer(success=False, detections=[])
+    with patch.object(Bundler, 'add_rule_indicator') as mock_add_rule_indicator:
+        bundler_instance.bundle_detections(container)
+        mock_add_rule_indicator.assert_not_called()
+        mock_add_rule_indicator.reset_mock()
+        detection = MagicMock()
+        container.detections.append(detection)
+        container.success = True
+        bundler_instance.bundle_detections(container)
+        mock_add_rule_indicator.assert_called_once_with(detection)
