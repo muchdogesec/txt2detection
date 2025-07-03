@@ -4,12 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "txt2detection"
-
-version = "0.0.2-rc12"
-authors = [ 
-  { name="DOGESEC", email="support@dogesec.com" },
+version = "0.0.3"
+authors = [
+  { name = "dogesec" }
 ]
-description = "txt2detection is a tool"
+maintainers = [
+  { name = "dogesec" }
+]
+description = "A command line tool that takes a txt file containing threat intelligence and turns it into a detection rule."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -31,6 +33,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/muchdogesec/txt2detection"
 Issues = "https://github.com/muchdogesec/txt2detection/issues"
+"dogesec HQ" = "https://dogesec.com"
 
 [project.scripts]
 txt2detection = "txt2detection.__main__:main"
