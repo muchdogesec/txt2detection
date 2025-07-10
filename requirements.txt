@@ -142,7 +142,7 @@ jsonschema==4.24.0 ; python_version >= "3.8"
     # via txt2detection (pyproject.toml)
 jsonschema-specifications==2025.4.1
     # via jsonschema
-llama-index-core==0.12.7
+llama-index-core==0.12.41
     # via
     #   llama-index-llms-anthropic
     #   llama-index-llms-gemini

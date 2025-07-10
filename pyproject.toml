@@ -40,7 +40,7 @@ txt2detection = "txt2detection.__main__:main"
 
 [project.optional-dependencies]
 llms = [
-  "llama-index-core==0.12.7",
+  "llama-index-core==0.12.41",
   "llama-index-llms-anthropic==0.6.3",
   "llama-index-llms-gemini==0.4.2",
   "llama-index-llms-openai==0.3.11",
