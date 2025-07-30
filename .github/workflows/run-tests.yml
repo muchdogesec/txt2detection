@@ -1,16 +1,19 @@
 name: Run Tests
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
       - main
   pull_request:
-
-permissions:
-  contents: read
+    types:
+      - opened
+      - synchronize
 
 jobs:
-  run-tests:
+  test-pipeline:
     runs-on: ubuntu-latest
     environment: test_pipeline
     
@@ -25,29 +28,31 @@ jobs:
         with:
           python-version: "3.11"
     
-          
-      - name: Set .env testing purpose
+      - name: Setup environment
+        id: setup_environment
         run: |
             echo > .env
             echo "INPUT_TOKEN_LIMIT=1000"  >> .env
-      - name: test all
-        id: test-endpoints
+
+      - name: Run Tests
+        id: run_tests
         run: |
           set -a; 
           source .env;
           set +a;
           pip install -r tests/src/requirements.txt 
           pip install -e .[llms]
-
           pytest --cov --cov-branch --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage reports to Codecov
+        id: upload_unit_test_coverage
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
+        id: upload_unit_test_results
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
         with:
