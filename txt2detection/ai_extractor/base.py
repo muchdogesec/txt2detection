@@ -55,3 +55,13 @@ class BaseAIExtractor():
     @property
     def extractor_name(self):
         return f"{self.provider}:{self.llm.model}"
+    
+    def check_credential(self):
+        try:
+            return "authorized" if self._check_credential() else "unauthorized"
+        except:
+            return "unknown"
+        
+    def _check_credential(self):
+        self.llm.complete("say 'hi'")
+        return True

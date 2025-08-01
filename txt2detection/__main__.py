@@ -13,6 +13,7 @@ import uuid
 from stix2 import Identity
 import yaml
 
+from txt2detection import credential_checker
 from txt2detection.ai_extractor.base import BaseAIExtractor
 from txt2detection.models import TAG_PATTERN, DetectionContainer, Level, SigmaRuleDetection
 from txt2detection.utils import validate_token_count
@@ -91,6 +92,7 @@ def parse_args():
     file = mode.add_parser('file', help="process a file input using ai")
     text = mode.add_parser('text', help="process a text argument using ai")
     sigma = mode.add_parser('sigma', help="process a sigma file without ai")
+    check_credentials = mode.add_parser('check-credentials', help="show status of external services with respect to credentials")
 
     for mode_parser in [file, text, sigma]:
         mode_parser.add_argument('--report_id', type=uuid.UUID, help='report_id to use for generated report')
@@ -115,7 +117,10 @@ def parse_args():
     sigma.add_argument('--level', help="If passed, will overwrite any existing `level` recorded in the rule", choices=Level._member_names_)
 
     args: Args = parser.parse_args()
-    print(args)
+    if args.mode == "check-credentials":
+        statuses = credential_checker.check_statuses(test_llms=True)
+        credential_checker.format_statuses(statuses)
+        sys.exit(0)
 
     if args.mode != 'sigma':
         assert args.ai_provider, "--ai_provider is required in file or txt mode"
@@ -127,6 +132,8 @@ def parse_args():
         args.report_id = Bundler.generate_report_id(args.use_identity.id if args.use_identity else None, args.created, args.name)
 
     return args
+
+
 
 
 def run_txt2detection(name, identity, tlp_level, input_text: str, labels: list[str], report_id: str|uuid.UUID, ai_provider: BaseAIExtractor, **kwargs) -> Bundler:

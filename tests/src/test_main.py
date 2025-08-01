@@ -135,3 +135,9 @@ def test_parse_args_sigma_mode_no_ai_provider(monkeypatch):
     assert getattr(args, "ai_provider", None) is None
     assert hasattr(args, "report_id")
     assert hasattr(args, "sigma_file")
+
+
+def test_parse_args_check_credentials(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["prog", "check-credentials"])
+    with pytest.raises(SystemExit):
+        parse_args()
