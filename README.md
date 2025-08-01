@@ -71,7 +71,7 @@ Then test your configoration
 
 ```shell
 python3 txt2detection.py \
-  --check-credentials
+  check-credentials
 ```
 
 It will return a response to show what API keys are working
