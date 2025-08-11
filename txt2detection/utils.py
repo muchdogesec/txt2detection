@@ -55,11 +55,13 @@ def validate_token_count(max_tokens, input, extractor: BaseAIExtractor):
     if  token_count > max_tokens:
         raise Exception(f"{extractor.extractor_name}: input_file token count ({token_count}) exceeds INPUT_TOKEN_LIMIT ({max_tokens})")
 
+
+@lru_cache(maxsize=5)
+def get_licenses(date):
+    resp = requests.get("https://github.com/spdx/license-list-data/raw/refs/heads/main/json/licenses.json")
+    return {l['licenseId']: l['name'] for l in resp.json()['licenses']}
+
 def valid_licenses():
-    @lru_cache(maxsize=5)
-    def get_licenses(date):
-        resp = requests.get("https://github.com/spdx/license-list-data/raw/refs/heads/main/json/licenses.json")
-        return {l['licenseId']: l['name'] for l in resp.json()['licenses']}
     return get_licenses(datetime.now().date().isoformat())
 
 

@@ -3,9 +3,10 @@ import json
 import re
 import typing
 import uuid
+import requests
 from slugify import slugify
 from datetime import date as dt_date
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, ClassVar, List, Literal, Optional, Union
 from uuid import UUID
 
 import jsonschema
@@ -194,6 +195,7 @@ class BaseDetection(BaseModel):
     level: Level
     _custom_id = None
     _extra_data: dict
+    sigma_json_schema: ClassVar = requests.get("https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json").json()
 
     def model_post_init(self, __context):
         self.tags = self.tags or []
@@ -249,9 +251,7 @@ class BaseDetection(BaseModel):
     def validate_rule_with_json_schema(self, rule):
         jsonschema.validate(
             rule,
-            {
-                "$ref": "https://github.com/SigmaHQ/sigma-specification/raw/refs/heads/main/json-schema/sigma-detection-rule-schema.json"
-            },
+            self.sigma_json_schema,
         )
     
     @property
