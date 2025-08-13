@@ -23,7 +23,7 @@ def test_as_date_with_datetime_and_date():
     assert as_date(d_obj) == d_obj
 
 def test_validate_token_count():
-    provider = parse_model('openai')
+    provider = parse_model('anthropic')
     with patch.object(type(provider), 'count_tokens') as mock_count_tokens:
         mock_count_tokens.return_value = 1025
         with pytest.raises(Exception):
