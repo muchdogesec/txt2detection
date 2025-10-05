@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "txt2detection"
-version = "1.0.7"
+version = "1.0.8"
 authors = [
   { name = "dogesec" }
 ]
@@ -31,6 +31,7 @@ dependencies = [
     "validators>=0.34.0",
     "llama-index-core>=0.12.42",
     'llama-index-llms-openai>=0.4.5',
+    'stix2extensions',
   ]
 [project.urls]
 Homepage = "https://github.com/muchdogesec/txt2detection"
