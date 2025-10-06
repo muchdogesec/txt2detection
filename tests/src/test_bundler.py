@@ -16,9 +16,9 @@ def dummy_detection():
     detection = SigmaRuleDetection(
         title="Test Detection",
         description="Detects something suspicious.",
-        detection=dict(condition="selection1", selection1=dict(ip='1.1.1.1')),
+        detection=dict(condition="selection1", selection1=dict(ip="1.1.1.1")),
         tags=["tlp.red", "sigma.execution"],
-        id=str(uuid.uuid4()),
+        id="cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
         external_references=[],
         logsource=dict(
             category="network-connection",
@@ -36,6 +36,8 @@ def bundler_instance():
         tlp_level="red",
         description="This is a test report.",
         labels=["tlp.red", "test.test-var"],
+        created=datetime(2025, 1, 1),
+        report_id="74e36652-00f5-4dca-bf10-9f02fc996dcc",
     )
 
 
@@ -229,7 +231,7 @@ def test_bundler_generates_valid_bundle(dummy_detection):
 
 def test_bundle_detections(dummy_detection, bundler_instance):
     container = DetectionContainer(success=False, detections=[])
-    with patch.object(Bundler, 'add_rule_indicator') as mock_add_rule_indicator:
+    with patch.object(Bundler, "add_rule_indicator") as mock_add_rule_indicator:
         bundler_instance.bundle_detections(container)
         mock_add_rule_indicator.assert_not_called()
         mock_add_rule_indicator.reset_mock()
@@ -238,3 +240,47 @@ def test_bundle_detections(dummy_detection, bundler_instance):
         container.success = True
         bundler_instance.bundle_detections(container)
         mock_add_rule_indicator.assert_called_once_with(detection)
+
+
+def test_bundle_detections__creates_log_source(dummy_detection, bundler_instance):
+    dummy_detection.detection_id = "d73e1632-c541-4b09-8281-95dc7f9c5782"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    objects = [
+        obj
+        for obj in bundler_instance.bundle_dict["objects"]
+        if obj["id"]
+        in (
+            "data-source--f078a18f-0f04-5fde-b6cd-a5af90b6346b",
+            "relationship--fe0a3715-6a21-5472-840f-39ea9c61ee83",
+        )
+    ]
+    assert objects == [
+        {
+            "type": "data-source",
+            "spec_version": "2.1",
+            "id": "data-source--f078a18f-0f04-5fde-b6cd-a5af90b6346b",
+            "category": "network-connection",
+            "product": "firewall",
+            "extensions": {
+                "extension-definition--afeeb724-bce2-575e-af3d-d705842ea84b": {
+                    "extension_type": "new-sco"
+                }
+            },
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--fe0a3715-6a21-5472-840f-39ea9c61ee83",
+            "created_by_ref": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+            "created": "2025-01-01T00:00:00.000Z",
+            "modified": "2025-01-01T00:00:00.000Z",
+            "relationship_type": "related-to",
+            "description": "Test Detection is created from log-source {category=network-connection, product=firewall}",
+            "source_ref": "indicator--d73e1632-c541-4b09-8281-95dc7f9c5782",
+            "target_ref": "data-source--f078a18f-0f04-5fde-b6cd-a5af90b6346b",
+            "object_marking_refs": [
+                "marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
+                "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+            ],
+        },
+    ]

@@ -105,7 +105,7 @@ class Bundler:
 
         self.job_id = f"report--{self.uuid}"
         self.external_refs = (external_refs or []) + [dict(source_name='txt2detection', url=url, description='txt2detection-reference') for url in self.reference_urls]
-        
+
         self.report = Report(
             created_by_ref=self.identity.id,
             name=name,
@@ -177,6 +177,7 @@ class Bundler:
             "external_id": hashlib.md5(indicator['pattern'].encode()).hexdigest()
             }
         )
+        logsource = detection.make_data_source()
 
         logger.debug(f"===== rule {detection.detection_id} =====")
         logger.debug("```yaml\n"+indicator['pattern']+"\n```")
@@ -191,24 +192,30 @@ class Bundler:
             self.add_relation(indicator, obj)
 
         self.add_ref(parse_stix(indicator, allow_custom=True), append_report=True)
+        print('everywhere')
+        self.add_ref(logsource, append_report=True)
+        print('here')
+        self.add_relation(indicator, logsource, description=f'{indicator["name"]} is created from {make_logsouce_string(logsource)}')
+        print('there')
 
         for ob_type, ob_value in set(observables.find_stix_observables(detection.detection)):
             try:
                 obj = observables.to_stix_object(ob_type, ob_value)
                 self.add_ref(obj)
-                self.add_relation(indicator, obj, 'detects', target_name=ob_value)
+                self.add_relation(indicator, obj, 'related-to', target_name=ob_value)
             except:
                 logger.exception(f"failed to process observable {ob_type}/{ob_value}")
 
-
-    def add_relation(self, indicator, target_object, relationship_type='detects', target_name=None):
+    def add_relation(self, indicator, target_object, relationship_type='related-to', target_name=None, description=None):
         ext_refs = []
 
         with contextlib.suppress(Exception):
             indicator['external_references'].append(target_object['external_references'][0])
             ext_refs = [target_object['external_references'][0]]
 
-        target_name = target_name or f"{target_object['external_references'][0]['external_id']} ({target_object['name']})"
+        if not description:
+            target_name = target_name or f"{target_object['external_references'][0]['external_id']} ({target_object['name']})"
+            description = f"{indicator['name']} {relationship_type} {target_name}"
 
         rel =  Relationship(
             id="relationship--" + str(
@@ -220,7 +227,7 @@ class Bundler:
             target_ref=target_object['id'],
             relationship_type=relationship_type,
             created_by_ref=self.report.created_by_ref,
-            description=f"{indicator['name']} {relationship_type} {target_name}",
+            description=description,
             created=self.report.created,
             modified=self.report.modified,
             object_marking_refs=self.report.object_marking_refs,
@@ -281,3 +288,9 @@ class Bundler:
             return
         for d in container.detections:
             self.add_rule_indicator(d)
+
+def make_logsouce_string(source: dict):
+    d = [f'{k}={v}' for k, v in source.items()
+        if k in ['product', 'service', 'category']]
+    d_str = ', '.join(d)
+    return 'log-source {'+d_str+'}'
