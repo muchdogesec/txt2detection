@@ -183,4 +183,3 @@ def to_stix_object(observable_type: str, value):
 
 # for a, b in observables:
 #     print(to_stix_object(a, b))
-
