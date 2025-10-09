@@ -122,6 +122,7 @@ class Bundler:
             )
             for url in self.reference_urls
         ]
+        self.data = DataContainer.model_construct()
 
         self.report = Report(
             created_by_ref=self.identity.id,
