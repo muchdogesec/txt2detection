@@ -118,19 +118,6 @@ def flow_id(report_id, technique_id, tactic_id):
     )
 
 
-def get_all_tactics():
-    tactics = {
-        "enterprise-attack": None,
-        "mobile-attack": None,
-        "ics-attack": None,
-    }
-    for k in tactics.keys():
-        matrix = k.replace("attack", "").strip("-")
-        all_tactics = STIXObjectRetriever().get_attack_tactics(matrix)
-        tactics[k] = all_tactics
-    return tactics
-
-
 def get_techniques_from_extracted_objects(objects: dict, tactics: dict):
     techniques = {}
     for obj in objects:
@@ -233,7 +220,7 @@ def extract_attack_flow_and_navigator(
     logged_techniques = [
         {k: v for k, v in t.items() if k != "stix_obj"} for t in techniques.values()
     ]
-    logging.debug(f"parsed techniques: {json.dumps(logged_techniques, indent=4)}")
+    logging.debug(f"parsed techniques: {logged_techniques}")
 
     flow = ex.extract_attack_flow(preprocessed_text, techniques)
     navigator = None

@@ -28,17 +28,6 @@ def dummy_detection():
     return detection
 
 
-@pytest.fixture
-def bundler_instance():
-    return Bundler(
-        name="Test Report",
-        identity=None,
-        tlp_level="red",
-        description="This is a test report.",
-        labels=["tlp.red", "test.test-var"],
-        created=datetime(2025, 1, 1),
-        report_id="74e36652-00f5-4dca-bf10-9f02fc996dcc",
-    )
 
 
 def test_bundler_initialization(bundler_instance):
@@ -284,3 +273,13 @@ def test_bundle_detections__creates_log_source(dummy_detection, bundler_instance
             ],
         },
     ]
+
+def test_get_attack_objects(bundler_instance):
+    retval = bundler_instance.get_attack_objects(['T1190', 'T1547'])
+    print({r['id'] for r in retval})
+    assert {r['id'] for r in retval} == {'attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf', 'attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c'}
+
+def test_get_cve_objects(bundler_instance):
+    cves = ['CVE-2025-1234', 'CVE-2024-1234']
+    retval = bundler_instance.get_cve_objects(cves)
+    assert {r['name'] for r in retval} == set(cves)

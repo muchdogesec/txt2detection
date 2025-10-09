@@ -300,7 +300,8 @@ class Bundler:
 
         return self._get_objects(endpoint, headers)
 
-    def get_attack_tactics(self):
+    @classmethod
+    def get_attack_tactics(cls):
         headers = {}
         api_root = os.environ["CTIBUTLER_BASE_URL"] + "/"
         if api_key := os.environ.get("CTIBUTLER_API_KEY"):
@@ -310,7 +311,7 @@ class Bundler:
             api_root, f"v1/attack-enterprise/objects/?attack_type=Tactic"
         )
         version_url = urljoin(api_root, f"v1/attack-enterprise/versions/installed/")
-        tactics = self._get_objects(endpoint, headers=headers)
+        tactics = cls._get_objects(endpoint, headers=headers)
         retval = dict(
             version=requests.get(version_url, headers=headers).json()["latest"]
         )
@@ -319,7 +320,8 @@ class Bundler:
             retval[tac["external_references"][0]["external_id"]] = tac
         return retval
 
-    def get_cve_objects(self, cve_ids):
+    @classmethod
+    def get_cve_objects(cls, cve_ids):
         if not cve_ids:
             return []
         logger.debug(f"retrieving cve objects: {cve_ids}")
@@ -331,9 +333,10 @@ class Bundler:
         if api_key := os.environ.get("VULMATCH_API_KEY"):
             headers["API-KEY"] = api_key
 
-        return self._get_objects(endpoint, headers)
+        return cls._get_objects(endpoint, headers)
 
-    def _get_objects(self, endpoint, headers):
+    @classmethod
+    def _get_objects(cls, endpoint, headers):
         data = []
         page = 1
         while True:
