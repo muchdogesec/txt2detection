@@ -19,6 +19,8 @@ from stix2 import (
     MarkingDefinition,
 )
 
+from txt2detection.ai_extractor.models import AttackFlowList
+
 if typing.TYPE_CHECKING:
     from txt2detection.bundler import Bundler
 
@@ -396,6 +398,15 @@ class SigmaRuleDetection(BaseDetection):
 class DetectionContainer(BaseModel):
     success: bool
     detections: list[Union[BaseDetection, AIDetection, SigmaRuleDetection]]
+
+
+class DataContainer(BaseModel):
+    detections: DetectionContainer
+    attack_flow: AttackFlowList = Field(default=None)
+    navigator_layer: list = Field(default=None)
+    observables: list[dict] = Field(default=None)
+    cves: dict[str, str] = Field(default=None)
+    attacks: dict[str, str] = Field(default=None)
 
 
 def tlp_from_tags(tags: list[SigmaTag]):

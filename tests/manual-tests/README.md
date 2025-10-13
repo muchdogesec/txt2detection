@@ -446,3 +446,32 @@ python3 txt2detection.py sigma \
   --status unsupported \
   --report_id d2d01afa-dc55-4a80-8d62-15d154450112
 ```
+
+
+## Attack Flow
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-attack-flow.yml \
+  --name "Create ATT&CK Flow" \
+  --report_id 330e2030-1dc2-45e6-be13-9342b102621b \
+  --ai_provider openai:gpt-5 \
+  --ai_create_attack_flow
+```
+
+## Attack Navigator
+
+### Enterprise
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-attack-enterprise.yml \
+  --name "Attack Navigator Enterprise" \
+  --report_id a18e76d1-f152-4b87-a552-d46f41afd637 \
+  --ai_provider openai:gpt-5 \
+  --ai_create_attack_navigator_layer
+```
+
+### Mobile / ICS
+
+Not currently supported by Sigma.

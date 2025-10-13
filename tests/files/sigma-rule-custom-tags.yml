@@ -11,7 +11,7 @@ modified: 2022-10-09
 tags:
     - tlp.red
     - attack.t1547
-    - attack.command_and_control
+    - attack.command-and-control
     - cve.2024-56520
     - detection.xyz
 logsource:

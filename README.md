@@ -31,12 +31,6 @@ txt2detection allows a user to enter some threat intelligence as a file to consi
 2. Based on the user input, AI prompts structured and sent to produce an intelligence rule
 3. Rules converted into STIX objects
 
-## tl;dr
-
-[![txt2detection](https://img.youtube.com/vi/uJWXYKyu3Xg/0.jpg)](https://www.youtube.com/watch?v=uJWXYKyu3Xg)
-
-[Watch the demo](https://www.youtube.com/watch?v=uJWXYKyu3Xg).
-
 ## Usage
 
 ### Setup
@@ -121,12 +115,14 @@ Use this mode to generate a set of rules from an input text file;
 * `--license` (optional): [License of the rule according the SPDX ID specification](https://spdx.org/licenses/). Will be added to the rule.
 * `--reference_urls` (optional): A list of URLs to be added as `references` in the Sigma Rule property and in the `external_references` property of the Indicator and Report STIX object created. e.g `"https://www.google.com/" "https://www.facebook.com/"`
 * `--external_refs` (optional): txt2detection will automatically populate the `external_references` of the report object it creates for the input. You can use this value to add additional objects to `external_references`. Note, you can only add `source_name` and `external_id` values currently. Pass as `source_name=external_id`. e.g. `--external_refs txt2stix=demo1 source=id` would create the following objects under the `external_references` property: `{"source_name":"txt2stix","external_id":"demo1"},{"source_name":"source","external_id":"id"}`
-* `ai_provider` (required): defines the `provider:model` to be used to generate the rule. Select one option. Currently supports:
+* `--ai_provider` (required): defines the `provider:model` to be used to generate the rule. Select one option. Currently supports:
     * Provider (env var required `OPENROUTER_API_KEY`): `openrouter:`, providers/models `openai/gpt-4o`, `deepseek/deepseek-chat` ([More here](https://openrouter.ai/models))
     * Provider (env var required `OPENAI_API_KEY`): `openai:`, models e.g.: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-4` ([More here](https://platform.openai.com/docs/models))
     * Provider (env var required `ANTHROPIC_API_KEY`): `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
     * Provider (env var required `GOOGLE_API_KEY`): `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
     * Provider (env var required `DEEPSEEK_API_KEY`): `deepseek:`, models `deepseek-chat` ([More here](https://api-docs.deepseek.com/quick_start/pricing))
+* `--ai_create_attack_flow` (boolean): passing this flag will also prompt the AI model (the same entered for `--ai_provider`, default `false`) to generate an [Attack Flow](https://center-for-threat-informed-defense.github.io/attack-flow/) for the MITRE ATT&CK tags to define the logical order in which they are being described. Note, Sigma currently supports ATT&CK Enterprise only.
+* `--ai_create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags. Note, Sigma currently supports ATT&CK Enterprise only. You don't need to pass this if `--ai_create_attack_flow` is set to `true` (as this mode relies on this setting being true)
 
 Note, in this mode, the following values will be automatically assigned to the rule
 
@@ -153,6 +149,8 @@ Note, in this mode you should be aware of a few things;
 * `--external_refs` (optional): txt2detection will automatically populate the `external_references` of the report object it creates for the input. You can use this value to add additional objects to `external_references`. Note, you can only add `source_name` and `external_id` values currently. Pass as `source_name=external_id`. e.g. `--external_refs txt2stix=demo1 source=id` would create the following objects under the `external_references` property: `{"source_name":"txt2stix","external_id":"demo1"},{"source_name":"source","external_id":"id"}`
 * `status` (optional): either `stable`, `test`, `experimental`, `deprecated`, `unsupported`. If passed, will overwrite any existing `status` recorded in the rule
 * `level` (optional): either `informational`, `low`, `medium`, `high`, `critical`. If passed, will overwrite any existing `level` recorded in the rule
+* `--ai_create_attack_flow` (boolean): passing this flag will also prompt the AI model (the same entered for `--ai_provider`, default `false`) to generate an [Attack Flow](https://center-for-threat-informed-defense.github.io/attack-flow/) for the MITRE ATT&CK tags to define the logical order in which they are being described. Note, Sigma currently supports ATT&CK Enterprise only.
+* `--ai_create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags. Note, Sigma currently supports ATT&CK Enterprise only. You don't need to pass this if `--ai_create_attack_flow` is set to `true` (as this mode relies on this setting being true)
 
 ### A note on observable extraction
 

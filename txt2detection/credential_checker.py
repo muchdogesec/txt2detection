@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 import requests
 
 
-
 def check_llms():
     from txt2detection.__main__ import parse_model
 
@@ -23,14 +22,17 @@ def check_llms():
 
 def check_ctibutler_vulmatch(service):
     session = requests.Session()
-    if service == 'vulmatch':
-        base_url = os.getenv('VULMATCH_BASE_URL')
-        url = urljoin(base_url, 'v1/cve/objects/vulnerability--f552f6f4-39da-48dc-8717-323772c99588/')
-        session.headers['API-KEY'] = os.environ.get('VULMATCH_API_KEY')
-    elif service == 'ctibutler':
-        base_url = os.getenv('CTIBUTLER_BASE_URL')
-        url = urljoin(base_url, 'v1/location/versions/available/')
-        session.headers['API-KEY'] = os.environ.get('CTIBUTLER_API_KEY')
+    if service == "vulmatch":
+        base_url = os.getenv("VULMATCH_BASE_URL")
+        url = urljoin(
+            base_url,
+            "v1/cve/objects/vulnerability--f552f6f4-39da-48dc-8717-323772c99588/",
+        )
+        session.headers["API-KEY"] = os.environ.get("VULMATCH_API_KEY")
+    elif service == "ctibutler":
+        base_url = os.getenv("CTIBUTLER_BASE_URL")
+        url = urljoin(base_url, "v1/location/versions/available/")
+        session.headers["API-KEY"] = os.environ.get("CTIBUTLER_API_KEY")
 
     try:
         resp = session.get(url)

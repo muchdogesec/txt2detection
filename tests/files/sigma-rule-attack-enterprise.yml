@@ -1,0 +1,27 @@
+title: Attack Navigator Enterprise
+id: a18e76d1-f152-4b87-a552-d46f41afd637
+status: test
+description: Build an Attack Enterprise Navigator layer
+references:
+    - https://www.dogesec.com
+author: dogesec
+date: 2020-01-01
+modified: 2020-01-02
+tags:
+    - tlp.clear
+    - attack.t1547
+    - attack.t1671
+    - attack.t1025
+    - attack.command-and-control
+    - attack.t1661 # will fail is mobile
+logsource:
+    product: okta
+    service: okta
+detection:
+    selection:
+        eventtype:
+            - policy.lifecycle.update
+            - policy.lifecycle.delete
+    condition: selection
+level: low
+license: MIT
