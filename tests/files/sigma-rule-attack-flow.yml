@@ -1,0 +1,26 @@
+title: Attack Flow demo
+id: 7894eba6-b0e5-48d9-be52-26bf5a556e45
+status: test
+description: Build an Attack Flow from a Sigma Rule
+references:
+    - https://www.dogesec.com
+author: dogesec
+date: 2020-01-01
+modified: 2020-01-02
+tags:
+    - tlp.clear
+    - attack.t1547
+    - attack.t1671
+    - attack.t1025
+    - attack.t1661
+logsource:
+    product: okta
+    service: okta
+detection:
+    selection:
+        eventtype:
+            - policy.lifecycle.update
+            - policy.lifecycle.delete
+    condition: selection
+level: low
+license: MIT
