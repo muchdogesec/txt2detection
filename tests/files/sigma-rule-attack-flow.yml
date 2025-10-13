@@ -12,7 +12,6 @@ tags:
     - attack.t1547
     - attack.t1671
     - attack.t1025
-    - attack.t1661
 logsource:
     product: okta
     service: okta

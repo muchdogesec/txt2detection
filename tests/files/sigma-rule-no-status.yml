@@ -10,7 +10,6 @@ modified: 2022-10-09
 tags:
     - tlp.red
     - attack.t1547
-    - attack.command_and_control
     - cve.2024-56520
 logsource:
     product: okta
