@@ -31,12 +31,6 @@ txt2detection allows a user to enter some threat intelligence as a file to consi
 2. Based on the user input, AI prompts structured and sent to produce an intelligence rule
 3. Rules converted into STIX objects
 
-## tl;dr
-
-[![txt2detection](https://img.youtube.com/vi/uJWXYKyu3Xg/0.jpg)](https://www.youtube.com/watch?v=uJWXYKyu3Xg)
-
-[Watch the demo](https://www.youtube.com/watch?v=uJWXYKyu3Xg).
-
 ## Usage
 
 ### Setup
