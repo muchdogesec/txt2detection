@@ -9,14 +9,12 @@ from .bundler import Bundler
 from .ai_extractor.base import BaseAIExtractor
 from .models import UUID_NAMESPACE
 from stix2extensions.attack_action import AttackAction, AttackFlow
-from stix2extensions._extensions import attack_flow_ExtensionDefinitionSMO
-
 
 def parse_flow(report, flow: AttackFlowList, techniques, tactics):
     logging.info(f"flow.success = {flow.success}")
     if not flow.success:
         return []
-    objects = [report, attack_flow_ExtensionDefinitionSMO]
+    objects = [report]
     for domain in ["enterprise-attack", "mobile-attack", "ics-attack"]:
         flow_objects = parse_domain_flow(report, flow, techniques, tactics, domain)
         objects.extend(flow_objects)

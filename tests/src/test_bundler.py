@@ -283,3 +283,9 @@ def test_get_cve_objects(bundler_instance):
     cves = ['CVE-2025-1234', 'CVE-2024-1234']
     retval = bundler_instance.get_cve_objects(cves)
     assert {r['name'] for r in retval} == set(cves)
+
+
+def test_flow_objects__adds_extension_definition(bundler_instance):
+    bundler_instance.flow_objects = [{'id': 'some-other', 'type': ''}]
+    assert bundler_instance.all_objects.issuperset({'some-other', "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4"})
+    assert "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4" not in bundler_instance.report.object_refs

@@ -42,6 +42,7 @@ class Bundler:
     uuid = None
     id_map = dict()
     data: DataContainer
+    ATTACK_FLOW_SMO_URL = "https://github.com/muchdogesec/stix2extensions/raw/refs/heads/main/remote-definitions/attack-flow.json"
     # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/txt2detection.json
     default_identity = Identity(
         **{
@@ -360,6 +361,23 @@ class Bundler:
             return
         for d in container.detections:
             self.add_rule_indicator(d)
+
+    
+    @property
+    def flow_objects(self):
+        return self._flow_objects
+
+    @flow_objects.setter
+    def flow_objects(self, objects):
+        smo_objects = requests.get(self.ATTACK_FLOW_SMO_URL).json()["objects"]
+        objects.extend(smo_objects)
+        for obj in objects:
+            if obj["id"] == self.report.id:
+                continue
+            is_report_object = obj["type"] not in ["extension-definition", "identity"]
+            self.add_ref(obj, append_report=is_report_object)
+        self._flow_objects = objects
+
 
 
 def make_logsouce_string(source: dict):
