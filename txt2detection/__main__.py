@@ -258,7 +258,7 @@ def run_txt2detection(
     **kwargs,
 ) -> Bundler:
     if (
-        kwargs.get("sigma_file") != "sigma_file"
+        not kwargs.get("sigma_file")
         or ai_create_attack_flow
         or ai_create_attack_navigator_layer
     ):
