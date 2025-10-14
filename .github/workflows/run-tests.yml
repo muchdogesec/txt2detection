@@ -33,6 +33,10 @@ jobs:
         run: |
             echo > .env
             echo "INPUT_TOKEN_LIMIT=1000"  >> .env
+            echo "CTIBUTLER_BASE_URL=https://api.ctibutler.com/" >> .env
+            echo "CTIBUTLER_API_KEY=${{ secrets.CTIBUTLER_API_KEY }}" >> .env
+            echo "VULMATCH_BASE_URL=https://api.vulmatch.com/" >> .env
+            echo "VULMATCH_API_KEY=${{ secrets.VULMATCH_API_KEY }}" >> .env
 
       - name: Run Tests
         id: run_tests
