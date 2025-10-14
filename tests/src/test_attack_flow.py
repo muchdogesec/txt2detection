@@ -2,9 +2,8 @@ from functools import lru_cache
 from types import SimpleNamespace
 import pytest
 from unittest.mock import MagicMock, patch
-from stix2extensions._extensions import attack_flow_ExtensionDefinitionSMO
 
-from txt2detection.ai_extractor.models import AttackFlowList, AttackFlowItem
+from txt2detection.ai_extractor.models import AttackFlowList
 from txt2detection.attack_flow import (
     create_navigator_layer,
     get_techniques_from_extracted_objects,
@@ -15,7 +14,6 @@ from txt2detection.attack_flow import (
 from stix2 import Report
 
 from txt2detection.bundler import Bundler
-from txt2detection.utils import parse_model
 
 
 def test_parse_flow(dummy_report, dummy_objects, dummy_flow):
