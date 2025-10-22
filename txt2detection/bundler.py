@@ -1,5 +1,6 @@
 import contextlib
 import enum
+import itertools
 import json
 import logging
 import os
@@ -124,6 +125,8 @@ class Bundler:
             for url in self.reference_urls
         ]
         self.data = DataContainer.model_construct()
+        self.tactics = {}
+        self.techniques = {}
 
         self.report = Report(
             created_by_ref=self.identity.id,
@@ -206,10 +209,16 @@ class Bundler:
         logger.debug(f" =================== end of rule =================== ")
 
         self.data.attacks = dict.fromkeys(detection.mitre_attack_ids, "Not found")
+        tactics = self.tactics[detection.id] = {}
+        techniques = self.techniques[detection.id] = []
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj)
             self.data.attacks[obj["external_references"][0]["external_id"]] = obj["id"]
+            if obj['type'] == 'x-mitre-tactic':
+                tactics[obj['x_mitre_shortname']] = obj
+            else:
+                techniques.append(obj)
 
         self.data.cves = dict.fromkeys(detection.cve_ids, "Not found")
         for obj in self.get_cve_objects(detection.cve_ids):
@@ -300,26 +309,15 @@ class Bundler:
             headers["API-KEY"] = api_key
 
         return self._get_objects(endpoint, headers)
-
+    
     @classmethod
-    def get_attack_tactics(cls):
+    def get_attack_version(cls):
         headers = {}
         api_root = os.environ["CTIBUTLER_BASE_URL"] + "/"
         if api_key := os.environ.get("CTIBUTLER_API_KEY"):
             headers["API-KEY"] = api_key
-
-        endpoint = urljoin(
-            api_root, f"v1/attack-enterprise/objects/?attack_type=Tactic"
-        )
         version_url = urljoin(api_root, f"v1/attack-enterprise/versions/installed/")
-        tactics = cls._get_objects(endpoint, headers=headers)
-        retval = dict(
-            version=requests.get(version_url, headers=headers).json()["latest"]
-        )
-        for tac in tactics:
-            retval[tac["x_mitre_shortname"]] = tac
-            retval[tac["external_references"][0]["external_id"]] = tac
-        return retval
+        return requests.get(version_url, headers=headers).json()["latest"]
 
     @classmethod
     def get_cve_objects(cls, cve_ids):
@@ -361,6 +359,19 @@ class Bundler:
             return
         for d in container.detections:
             self.add_rule_indicator(d)
+
+        self.create_attack_navigator()
+        
+    def create_attack_navigator(self):
+        self.mitre_version = self.get_attack_version()
+        all_tactics = dict(itertools.chain(*map(lambda x: x.items(), self.tactics.values())))
+        self.data.navigator_layer = {}
+        for detection_id, techniques in self.techniques.items():
+            tactics = self.tactics[detection_id]
+            mapping = dict([attack_flow.map_technique_tactic(techniques[0], all_tactics, tactics)for technique in techniques])
+            indicator = [f for f in self.bundle.objects if f['id'].endswith(detection_id) and f['type'] == 'indicator'][0]
+            self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer_new(self.report, indicator, mapping, self.mitre_version)
+
 
     
     @property

@@ -185,14 +185,8 @@ def parse_args():
             choices=valid_licenses(),
         )
         mode_parser.add_argument(
-            "--ai_create_attack_navigator_layer",
+            "--create_attack_navigator_layer",
             help="Create navigator layer",
-            action="store_true",
-            default=False,
-        )
-        mode_parser.add_argument(
-            "--ai_create_attack_flow",
-            help="Create attack flow",
             action="store_true",
             default=False,
         )
@@ -228,10 +222,10 @@ def parse_args():
     if args.mode != "sigma":
         assert args.ai_provider, "--ai_provider is required in file or txt mode"
 
-    if args.ai_create_attack_navigator_layer or args.ai_create_attack_flow:
+    if args.create_attack_navigator_layer:
         assert (
             args.ai_provider
-        ), "--ai_provider is required when --ai_create_attack_navigator_layer/--ai_create_attack_flow is passed"
+        ), "--ai_provider is required when --create_attack_navigator_layer is passed"
 
     if args.mode == "file":
         args.input_text = args.input_file
@@ -253,15 +247,10 @@ def run_txt2detection(
     labels: list[str],
     report_id: str | uuid.UUID,
     ai_provider: BaseAIExtractor,
-    ai_create_attack_flow=False,
-    ai_create_attack_navigator_layer=False,
+    create_attack_navigator_layer=False,
     **kwargs,
 ) -> Bundler:
-    if (
-        not kwargs.get("sigma_file")
-        or ai_create_attack_flow
-        or ai_create_attack_navigator_layer
-    ):
+    if not kwargs.get("sigma_file"):
         validate_token_count(
             int(os.getenv("INPUT_TOKEN_LIMIT", 0)), input_text, ai_provider
         )
@@ -304,16 +293,8 @@ def run_txt2detection(
         detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
 
-    if ai_create_attack_flow or ai_create_attack_navigator_layer:
-        bundler.data.attack_flow, bundler.data.navigator_layer = (
-            attack_flow.extract_attack_flow_and_navigator(
-                bundler,
-                bundler.report.description,
-                ai_create_attack_flow,
-                ai_create_attack_navigator_layer,
-                ai_provider,
-            )
-        )
+    if create_attack_navigator_layer:
+        pass
     return bundler
 
 

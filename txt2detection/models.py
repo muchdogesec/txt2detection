@@ -403,7 +403,7 @@ class DetectionContainer(BaseModel):
 class DataContainer(BaseModel):
     detections: DetectionContainer
     attack_flow: AttackFlowList = Field(default=None)
-    navigator_layer: list = Field(default=None)
+    navigator_layer: dict = Field(default=None)
     observables: list[dict] = Field(default=None)
     cves: dict[str, str] = Field(default=None)
     attacks: dict[str, str] = Field(default=None)
