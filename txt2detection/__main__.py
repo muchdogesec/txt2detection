@@ -292,9 +292,8 @@ def run_txt2detection(
         )
         detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
-
     if create_attack_navigator_layer:
-        pass
+        bundler.create_attack_navigator()
     return bundler
 
 

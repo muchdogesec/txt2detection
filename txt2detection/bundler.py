@@ -359,8 +359,6 @@ class Bundler:
             return
         for d in container.detections:
             self.add_rule_indicator(d)
-
-        self.create_attack_navigator()
         
     def create_attack_navigator(self):
         self.mitre_version = self.get_attack_version()
@@ -370,7 +368,7 @@ class Bundler:
             tactics = self.tactics[detection_id]
             mapping = dict([attack_flow.map_technique_tactic(techniques[0], all_tactics, tactics)for technique in techniques])
             indicator = [f for f in self.bundle.objects if str(f['id']).endswith(detection_id) and f['type'] == 'indicator'][0]
-            self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer_new(self.report, indicator, mapping, self.mitre_version)
+            self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer(self.report, indicator, mapping, self.mitre_version)
 
 
     
