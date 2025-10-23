@@ -369,7 +369,7 @@ class Bundler:
         for detection_id, techniques in self.techniques.items():
             tactics = self.tactics[detection_id]
             mapping = dict([attack_flow.map_technique_tactic(techniques[0], all_tactics, tactics)for technique in techniques])
-            indicator = [f for f in self.bundle.objects if f['id'].endswith(detection_id) and f['type'] == 'indicator'][0]
+            indicator = [f for f in self.bundle.objects if str(f['id']).endswith(detection_id) and f['type'] == 'indicator'][0]
             self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer_new(self.report, indicator, mapping, self.mitre_version)
 
 
