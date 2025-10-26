@@ -1,4 +1,5 @@
 id: 1667a172-ed4c-463c-9969-efd92195319a
+name: is always optional
 status: test
 description: Detects when an Okta policy is modified or deleted.
 references:

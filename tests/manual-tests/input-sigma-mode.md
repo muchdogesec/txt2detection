@@ -1,17 +1,47 @@
 # Sigma Mode
 
+## Good test cases
+
+### A rule with all properties
+
 ```shell
 python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Complete Sigma Rule" \
   --create_attack_navigator_layer \
   --ai_provider openai:gpt-5 \
-  --report_id a18e76d1-f152-4b87-a552-d46f41afd637 \
+  --report_id a18e76d1-f152-4b87-a552-d46f41afd637
 ```
 
-## Title
+Check that derived-from is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a) and rule id matches the report it
 
-Should fail
+### Test with no report ID passed
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-master.yml \
+  --name "Complete Sigma Rule" \
+  --create_attack_navigator_layer \
+  --ai_provider openai:gpt-5
+```
+
+Check that derived-from is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a). Rule id generation (and report) is random. This happens because we can't be sure all id's in Rules uploaded will conform to UUIDv4 RFC.
+
+### Check required properties CLI overide
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-no-title.yml \
+  --name "A new title" \
+  --report_id 272daf95-2790-4fd5-9ca6-ee8cef08315d
+```
+
+Here rule contains no name, but is passed in the request to ensure compliance so script will generate a rule.
+
+## Bad test cases
+
+### No title
+
 
 ```shell
 python3 txt2detection.py sigma \
@@ -21,12 +51,7 @@ python3 txt2detection.py sigma \
 
 Title, but report name is override by CLI input
 
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-master.yml \
-  --name "A new title" \
-  --report_id 272daf95-2790-4fd5-9ca6-ee8cef08315d
-```
+
 
 ## No description
 
