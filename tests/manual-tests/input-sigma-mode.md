@@ -13,7 +13,7 @@ python3 txt2detection.py sigma \
   --report_id a18e76d1-f152-4b87-a552-d46f41afd637
 ```
 
-Check that derived-from is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a) and rule id matches the report it
+Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a) and rule id matches the report it
 
 ### Test with no report ID passed
 
@@ -25,7 +25,7 @@ python3 txt2detection.py sigma \
   --ai_provider openai:gpt-5
 ```
 
-Check that derived-from is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a). Rule id generation (and report) is random. This happens because we can't be sure all id's in Rules uploaded will conform to UUIDv4 RFC.
+Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a). Rule id generation (and report) is random. This happens because we can't be sure all id's in Rules uploaded will conform to UUIDv4 RFC.
 
 ### Check required properties CLI overide
 
@@ -38,10 +38,20 @@ python3 txt2detection.py sigma \
 
 Here rule contains no name, but is passed in the request to ensure compliance so script will generate a rule.
 
+### Append related
+
+`related` property exist, check append of new related property for this run is correct
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-existing-related.yml \
+  --name "Append related" \
+  --report_id 655f0689-5209-4ad5-a6de-3f198c696060
+```
+
 ## Bad test cases
 
 ### No title
-
 
 ```shell
 python3 txt2detection.py sigma \
@@ -53,42 +63,8 @@ Title, but report name is override by CLI input
 
 
 
-## No description
 
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-no-description.yml \
-  --name "No description" \
-  --report_id fd38cd23-93af-41ad-ab43-a6fa0ca69bf5
-```
 
-## Check that derived-from is created
-
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-master.yml \
-  --name "Manual Rule Gen" \
-  --report_id 80fc4d1c-f02c-4bff-80bf-d97490a04542
-```
-
-## Random ID
-
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-master.yml \
-  --name "Random ID"
-```
-
-## Append related
-
-`related` property exist, check append is correct
-
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-existing-related.yml \
-  --name "Append related" \
-  --report_id 655f0689-5209-4ad5-a6de-3f198c696060
-```
 
 ## Check dates
 
