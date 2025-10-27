@@ -31,7 +31,11 @@ import uuid
 from stix2 import parse as parse_stix
 
 from txt2detection.models import TLP_LEVEL
-from txt2detection.utils import STATUSES, remove_rule_specific_tags
+from txt2detection.utils import (
+    STATUSES,
+    load_stix_object_from_url,
+    remove_rule_specific_tags,
+)
 
 
 logger = logging.getLogger("txt2detection.bundler")
@@ -82,6 +86,10 @@ class Bundler:
         }
     )
 
+    extension_definition = load_stix_object_from_url(
+        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma_rule.json"
+    )
+
     @classmethod
     def generate_report_id(cls, created_by_ref, created, name):
         if not created_by_ref:
@@ -114,6 +122,7 @@ class Bundler:
         self.labels = labels or []
         self.license = license
 
+        self.all_objects = set()
         self.job_id = f"report--{self.uuid}"
         self.external_refs = (external_refs or []) + [
             dict(
@@ -150,7 +159,6 @@ class Bundler:
         )
         self.report.object_refs.clear()  # clear object refs
         self.set_defaults()
-        self.all_objects = set()
         if not description:
             self.report.external_references.pop(0)
 
@@ -161,6 +169,7 @@ class Bundler:
         self.bundle.objects.extend([self.default_marking, self.identity, self.report])
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
+        self.add_ref(self.extension_definition)
 
     def add_ref(self, sdo, append_report=False):
         sdo_id = sdo["id"]
@@ -194,6 +203,18 @@ class Bundler:
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": self.external_refs + detection.external_references,
+            "extensions": {
+                self.extension_definition["id"]: {
+                    "extension_type": "toplevel-property-extension"
+                }
+            },
+            "x_sigma_type": "base",
+            "x_sigma_level": detection.level,
+            "x_sigma_status": detection.status,
+            "x_sigma_license": detection.license,
+            "x_sigma_fields": detection.fields,
+            "x_sigma_falsepositives": detection.falsepositives,
+            "x_sigma_scope": detection.scope,
         }
         indicator["external_references"].append(
             {
@@ -207,7 +228,7 @@ class Bundler:
         logger.debug("```yaml\n" + indicator["pattern"] + "\n```")
         logger.debug(f" =================== end of rule =================== ")
 
-        self.data.attacks = dict.fromkeys(detection.mitre_attack_ids, "Not found")
+        self.data.attacks.update(dict.fromkeys(detection.mitre_attack_ids, "Not found"))
         tactics = self.tactics[detection.id] = {}
         techniques = self.techniques[detection.id] = []
         for obj in self.get_attack_objects(detection.mitre_attack_ids):
@@ -219,7 +240,7 @@ class Bundler:
             else:
                 techniques.append(obj)
 
-        self.data.cves = dict.fromkeys(detection.cve_ids, "Not found")
+        self.data.cves.update(dict.fromkeys(detection.cve_ids, "Not found"))
         for obj in self.get_cve_objects(detection.cve_ids):
             self.add_ref(obj)
             self.add_relation(indicator, obj)
@@ -353,7 +374,7 @@ class Bundler:
         return data
 
     def bundle_detections(self, container: DetectionContainer):
-        self.data = DataContainer(detections=container)
+        self.data.detections = container
         if not container.success:
             return
         for d in container.detections:

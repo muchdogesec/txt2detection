@@ -404,8 +404,8 @@ class DataContainer(BaseModel):
     detections: DetectionContainer
     navigator_layer: dict = Field(default=None)
     observables: list[dict] = Field(default=None)
-    cves: dict[str, str] = Field(default=None)
-    attacks: dict[str, str] = Field(default=None)
+    cves: dict[str, str] = Field(default=dict)
+    attacks: dict[str, str] = Field(default=dict)
 
 
 def tlp_from_tags(tags: list[SigmaTag]):

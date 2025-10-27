@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import stix2
 from txt2detection.bundler import Bundler
-from txt2detection.models import DetectionContainer, SigmaRuleDetection
+from txt2detection.models import DetectionContainer, SigmaRuleDetection, Level
 from datetime import datetime, timezone
 from stix2 import Relationship
 
@@ -24,6 +24,9 @@ def dummy_detection():
             category="network-connection",
             product="firewall",
         ),
+        level=Level.informational,
+        falsepositives=["Not actually suspicious", "the computer is drunk"],
+        scope=["network", "it"],
     )
     return detection
 
@@ -36,6 +39,7 @@ def test_bundler_initialization(bundler_instance):
     assert bundler_instance.report.labels == remove_rule_specific_tags(
         bundler_instance.labels
     )
+    assert 'extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7' in bundler_instance.all_objects, 'extension-definition not in bundle'
 
 
 def test_report_reference_urls():
@@ -275,7 +279,6 @@ def test_bundle_detections__creates_log_source(dummy_detection, bundler_instance
 
 def test_get_attack_objects(bundler_instance):
     retval = bundler_instance.get_attack_objects(["T1190", "T1547"])
-    print({r["id"] for r in retval})
     assert {r["id"] for r in retval} == {
         "attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf",
         "attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c",
@@ -286,3 +289,47 @@ def test_get_cve_objects(bundler_instance):
     cves = ["CVE-2025-1234", "CVE-2024-1234"]
     retval = bundler_instance.get_cve_objects(cves)
     assert {r["name"] for r in retval} == set(cves)
+
+
+def test_add_rule_indicator__adds_sigma_extension_properties(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    obj = [
+        k
+        for k in bundler_instance.bundle_dict["objects"]
+        if k["id"] == "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    ][0]
+    assert obj == {
+        "type": "indicator",
+        "spec_version": "2.1",
+        "id": "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
+        "created_by_ref": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+        "created": "2025-01-01T00:00:00.000Z",
+        "modified": "2025-01-01T00:00:00.000Z",
+        "name": "Test Detection",
+        "description": "Detects something suspicious.",
+        "pattern": "id: cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be\ntitle: Test Detection\ndescription: Detects something suspicious.\ndetection:\n    condition: selection1\n    selection1:\n        ip: 1.1.1.1\nlogsource:\n    category: network-connection\n    product: firewall\nfalsepositives:\n- Not actually suspicious\n- the computer is drunk\ntags:\n- sigma.execution\n- test.test-var\n- tlp.red\nlevel: informational\nauthor: identity--a4d70b75-6f4a-5d19-9137-da863edd33d7\ndate: 2025-01-01\nscope:\n- network\n- it\n",
+        "pattern_type": "sigma",
+        "valid_from": "2025-01-01T00:00:00Z",
+        "labels": ["test.test-var"],
+        "external_references": [
+            {"source_name": "sigma-level", "description": "informational"},
+            {
+                "source_name": "rule_md5_hash",
+                "external_id": "9ab1a679f6e08e2c1fa94112966dc51a",
+            },
+        ],
+        "object_marking_refs": [
+            "marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
+            "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+        ],
+        "extensions": {
+            "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7": {
+                "extension_type": "toplevel-property-extension"
+            }
+        },
+        "x_sigma_level": "informational",
+        "x_sigma_falsepositives": ["Not actually suspicious", "the computer is drunk"],
+        "x_sigma_type": "base",
+        "x_sigma_scope": ["network", "it"],
+    }
