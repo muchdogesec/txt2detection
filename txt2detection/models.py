@@ -274,7 +274,8 @@ class BaseDetection(BaseModel):
     @property
     def mitre_attack_ids(self):
         retval = []
-        for label in self.tags:
+        for i, label in enumerate(self.tags):
+            label = label.replace('_', '-').lower()
             namespace, _, label_id = label.partition(".")
             if namespace == "attack":
                 retval.append(MITRE_TACTIC_MAP.get(label_id, label_id.upper()))

@@ -167,10 +167,14 @@ def test_mitre_attack_ids_and_cve_ids():
         detection={},
         logsource={},
         falsepositives=[],
-        tags=["attack.execution", "cve.2021-1234", "attack.t123"],
+        tags=["attack.execution", "cve.2021-1234", "attack.t1025", "attack.credential_access"],
         level=Level.medium,
     )
-    assert det.mitre_attack_ids == ["TA0002", "T123"]
+    assert det.mitre_attack_ids == [
+        "TA0002",  #attack.execution
+        "T1025",
+        "TA0006" #credential-access
+    ]
     assert det.cve_ids == ["CVE-2021-1234"]
 
 
