@@ -256,7 +256,7 @@ def run_txt2detection(
         )
 
     if sigma := kwargs.get("sigma_file"):
-        detection = get_sigma_detections(sigma)
+        detection = get_sigma_detections(sigma, name=name)
         if not identity and detection.author:
             identity = make_identity(detection.author)
         kwargs.update(
@@ -297,8 +297,10 @@ def run_txt2detection(
     return bundler
 
 
-def get_sigma_detections(sigma: str) -> SigmaRuleDetection:
+def get_sigma_detections(sigma: str, name=None) -> SigmaRuleDetection:
     obj = yaml.safe_load(io.StringIO(sigma))
+    if name:
+        obj['title'] = name
     return SigmaRuleDetection.model_validate(obj)
 
 
@@ -326,6 +328,6 @@ def main(args: Args):
         rule_path = rules_dir / ("rule--" + rule_id + ".yml")
         nav_path = rules_dir / f"attack-enterprise-navigator-layer-rule--{rule_id}.json"
         rule_path.write_text(obj["pattern"])
-        if rule_nav := bundler.data.navigator_layer.get(rule_id):
+        if rule_nav := (bundler.data.navigator_layer and bundler.data.navigator_layer.get(rule_id)):
             nav_path.write_text(json.dumps(rule_nav, indent=4))
     logging.info(f"Writing bundle output to `{output_path}`")
