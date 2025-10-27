@@ -10,6 +10,7 @@ import logging
 import re
 import sys
 import uuid
+from pydantic import ValidationError
 from stix2 import Identity
 import yaml
 
@@ -299,6 +300,8 @@ def run_txt2detection(
 
 def get_sigma_detections(sigma: str, name=None) -> SigmaRuleDetection:
     obj = yaml.safe_load(io.StringIO(sigma))
+    if not isinstance(obj, dict):
+        raise ValueError(f'bad sigma input file. expected object/dict, got {type(obj)}.')
     if name:
         obj['title'] = name
     return SigmaRuleDetection.model_validate(obj)
@@ -310,7 +313,14 @@ def main(args: Args):
     logging.info(f"starting argument: {json.dumps(sys.argv[1:])}")
     kwargs = args.__dict__
     kwargs["identity"] = args.use_identity
-    bundler = run_txt2detection(**kwargs)
+    try:
+        bundler = run_txt2detection(**kwargs)
+    except (ValidationError, ValueError) as e:
+        logging.error(f"Validate sigma file failed: {str(e)}")
+        if isinstance(e, ValidationError):
+            full_error = e.json(indent=4)
+            logging.debug(f"Validate sigma file failed: {full_error}", exc_info=True)
+        sys.exit(19)
 
     output_dir = Path("./output") / str(bundler.bundle.id)
     shutil.rmtree(output_dir, ignore_errors=True)
