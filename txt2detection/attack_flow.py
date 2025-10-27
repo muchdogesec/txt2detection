@@ -17,7 +17,6 @@ def map_technique_tactic(obj, report_tactics, rule_tactics):
         if not set(phase["kill_chain_name"].split("-")).issuperset(["mitre", "attack"]):
             continue
         tactic_names.add(phase["phase_name"])
-
     tactic_obj = None
     if s := tactic_names.intersection(rule_tactics):
         tactic_obj = rule_tactics[s.pop()]
@@ -40,13 +39,13 @@ def create_navigator_layer(report, indicator, technique_mapping, mitre_version):
             technique_item["tactic"] = tactic
         techniques.append(technique_item)
     return {
+        "name": indicator["name"],
+        "domain": "enterprise-attack",
         "versions": {
             "layer": "4.5",
             "attack": mitre_version,
             "navigator": "5.1.0",
         },
-        "name": indicator["name"],
-        "domain": "enterprise-attack",
         "techniques": techniques,
         "gradient": {
             "colors": ["#ffffff", "#ff6666"],

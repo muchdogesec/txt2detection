@@ -322,6 +322,10 @@ def main(args: Args):
     for obj in bundler.bundle["objects"]:
         if obj["type"] != "indicator" or obj["pattern_type"] != "sigma":
             continue
-        name = obj["id"].replace("indicator", "rule") + ".yml"
-        (rules_dir / name).write_text(obj["pattern"])
+        rule_id: str = obj["id"].replace("indicator--", "")
+        rule_path = rules_dir / ("rule--" + rule_id + ".yml")
+        nav_path = rules_dir / f"attack-enterprise-navigator-layer-rule--{rule_id}.json"
+        rule_path.write_text(obj["pattern"])
+        if rule_nav := bundler.data.navigator_layer.get(rule_id):
+            nav_path.write_text(json.dumps(rule_nav, indent=4))
     logging.info(f"Writing bundle output to `{output_path}`")

@@ -365,8 +365,10 @@ class Bundler:
         all_tactics = dict(itertools.chain(*map(lambda x: x.items(), self.tactics.values())))
         self.data.navigator_layer = {}
         for detection_id, techniques in self.techniques.items():
+            if not techniques:
+                continue
             tactics = self.tactics[detection_id]
-            mapping = dict([attack_flow.map_technique_tactic(techniques[0], all_tactics, tactics)for technique in techniques])
+            mapping = dict([attack_flow.map_technique_tactic(technique, all_tactics, tactics)for technique in techniques])
             indicator = [f for f in self.bundle.objects if str(f['id']).endswith(detection_id) and f['type'] == 'indicator'][0]
             self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer(self.report, indicator, mapping, self.mitre_version)
 
