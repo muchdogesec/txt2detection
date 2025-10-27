@@ -19,7 +19,6 @@ from stix2 import (
     MarkingDefinition,
 )
 
-from txt2detection.ai_extractor.models import AttackFlowList
 
 if typing.TYPE_CHECKING:
     from txt2detection.bundler import Bundler
@@ -275,7 +274,7 @@ class BaseDetection(BaseModel):
     def mitre_attack_ids(self):
         retval = []
         for i, label in enumerate(self.tags):
-            label = label.replace('_', '-').lower()
+            label = label.replace("_", "-").lower()
             namespace, _, label_id = label.partition(".")
             if namespace == "attack":
                 retval.append(MITRE_TACTIC_MAP.get(label_id, label_id.upper()))
@@ -403,7 +402,6 @@ class DetectionContainer(BaseModel):
 
 class DataContainer(BaseModel):
     detections: DetectionContainer
-    attack_flow: AttackFlowList = Field(default=None)
     navigator_layer: dict = Field(default=None)
     observables: list[dict] = Field(default=None)
     cves: dict[str, str] = Field(default=None)

@@ -7,7 +7,6 @@ from llama_index.core.llms.llm import LLM
 
 from txt2detection.ai_extractor import prompts
 
-from txt2detection.ai_extractor.models import AttackFlowList
 from txt2detection.ai_extractor.utils import ParserWithLogging
 from txt2detection.models import DetectionContainer, DetectionContainer
 from llama_index.core.utils import get_tokenizer
@@ -61,28 +60,6 @@ class BaseAIExtractor:
     @property
     def extractor_name(self):
         return f"{self.provider}:{self.llm.model}"
-
-    def _get_attack_flow_program(self):
-        return LLMTextCompletionProgram.from_defaults(
-            output_parser=ParserWithLogging(AttackFlowList),
-            prompt=prompts.ATTACK_FLOW_PROMPT_TEMPL,
-            verbose=True,
-            llm=self.llm,
-        )
-
-    def extract_attack_flow(self, input_text, techniques) -> AttackFlowList:
-        extracted_techniques = []
-        for t in techniques.values():
-            extracted_techniques.append(
-                dict(
-                    id=t["id"],
-                    name=t["name"],
-                    possible_tactics=list(t["possible_tactics"].keys()),
-                )
-            )
-        return self._get_attack_flow_program()(
-            document=input_text, extracted_techniques=extracted_techniques
-        )
 
     def check_credential(self):
         try:

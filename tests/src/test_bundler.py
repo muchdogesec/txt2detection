@@ -28,8 +28,6 @@ def dummy_detection():
     return detection
 
 
-
-
 def test_bundler_initialization(bundler_instance):
     assert bundler_instance.report.name == "Test Report"
     assert bundler_instance.report.description == "This is a test report."
@@ -274,18 +272,17 @@ def test_bundle_detections__creates_log_source(dummy_detection, bundler_instance
         },
     ]
 
+
 def test_get_attack_objects(bundler_instance):
-    retval = bundler_instance.get_attack_objects(['T1190', 'T1547'])
-    print({r['id'] for r in retval})
-    assert {r['id'] for r in retval} == {'attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf', 'attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c'}
+    retval = bundler_instance.get_attack_objects(["T1190", "T1547"])
+    print({r["id"] for r in retval})
+    assert {r["id"] for r in retval} == {
+        "attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf",
+        "attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c",
+    }
+
 
 def test_get_cve_objects(bundler_instance):
-    cves = ['CVE-2025-1234', 'CVE-2024-1234']
+    cves = ["CVE-2025-1234", "CVE-2024-1234"]
     retval = bundler_instance.get_cve_objects(cves)
-    assert {r['name'] for r in retval} == set(cves)
-
-
-def test_flow_objects__adds_extension_definition(bundler_instance):
-    bundler_instance.flow_objects = [{'id': 'some-other', 'type': ''}]
-    assert bundler_instance.all_objects.issuperset({'some-other', "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4"})
-    assert "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4" not in bundler_instance.report.object_refs
+    assert {r["name"] for r in retval} == set(cves)

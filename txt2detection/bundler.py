@@ -16,7 +16,7 @@ from stix2 import (
 from stix2.serialization import serialize
 import hashlib
 
-from txt2detection import attack_flow, observables
+from txt2detection import attack_navigator, observables
 from txt2detection.models import (
     AIDetection,
     BaseDetection,
@@ -43,7 +43,6 @@ class Bundler:
     uuid = None
     id_map = dict()
     data: DataContainer
-    ATTACK_FLOW_SMO_URL = "https://github.com/muchdogesec/stix2extensions/raw/refs/heads/main/remote-definitions/attack-flow.json"
     # https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/identity/txt2detection.json
     default_identity = Identity(
         **{
@@ -215,8 +214,8 @@ class Bundler:
             self.add_ref(obj)
             self.add_relation(indicator, obj)
             self.data.attacks[obj["external_references"][0]["external_id"]] = obj["id"]
-            if obj['type'] == 'x-mitre-tactic':
-                tactics[obj['x_mitre_shortname']] = obj
+            if obj["type"] == "x-mitre-tactic":
+                tactics[obj["x_mitre_shortname"]] = obj
             else:
                 techniques.append(obj)
 
@@ -309,7 +308,7 @@ class Bundler:
             headers["API-KEY"] = api_key
 
         return self._get_objects(endpoint, headers)
-    
+
     @classmethod
     def get_attack_version(cls):
         headers = {}
@@ -359,36 +358,35 @@ class Bundler:
             return
         for d in container.detections:
             self.add_rule_indicator(d)
-        
+
     def create_attack_navigator(self):
         self.mitre_version = self.get_attack_version()
-        all_tactics = dict(itertools.chain(*map(lambda x: x.items(), self.tactics.values())))
+        all_tactics = dict(
+            itertools.chain(*map(lambda x: x.items(), self.tactics.values()))
+        )
         self.data.navigator_layer = {}
         for detection_id, techniques in self.techniques.items():
             if not techniques:
                 continue
             tactics = self.tactics[detection_id]
-            mapping = dict([attack_flow.map_technique_tactic(technique, all_tactics, tactics)for technique in techniques])
-            indicator = [f for f in self.bundle.objects if str(f['id']).endswith(detection_id) and f['type'] == 'indicator'][0]
-            self.data.navigator_layer[detection_id] = attack_flow.create_navigator_layer(self.report, indicator, mapping, self.mitre_version)
-
-
-    
-    @property
-    def flow_objects(self):
-        return self._flow_objects
-
-    @flow_objects.setter
-    def flow_objects(self, objects):
-        smo_objects = requests.get(self.ATTACK_FLOW_SMO_URL).json()["objects"]
-        objects.extend(smo_objects)
-        for obj in objects:
-            if obj["id"] == self.report.id:
-                continue
-            is_report_object = obj["type"] not in ["extension-definition", "identity"]
-            self.add_ref(obj, append_report=is_report_object)
-        self._flow_objects = objects
-
+            mapping = dict(
+                [
+                    attack_navigator.map_technique_tactic(
+                        technique, all_tactics, tactics
+                    )
+                    for technique in techniques
+                ]
+            )
+            indicator = [
+                f
+                for f in self.bundle.objects
+                if str(f["id"]).endswith(detection_id) and f["type"] == "indicator"
+            ][0]
+            self.data.navigator_layer[detection_id] = (
+                attack_navigator.create_navigator_layer(
+                    self.report, indicator, mapping, self.mitre_version
+                )
+            )
 
 
 def make_logsouce_string(source: dict):

@@ -159,27 +159,3 @@ def to_stix_object(observable_type: str, value):
                 )
             )
     return None
-
-
-# example_detection = {
-#     "selection": {
-#         "source_ip": "192.168.1.10",
-#         "destination_email": "attacker@example.com",
-#         "url_path": "http://malicious.example.com/payload.exe",
-#         "file_hash_md5": "44d88612fea8a8f36de82e1278abb02f",
-#         "mac_address": "00:1A:2B:3C:4D:5E",
-#         "username": "CORP\\jdoe",
-#         "registry_key": "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
-#         "registry_key2": "HK_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
-#         "certificate": "-----BEGIN CERTIFICATE-----FAKECERT-----END CERTIFICATE-----",
-#         "ip": " 192.167.1.1",
-#     },
-#     "condition": "selection",
-# }
-
-# # Usage
-# observables = find_stix_observables(example_detection)
-# print(observables)
-
-# for a, b in observables:
-#     print(to_stix_object(a, b))

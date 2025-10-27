@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from stix2 import Identity
 import yaml
 
-from txt2detection import attack_flow, credential_checker
+from txt2detection import credential_checker
 from txt2detection.ai_extractor.base import BaseAIExtractor
 from txt2detection.models import (
     TAG_PATTERN,
@@ -301,9 +301,11 @@ def run_txt2detection(
 def get_sigma_detections(sigma: str, name=None) -> SigmaRuleDetection:
     obj = yaml.safe_load(io.StringIO(sigma))
     if not isinstance(obj, dict):
-        raise ValueError(f'bad sigma input file. expected object/dict, got {type(obj)}.')
+        raise ValueError(
+            f"bad sigma input file. expected object/dict, got {type(obj)}."
+        )
     if name:
-        obj['title'] = name
+        obj["title"] = name
     return SigmaRuleDetection.model_validate(obj)
 
 
@@ -338,6 +340,8 @@ def main(args: Args):
         rule_path = rules_dir / ("rule--" + rule_id + ".yml")
         nav_path = rules_dir / f"attack-enterprise-navigator-layer-rule--{rule_id}.json"
         rule_path.write_text(obj["pattern"])
-        if rule_nav := (bundler.data.navigator_layer and bundler.data.navigator_layer.get(rule_id)):
+        if rule_nav := (
+            bundler.data.navigator_layer and bundler.data.navigator_layer.get(rule_id)
+        ):
             nav_path.write_text(json.dumps(rule_nav, indent=4))
     logging.info(f"Writing bundle output to `{output_path}`")
