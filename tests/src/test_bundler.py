@@ -17,7 +17,15 @@ def dummy_detection():
         title="Test Detection",
         description="Detects something suspicious.",
         detection=dict(condition="selection1", selection1=dict(ip="1.1.1.1")),
-        tags=["tlp.red", "sigma.execution"],
+        tags=[
+            "tlp.red",
+            "sigma.execution",
+            "attack.execution",
+            "attack.t1190",
+            "attack.initial-access",
+            "attack.t1159",
+            "attack.t1025",
+        ],
         id="cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
         external_references=[],
         logsource=dict(
@@ -25,7 +33,7 @@ def dummy_detection():
             product="firewall",
         ),
         level=Level.informational,
-        falsepositives=["Not actually suspicious", "the computer is drunk"],
+        falsepositives=["Not actually suspicious", "the source is random"],
         scope=["network", "it"],
     )
     return detection
@@ -39,7 +47,10 @@ def test_bundler_initialization(bundler_instance):
     assert bundler_instance.report.labels == remove_rule_specific_tags(
         bundler_instance.labels
     )
-    assert 'extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7' in bundler_instance.all_objects, 'extension-definition not in bundle'
+    assert (
+        "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7"
+        in bundler_instance.all_objects
+    ), "extension-definition not in bundle"
 
 
 def test_report_reference_urls():
@@ -291,7 +302,9 @@ def test_get_cve_objects(bundler_instance):
     assert {r["name"] for r in retval} == set(cves)
 
 
-def test_add_rule_indicator__adds_sigma_extension_properties(bundler_instance, dummy_detection):
+def test_add_rule_indicator__adds_sigma_extension_properties(
+    bundler_instance, dummy_detection
+):
     dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
     bundler_instance.add_rule_indicator(dummy_detection)
     obj = [
@@ -308,7 +321,7 @@ def test_add_rule_indicator__adds_sigma_extension_properties(bundler_instance, d
         "modified": "2025-01-01T00:00:00.000Z",
         "name": "Test Detection",
         "description": "Detects something suspicious.",
-        "pattern": "id: cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be\ntitle: Test Detection\ndescription: Detects something suspicious.\ndetection:\n    condition: selection1\n    selection1:\n        ip: 1.1.1.1\nlogsource:\n    category: network-connection\n    product: firewall\nfalsepositives:\n- Not actually suspicious\n- the computer is drunk\ntags:\n- sigma.execution\n- test.test-var\n- tlp.red\nlevel: informational\nauthor: identity--a4d70b75-6f4a-5d19-9137-da863edd33d7\ndate: 2025-01-01\nscope:\n- network\n- it\n",
+        "pattern": "id: cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be\ntitle: Test Detection\ndescription: Detects something suspicious.\ndetection:\n    condition: selection1\n    selection1:\n        ip: 1.1.1.1\nlogsource:\n    category: network-connection\n    product: firewall\nfalsepositives:\n- Not actually suspicious\n- the source is random\ntags:\n- sigma.execution\n- attack.execution\n- attack.t1190\n- attack.initial-access\n- attack.t1159\n- attack.t1025\n- test.test-var\n- tlp.red\nlevel: informational\nauthor: identity--a4d70b75-6f4a-5d19-9137-da863edd33d7\ndate: 2025-01-01\nscope:\n- network\n- it\n",
         "pattern_type": "sigma",
         "valid_from": "2025-01-01T00:00:00Z",
         "labels": ["test.test-var"],
@@ -316,7 +329,27 @@ def test_add_rule_indicator__adds_sigma_extension_properties(bundler_instance, d
             {"source_name": "sigma-level", "description": "informational"},
             {
                 "source_name": "rule_md5_hash",
-                "external_id": "9ab1a679f6e08e2c1fa94112966dc51a",
+                "external_id": "ecadc1c4d8ad4c317e4082b7653fe790",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/tactics/TA0001",
+                "external_id": "TA0001",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/tactics/TA0002",
+                "external_id": "TA0002",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1190",
+                "external_id": "T1190",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1025",
+                "external_id": "T1025",
             },
         ],
         "object_marking_refs": [
@@ -328,8 +361,50 @@ def test_add_rule_indicator__adds_sigma_extension_properties(bundler_instance, d
                 "extension_type": "toplevel-property-extension"
             }
         },
-        "x_sigma_level": "informational",
-        "x_sigma_falsepositives": ["Not actually suspicious", "the computer is drunk"],
         "x_sigma_type": "base",
         "x_sigma_scope": ["network", "it"],
+        "x_sigma_level": "informational",
+        "x_sigma_falsepositives": ["Not actually suspicious", "the source is random"],
+    }
+
+
+def test_generate_navigators(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    bundler_instance.create_attack_navigator()
+    assert bundler_instance.data.navigator_layer[
+        "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    ] == {
+        "name": "Test Detection",
+        "domain": "enterprise-attack",
+        "versions": {"layer": "4.5", "attack": "17.0", "navigator": "5.1.0"},
+        "techniques": [
+            {
+                "techniqueID": "T1190",
+                "score": 100,
+                "showSubtechniques": True,
+                "tactic": "TA0001",
+            },
+            {"techniqueID": "T1025", "score": 100, "showSubtechniques": True},
+        ],
+        "gradient": {
+            "colors": ["#ffffff", "#ff6666"],
+            "minValue": 0,
+            "maxValue": 100,
+        },
+        "legendItems": [],
+        "metadata": [
+            {
+                "name": "report_id",
+                "value": "report--74e36652-00f5-4dca-bf10-9f02fc996dcc",
+                "rule_id": "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
+            }
+        ],
+        "links": [
+            {
+                "label": "Generated using txt2detection",
+                "url": "https://github.com/muchdogesec/txt2detection/",
+            }
+        ],
+        "layout": {"layout": "side"},
     }
