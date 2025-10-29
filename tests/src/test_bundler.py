@@ -27,7 +27,6 @@ def dummy_detection():
             "attack.t1025",
         ],
         id="cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
-        external_references=[],
         logsource=dict(
             category="network-connection",
             product="firewall",
@@ -312,6 +311,9 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
         for k in bundler_instance.bundle_dict["objects"]
         if k["id"] == "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
     ][0]
+    obj["external_references"].sort(
+        key=lambda x: (x["source_name"], x.get("external_id"))
+    ) # sort elements to avoid failing due to random order
     assert obj == {
         "type": "indicator",
         "spec_version": "2.1",
@@ -326,10 +328,15 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
         "valid_from": "2025-01-01T00:00:00Z",
         "labels": ["test.test-var"],
         "external_references": [
-            {"source_name": "sigma-level", "description": "informational"},
             {
-                "source_name": "rule_md5_hash",
-                "external_id": "ecadc1c4d8ad4c317e4082b7653fe790",
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1025",
+                "external_id": "T1025",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1190",
+                "external_id": "T1190",
             },
             {
                 "source_name": "mitre-attack",
@@ -342,14 +349,8 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
                 "external_id": "TA0002",
             },
             {
-                "source_name": "mitre-attack",
-                "url": "https://attack.mitre.org/techniques/T1190",
-                "external_id": "T1190",
-            },
-            {
-                "source_name": "mitre-attack",
-                "url": "https://attack.mitre.org/techniques/T1025",
-                "external_id": "T1025",
+                "source_name": "rule_md5_hash",
+                "external_id": "ecadc1c4d8ad4c317e4082b7653fe790",
             },
         ],
         "object_marking_refs": [
@@ -361,9 +362,9 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
                 "extension_type": "toplevel-property-extension"
             }
         },
-        "x_sigma_type": "base",
-        "x_sigma_scope": ["network", "it"],
         "x_sigma_level": "informational",
+        "x_sigma_scope": ["network", "it"],
+        "x_sigma_type": "base",
         "x_sigma_falsepositives": ["Not actually suspicious", "the source is random"],
     }
 
@@ -377,7 +378,11 @@ def test_generate_navigators(bundler_instance, dummy_detection):
     ] == {
         "name": "Test Detection",
         "domain": "enterprise-attack",
-        "versions": {"layer": "4.5", "attack": "17.0", "navigator": "5.1.0"},
+        "versions": {
+            "layer": "4.5",
+            "attack": bundler_instance.mitre_version,
+            "navigator": "5.1.0",
+        },
         "techniques": [
             {
                 "techniqueID": "T1190",

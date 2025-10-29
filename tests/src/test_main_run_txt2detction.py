@@ -53,7 +53,6 @@ def test_run_txt2detection_sigma_branch(mock_get_sigma_detections, monkeypatch, 
         detection=dict(condition='selection1'),
         tags=["tlp.red"],
         id=str(uuid.uuid4()),
-        external_references=[],
         logsource=dict(
             category="network-connection",
             product="firewall",

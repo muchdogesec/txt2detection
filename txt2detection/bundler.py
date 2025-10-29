@@ -202,7 +202,7 @@ class Bundler:
             "pattern": detection.make_rule(self),
             "valid_from": self.report.created,
             "object_marking_refs": self.report.object_marking_refs,
-            "external_references": self.external_refs + detection.external_references,
+            "external_references": self.external_refs,
             "extensions": {
                 self.extension_definition["id"]: {
                     "extension_type": "toplevel-property-extension"
