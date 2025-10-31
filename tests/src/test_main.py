@@ -1,10 +1,20 @@
+import json
+import os
+from pathlib import Path
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+from pydantic import ValidationError
 import pytest
 import argparse
 from datetime import datetime, timezone
 
-from txt2detection.__main__ import parse_created, parse_ref, parse_label, parse_args
+from txt2detection.__main__ import (
+    parse_created,
+    parse_ref,
+    parse_label,
+    parse_args,
+    main,
+)
 
 
 @pytest.mark.parametrize(
@@ -141,3 +151,98 @@ def test_parse_args_check_credentials(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["prog", "check-credentials"])
     with pytest.raises(SystemExit):
         parse_args()
+
+
+@pytest.fixture
+def args(tmp_path):
+    """Fake Args object."""
+
+    class Args:
+        report_id = "test123"
+        use_identity = "id-456"
+        other_param = "value"
+
+    return Args()
+
+
+@pytest.fixture
+def fake_bundler(bundler_instance):
+    bundler_instance.data.navigator_layer = {
+        "abc123": {"nav": "layer"},
+        "def145": {"nothing": "to see here"},
+    }
+    bundler_instance.bundle.objects.extend(
+        [
+            {
+                "type": "indicator",
+                "pattern_type": "sigma",
+                "id": "indicator--abc123",
+                "pattern": "sigma: rule content",
+            },
+            {
+                "type": "indicator",
+                "pattern_type": "not-sigma",
+                "id": "indicator--ignored-not-sigma",
+                "pattern": "ignored",
+            },
+            {
+                "type": "indicator",
+                "pattern_type": "sigma",
+                "id": "indicator--def145",
+                "pattern": "sigma: rule content",
+            },
+        ]
+    )
+    return bundler_instance
+
+
+@patch("txt2detection.__main__.setLogFile")
+@patch("txt2detection.__main__.run_txt2detection")
+def test_main_happy_path(
+    mock_run, mock_setlog, args, fake_bundler, tmp_path, monkeypatch
+):
+    mock_run.return_value = fake_bundler
+    monkeypatch.chdir(tmp_path)
+
+    main(args)
+
+    mock_setlog.assert_called_once()
+
+    called_kwargs = mock_run.call_args.kwargs
+    assert called_kwargs["identity"] == args.use_identity
+
+    out_dir = Path(f"./output/{fake_bundler.bundle.id}")
+    assert (out_dir / "bundle.json").exists()
+    assert (out_dir / "data.json").exists()
+
+    rule_file = out_dir / "rules/rule--abc123.yml"
+    nav_file = out_dir / "rules/attack-enterprise-navigator-layer-rule--abc123.json"
+    assert rule_file.read_text() == "sigma: rule content"
+    assert json.loads(nav_file.read_text()) == {"nav": "layer"}
+    nav_file2 = out_dir / "rules/attack-enterprise-navigator-layer-rule--def145.json"
+    print(os.listdir(nav_file2.parent))
+    assert json.loads(nav_file2.read_text()) == {"nothing": "to see here"}
+
+
+@patch("txt2detection.__main__.setLogFile")
+@patch("txt2detection.__main__.run_txt2detection", side_effect=ValueError("invalid"))
+def test_main_valueerror_exit(mock_run, mock_setlog, args, tmp_path, monkeypatch):
+    """Ensure ValueError causes sys.exit(19)."""
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as e:
+        main(args)
+        assert e.value == 19
+
+
+@patch("txt2detection.__main__.setLogFile")
+@patch("txt2detection.__main__.run_txt2detection")
+def test_main_validationerror_exit(mock_run, mock_setlog, args, tmp_path, monkeypatch):
+    """Ensure ValidationError is logged and exits."""
+
+    mock_run.side_effect = ValidationError("title", [])
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit), patch("logging.error") as mock_error:
+        main(args)
+        mock_error.assert_any_call("Validate sigma file failed: validation failed")

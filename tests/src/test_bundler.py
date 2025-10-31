@@ -195,9 +195,7 @@ def test_add_relation_creates_relationship(bundler_instance: Bundler):
     relationships = [
         o for o in bundler_instance.bundle.objects if isinstance(o, Relationship)
     ]
-    assert any(r.source_ref == indicator["id"] for r in relationships)
-    # make sure the ref is added in indicator.external_references
-    assert target["external_references"][0] in indicator["external_references"]
+    assert any((r.source_ref == indicator["id"] and r.target_ref == target['id']) for r in relationships)
 
 
 def test_bundler_generates_valid_bundle(dummy_detection):

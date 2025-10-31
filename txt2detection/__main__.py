@@ -223,11 +223,6 @@ def parse_args():
     if args.mode != "sigma":
         assert args.ai_provider, "--ai_provider is required in file or txt mode"
 
-    if args.create_attack_navigator_layer:
-        assert (
-            args.ai_provider
-        ), "--ai_provider is required when --create_attack_navigator_layer is passed"
-
     if args.mode == "file":
         args.input_text = args.input_file
 
