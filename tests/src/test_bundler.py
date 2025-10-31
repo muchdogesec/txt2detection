@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import stix2
 from txt2detection.bundler import Bundler
-from txt2detection.models import DetectionContainer, SigmaRuleDetection
+from txt2detection.models import DetectionContainer, SigmaRuleDetection, Level
 from datetime import datetime, timezone
 from stix2 import Relationship
 
@@ -17,17 +17,25 @@ def dummy_detection():
         title="Test Detection",
         description="Detects something suspicious.",
         detection=dict(condition="selection1", selection1=dict(ip="1.1.1.1")),
-        tags=["tlp.red", "sigma.execution"],
+        tags=[
+            "tlp.red",
+            "sigma.execution",
+            "attack.execution",
+            "attack.t1190",
+            "attack.initial-access",
+            "attack.t1159",
+            "attack.t1025",
+        ],
         id="cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
-        external_references=[],
         logsource=dict(
             category="network-connection",
             product="firewall",
         ),
+        level=Level.informational,
+        falsepositives=["Not actually suspicious", "the source is random"],
+        scope=["network", "it"],
     )
     return detection
-
-
 
 
 def test_bundler_initialization(bundler_instance):
@@ -38,6 +46,10 @@ def test_bundler_initialization(bundler_instance):
     assert bundler_instance.report.labels == remove_rule_specific_tags(
         bundler_instance.labels
     )
+    assert (
+        "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7"
+        in bundler_instance.all_objects
+    ), "extension-definition not in bundle"
 
 
 def test_report_reference_urls():
@@ -183,9 +195,7 @@ def test_add_relation_creates_relationship(bundler_instance: Bundler):
     relationships = [
         o for o in bundler_instance.bundle.objects if isinstance(o, Relationship)
     ]
-    assert any(r.source_ref == indicator["id"] for r in relationships)
-    # make sure the ref is added in indicator.external_references
-    assert target["external_references"][0] in indicator["external_references"]
+    assert any((r.source_ref == indicator["id"] and r.target_ref == target['id']) for r in relationships)
 
 
 def test_bundler_generates_valid_bundle(dummy_detection):
@@ -274,18 +284,130 @@ def test_bundle_detections__creates_log_source(dummy_detection, bundler_instance
         },
     ]
 
+
 def test_get_attack_objects(bundler_instance):
-    retval = bundler_instance.get_attack_objects(['T1190', 'T1547'])
-    print({r['id'] for r in retval})
-    assert {r['id'] for r in retval} == {'attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf', 'attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c'}
+    retval = bundler_instance.get_attack_objects(["T1190", "T1547"])
+    assert {r["id"] for r in retval} == {
+        "attack-pattern--1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf",
+        "attack-pattern--3f886f2a-874f-4333-b794-aa6075009b1c",
+    }
+
 
 def test_get_cve_objects(bundler_instance):
-    cves = ['CVE-2025-1234', 'CVE-2024-1234']
+    cves = ["CVE-2025-1234", "CVE-2024-1234"]
     retval = bundler_instance.get_cve_objects(cves)
-    assert {r['name'] for r in retval} == set(cves)
+    assert {r["name"] for r in retval} == set(cves)
 
 
-def test_flow_objects__adds_extension_definition(bundler_instance):
-    bundler_instance.flow_objects = [{'id': 'some-other', 'type': ''}]
-    assert bundler_instance.all_objects.issuperset({'some-other', "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4"})
-    assert "extension-definition--fb9c968a-745b-4ade-9b25-c324172197f4" not in bundler_instance.report.object_refs
+def test_add_rule_indicator__adds_sigma_extension_properties(
+    bundler_instance, dummy_detection
+):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    obj = [
+        k
+        for k in bundler_instance.bundle_dict["objects"]
+        if k["id"] == "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    ][0]
+    obj["external_references"].sort(
+        key=lambda x: (x["source_name"], x.get("external_id"))
+    ) # sort elements to avoid failing due to random order
+    assert obj == {
+        "type": "indicator",
+        "spec_version": "2.1",
+        "id": "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
+        "created_by_ref": "identity--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+        "created": "2025-01-01T00:00:00.000Z",
+        "modified": "2025-01-01T00:00:00.000Z",
+        "name": "Test Detection",
+        "description": "Detects something suspicious.",
+        "pattern": "id: cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be\ntitle: Test Detection\ndescription: Detects something suspicious.\ndetection:\n    condition: selection1\n    selection1:\n        ip: 1.1.1.1\nlogsource:\n    category: network-connection\n    product: firewall\nfalsepositives:\n- Not actually suspicious\n- the source is random\ntags:\n- sigma.execution\n- attack.execution\n- attack.t1190\n- attack.initial-access\n- attack.t1159\n- attack.t1025\n- test.test-var\n- tlp.red\nlevel: informational\nauthor: identity--a4d70b75-6f4a-5d19-9137-da863edd33d7\ndate: 2025-01-01\nscope:\n- network\n- it\n",
+        "pattern_type": "sigma",
+        "valid_from": "2025-01-01T00:00:00Z",
+        "labels": ["test.test-var"],
+        "external_references": [
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1025",
+                "external_id": "T1025",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/techniques/T1190",
+                "external_id": "T1190",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/tactics/TA0001",
+                "external_id": "TA0001",
+            },
+            {
+                "source_name": "mitre-attack",
+                "url": "https://attack.mitre.org/tactics/TA0002",
+                "external_id": "TA0002",
+            },
+            {
+                "source_name": "rule_md5_hash",
+                "external_id": "ecadc1c4d8ad4c317e4082b7653fe790",
+            },
+        ],
+        "object_marking_refs": [
+            "marking-definition--e828b379-4e03-4974-9ac4-e53a884c97c1",
+            "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7",
+        ],
+        "extensions": {
+            "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7": {
+                "extension_type": "toplevel-property-extension"
+            }
+        },
+        "x_sigma_level": "informational",
+        "x_sigma_scope": ["network", "it"],
+        "x_sigma_type": "base",
+        "x_sigma_falsepositives": ["Not actually suspicious", "the source is random"],
+    }
+
+
+def test_generate_navigators(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    bundler_instance.create_attack_navigator()
+    assert bundler_instance.data.navigator_layer[
+        "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    ] == {
+        "name": "Test Detection",
+        "domain": "enterprise-attack",
+        "versions": {
+            "layer": "4.5",
+            "attack": bundler_instance.mitre_version,
+            "navigator": "5.1.0",
+        },
+        "techniques": [
+            {
+                "techniqueID": "T1190",
+                "score": 100,
+                "showSubtechniques": True,
+                "tactic": "TA0001",
+            },
+            {"techniqueID": "T1025", "score": 100, "showSubtechniques": True},
+        ],
+        "gradient": {
+            "colors": ["#ffffff", "#ff6666"],
+            "minValue": 0,
+            "maxValue": 100,
+        },
+        "legendItems": [],
+        "metadata": [
+            {
+                "name": "report_id",
+                "value": "report--74e36652-00f5-4dca-bf10-9f02fc996dcc",
+                "rule_id": "indicator--cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be",
+            }
+        ],
+        "links": [
+            {
+                "label": "Generated using txt2detection",
+                "url": "https://github.com/muchdogesec/txt2detection/",
+            }
+        ],
+        "layout": {"layout": "side"},
+    }

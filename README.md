@@ -121,8 +121,7 @@ Use this mode to generate a set of rules from an input text file;
     * Provider (env var required `ANTHROPIC_API_KEY`): `anthropic:`, models e.g.: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`, `claude-3-opus-latest` ([More here](https://docs.anthropic.com/en/docs/about-claude/models))
     * Provider (env var required `GOOGLE_API_KEY`): `gemini:models/`, models: `gemini-1.5-pro-latest`, `gemini-1.5-flash-latest` ([More here](https://ai.google.dev/gemini-api/docs/models/gemini))
     * Provider (env var required `DEEPSEEK_API_KEY`): `deepseek:`, models `deepseek-chat` ([More here](https://api-docs.deepseek.com/quick_start/pricing))
-* `--ai_create_attack_flow` (boolean): passing this flag will also prompt the AI model (the same entered for `--ai_provider`, default `false`) to generate an [Attack Flow](https://center-for-threat-informed-defense.github.io/attack-flow/) for the MITRE ATT&CK tags to define the logical order in which they are being described. Note, Sigma currently supports ATT&CK Enterprise only.
-* `--ai_create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags. Note, Sigma currently supports ATT&CK Enterprise only. You don't need to pass this if `--ai_create_attack_flow` is set to `true` (as this mode relies on this setting being true)
+* `--create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags. Note, Sigma currently supports ATT&CK Enterprise only.
 
 Note, in this mode, the following values will be automatically assigned to the rule
 
@@ -149,8 +148,7 @@ Note, in this mode you should be aware of a few things;
 * `--external_refs` (optional): txt2detection will automatically populate the `external_references` of the report object it creates for the input. You can use this value to add additional objects to `external_references`. Note, you can only add `source_name` and `external_id` values currently. Pass as `source_name=external_id`. e.g. `--external_refs txt2stix=demo1 source=id` would create the following objects under the `external_references` property: `{"source_name":"txt2stix","external_id":"demo1"},{"source_name":"source","external_id":"id"}`
 * `status` (optional): either `stable`, `test`, `experimental`, `deprecated`, `unsupported`. If passed, will overwrite any existing `status` recorded in the rule
 * `level` (optional): either `informational`, `low`, `medium`, `high`, `critical`. If passed, will overwrite any existing `level` recorded in the rule
-* `--ai_create_attack_flow` (boolean): passing this flag will also prompt the AI model (the same entered for `--ai_provider`, default `false`) to generate an [Attack Flow](https://center-for-threat-informed-defense.github.io/attack-flow/) for the MITRE ATT&CK tags to define the logical order in which they are being described. Note, Sigma currently supports ATT&CK Enterprise only.
-* `--ai_create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags. Note, Sigma currently supports ATT&CK Enterprise only. You don't need to pass this if `--ai_create_attack_flow` is set to `true` (as this mode relies on this setting being true)
+* `--create_attack_navigator_layer` (boolean, default `false`): passing this flag will generate a [MITRE ATT&CK Navigator layer](https://mitre-attack.github.io/attack-navigator/) for MITRE ATT&CK tags.
 
 ### A note on observable extraction
 

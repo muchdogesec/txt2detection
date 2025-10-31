@@ -1,14 +1,22 @@
 import uuid
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 
 from txt2detection.__main__ import (
     run_txt2detection,
 )
 from txt2detection.models import SigmaRuleDetection
 
-
-def test_run_txt2detection_ai_branch(monkeypatch):
+@pytest.mark.parametrize(
+    'create_navigator_layer',
+    [
+        True,
+        False
+    ]
+)
+def test_run_txt2detection_ai_branch(monkeypatch, create_navigator_layer):
     input_text = "my text"
     ai_provider = MagicMock()
     name = "name"
@@ -17,24 +25,34 @@ def test_run_txt2detection_ai_branch(monkeypatch):
     monkeypatch.setenv('INPUT_TOKEN_LIMIT', "100")
     report_id = uuid.uuid4()
 
-    with patch('txt2detection.__main__.validate_token_count') as mock_validate_token_count, patch('txt2detection.bundler.Bundler.bundle_detections') as mock_bundle_detection:
-        bundler = run_txt2detection(name, identity, tlp_level, input_text, [], report_id, ai_provider)
+    with patch('txt2detection.__main__.validate_token_count') as mock_validate_token_count, patch('txt2detection.bundler.Bundler.bundle_detections') as mock_bundle_detection, patch('txt2detection.bundler.Bundler.create_attack_navigator') as mock_create_attack_navigator:
+        bundler = run_txt2detection(name, identity, tlp_level, input_text, [], report_id, ai_provider, create_attack_navigator_layer=create_navigator_layer)
         mock_validate_token_count.assert_called_once_with(100, input_text, ai_provider)
         ai_provider.get_detections.assert_called_once_with(input_text)
         mock_bundle_detection.assert_called_once_with(ai_provider.get_detections.return_value)
         assert bundler.report.description == input_text
         assert bundler.report.name == name
         assert bundler.report.id == "report--"+str(report_id)
+        if create_navigator_layer:
+            mock_create_attack_navigator.assert_called_once_with()
+        else:
+            mock_create_attack_navigator.assert_not_called()
 
+@pytest.mark.parametrize(
+    'create_navigator_layer',
+    [
+        True,
+        False
+    ]
+)
 @patch("txt2detection.__main__.get_sigma_detections")
-def test_run_txt2detection_sigma_branch(mock_get_sigma_detections, monkeypatch):
+def test_run_txt2detection_sigma_branch(mock_get_sigma_detections, monkeypatch, create_navigator_layer):
     detection = SigmaRuleDetection(
         title="Test Detection",
         description="Detects something suspicious.",
         detection=dict(condition='selection1'),
         tags=["tlp.red"],
         id=str(uuid.uuid4()),
-        external_references=[],
         logsource=dict(
             category="network-connection",
             product="firewall",
@@ -49,8 +67,8 @@ def test_run_txt2detection_sigma_branch(mock_get_sigma_detections, monkeypatch):
     tlp_level = "red"
     report_id = uuid.uuid4()
     monkeypatch.setenv('INPUT_TOKEN_LIMIT', "100")
-    with patch('txt2detection.__main__.validate_token_count') as mock_validate_token_count, patch('txt2detection.bundler.Bundler.bundle_detections') as mock_bundle_detection:
-        bundler = run_txt2detection(name, identity, tlp_level, "", [], report_id, ai_provider, sigma_file="sigma_yaml")
+    with patch('txt2detection.__main__.validate_token_count') as mock_validate_token_count, patch('txt2detection.bundler.Bundler.bundle_detections') as mock_bundle_detection, patch('txt2detection.bundler.Bundler.create_attack_navigator') as mock_create_attack_navigator:
+        bundler = run_txt2detection(name, identity, tlp_level, "", [], report_id, ai_provider, sigma_file="sigma_yaml", create_attack_navigator_layer=create_navigator_layer)
         mock_get_sigma_detections.assert_called_once()
         assert bundler is not None
         assert bundler.report.id == "report--"+str(report_id)
@@ -58,4 +76,7 @@ def test_run_txt2detection_sigma_branch(mock_get_sigma_detections, monkeypatch):
         assert str(detection.detection_id) == str(report_id)
         assert detection.references == bundler.reference_urls
         # assert detection.author == bundler.report.created_by_ref
-
+        if create_navigator_layer:
+            mock_create_attack_navigator.assert_called_once_with()
+        else:
+            mock_create_attack_navigator.assert_not_called()

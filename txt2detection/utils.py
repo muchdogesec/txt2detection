@@ -85,6 +85,11 @@ def remove_rule_specific_tags(tags):
         labels.append(tag)
     return labels
 
+@lru_cache()
+def load_stix_object_from_url(url):
+    resp = requests.get(url)
+    return resp.json()
+
 
 def as_date(d: "date|datetime"):
     if isinstance(d, datetime):

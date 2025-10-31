@@ -1,21 +1,32 @@
 title: Okta Policy Modified or Deleted
+name: Always optional
 id: 1667a172-ed4c-463c-9969-efd92195319a
-status: test
+related:
+  - id: 08fbc97d-0a2f-491c-ae21-8ffcfd3174e9
+    type: derived
+  - id: 929a690e-bef0-4204-a928-ef5e620d6fcc
+    type: obsolete
 description: Detects when an Okta policy is modified or deleted.
 references:
     - https://developer.okta.com/docs/reference/api/system-log/
     - https://developer.okta.com/docs/reference/api/event-types/
-author: Austin Songer @austinsonger
-date: 2021-09-12
-modified: 2022-10-09
+author: dogesec tests
+date: 2020-01-01
+modified: 2023-12-25
 tags:
-    - tlp.red
+    - tlp.clear
     - attack.t1547
+    - attack.t1671
+    - attack.t1025
     - attack.command-and-control
-    - cve.2024-56520
+    - attack.credential_access # not sigma spec format, but still supported
+    - attack.t1661 # will fail is mobile
+    - custom.tag
 logsource:
     product: okta
     service: okta
+    category: login
+    definition: Logging must be enabled.
 detection:
     selection:
         eventtype:
@@ -26,5 +37,11 @@ falsepositives:
     - Okta Policies being modified or deleted may be performed by a system administrator.
     - Verify whether the user identity, user agent, and/or hostname should be making changes in your environment.
     - Okta Policies modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.
+fields: 
+    - sourceIPAddress
+    - userIdentity.arn
+scope:
+    - server
+status: test
 level: low
 license: MIT

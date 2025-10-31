@@ -167,10 +167,14 @@ def test_mitre_attack_ids_and_cve_ids():
         detection={},
         logsource={},
         falsepositives=[],
-        tags=["attack.execution", "cve.2021-1234", "attack.t123"],
+        tags=["attack.execution", "cve.2021-1234", "attack.t1025", "attack.credential_access"],
         level=Level.medium,
     )
-    assert det.mitre_attack_ids == ["TA0002", "T123"]
+    assert det.mitre_attack_ids == [
+        "TA0002",  #attack.execution
+        "T1025",
+        "TA0006" #credential-access
+    ]
     assert det.cve_ids == ["CVE-2021-1234"]
 
 
@@ -188,51 +192,3 @@ def test_sigma_detection_id_tracks_renamed():
     assert len(det.related) == 1
     assert det.related[0].type == "renamed"
     assert det.related[0].id == id1
-
-
-# -----------------------
-# BaseDetection.external_references
-# -----------------------
-@pytest.mark.parametrize(
-    "level,status,license_,expected_refs",
-    [
-        (
-            Level.critical,
-            Statuses.stable,
-            "MIT",
-            [
-                {"source_name": "sigma-level", "description": Level.critical},
-                {"source_name": "sigma-status", "description": Statuses.stable},
-                {"source_name": "sigma-license", "description": "MIT"},
-            ],
-        ),
-        (
-            Level.medium,
-            None,
-            None,
-            [
-                {"source_name": "sigma-level", "description": Level.medium},
-            ],
-        ),
-        (
-            None,
-            None,
-            None,
-            [],
-        ),
-    ],
-)
-def test_external_references_generated(level, status, license_, expected_refs):
-    detection = SigmaRuleDetection(
-        title="External Ref Test",
-        detection={"selection": {"field": "value"}},
-        logsource={"category": "process_creation"},
-        tags=[],
-        falsepositives=[],
-        id=uuid.uuid4(),
-        level=level,
-        status=status,
-        license=license_,
-    )
-
-    assert detection.external_references == expected_refs

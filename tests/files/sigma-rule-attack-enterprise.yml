@@ -13,6 +13,7 @@ tags:
     - attack.t1671
     - attack.t1025
     - attack.command-and-control
+    - attack.credential_access # not sigma spec format, but still supported
     - attack.t1661 # will fail is mobile
 logsource:
     product: okta

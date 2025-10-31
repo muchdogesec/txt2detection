@@ -10,10 +10,11 @@ import logging
 import re
 import sys
 import uuid
+from pydantic import ValidationError
 from stix2 import Identity
 import yaml
 
-from txt2detection import attack_flow, credential_checker
+from txt2detection import credential_checker
 from txt2detection.ai_extractor.base import BaseAIExtractor
 from txt2detection.models import (
     TAG_PATTERN,
@@ -185,14 +186,8 @@ def parse_args():
             choices=valid_licenses(),
         )
         mode_parser.add_argument(
-            "--ai_create_attack_navigator_layer",
+            "--create_attack_navigator_layer",
             help="Create navigator layer",
-            action="store_true",
-            default=False,
-        )
-        mode_parser.add_argument(
-            "--ai_create_attack_flow",
-            help="Create attack flow",
             action="store_true",
             default=False,
         )
@@ -228,11 +223,6 @@ def parse_args():
     if args.mode != "sigma":
         assert args.ai_provider, "--ai_provider is required in file or txt mode"
 
-    if args.ai_create_attack_navigator_layer or args.ai_create_attack_flow:
-        assert (
-            args.ai_provider
-        ), "--ai_provider is required when --ai_create_attack_navigator_layer/--ai_create_attack_flow is passed"
-
     if args.mode == "file":
         args.input_text = args.input_file
 
@@ -253,21 +243,16 @@ def run_txt2detection(
     labels: list[str],
     report_id: str | uuid.UUID,
     ai_provider: BaseAIExtractor,
-    ai_create_attack_flow=False,
-    ai_create_attack_navigator_layer=False,
+    create_attack_navigator_layer=False,
     **kwargs,
 ) -> Bundler:
-    if (
-        not kwargs.get("sigma_file")
-        or ai_create_attack_flow
-        or ai_create_attack_navigator_layer
-    ):
+    if not kwargs.get("sigma_file"):
         validate_token_count(
             int(os.getenv("INPUT_TOKEN_LIMIT", 0)), input_text, ai_provider
         )
 
     if sigma := kwargs.get("sigma_file"):
-        detection = get_sigma_detections(sigma)
+        detection = get_sigma_detections(sigma, name=name)
         if not identity and detection.author:
             identity = make_identity(detection.author)
         kwargs.update(
@@ -303,22 +288,19 @@ def run_txt2detection(
         )
         detections = ai_provider.get_detections(input_text)
     bundler.bundle_detections(detections)
-
-    if ai_create_attack_flow or ai_create_attack_navigator_layer:
-        bundler.data.attack_flow, bundler.data.navigator_layer = (
-            attack_flow.extract_attack_flow_and_navigator(
-                bundler,
-                bundler.report.description,
-                ai_create_attack_flow,
-                ai_create_attack_navigator_layer,
-                ai_provider,
-            )
-        )
+    if create_attack_navigator_layer:
+        bundler.create_attack_navigator()
     return bundler
 
 
-def get_sigma_detections(sigma: str) -> SigmaRuleDetection:
+def get_sigma_detections(sigma: str, name=None) -> SigmaRuleDetection:
     obj = yaml.safe_load(io.StringIO(sigma))
+    if not isinstance(obj, dict):
+        raise ValueError(
+            f"bad sigma input file. expected object/dict, got {type(obj)}."
+        )
+    if name:
+        obj["title"] = name
     return SigmaRuleDetection.model_validate(obj)
 
 
@@ -328,7 +310,14 @@ def main(args: Args):
     logging.info(f"starting argument: {json.dumps(sys.argv[1:])}")
     kwargs = args.__dict__
     kwargs["identity"] = args.use_identity
-    bundler = run_txt2detection(**kwargs)
+    try:
+        bundler = run_txt2detection(**kwargs)
+    except (ValidationError, ValueError) as e:
+        logging.error(f"Validate sigma file failed: {str(e)}")
+        if isinstance(e, ValidationError):
+            full_error = e.json(indent=4)
+            logging.debug(f"Validate sigma file failed: {full_error}", exc_info=True)
+        sys.exit(19)
 
     output_dir = Path("./output") / str(bundler.bundle.id)
     shutil.rmtree(output_dir, ignore_errors=True)
@@ -342,6 +331,12 @@ def main(args: Args):
     for obj in bundler.bundle["objects"]:
         if obj["type"] != "indicator" or obj["pattern_type"] != "sigma":
             continue
-        name = obj["id"].replace("indicator", "rule") + ".yml"
-        (rules_dir / name).write_text(obj["pattern"])
+        rule_id: str = obj["id"].replace("indicator--", "")
+        rule_path = rules_dir / ("rule--" + rule_id + ".yml")
+        nav_path = rules_dir / f"attack-enterprise-navigator-layer-rule--{rule_id}.json"
+        rule_path.write_text(obj["pattern"])
+        if rule_nav := (
+            bundler.data.navigator_layer and bundler.data.navigator_layer.get(rule_id)
+        ):
+            nav_path.write_text(json.dumps(rule_nav, indent=4))
     logging.info(f"Writing bundle output to `{output_path}`")

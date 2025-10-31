@@ -5,7 +5,7 @@ import typing
 from llama_index.core.output_parsers import PydanticOutputParser
 
 
-if typing.TYPE_CHECKING:    
+if typing.TYPE_CHECKING:
     from txt2detection.bundler import Bundler
 
 
