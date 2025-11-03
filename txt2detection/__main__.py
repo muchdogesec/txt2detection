@@ -265,8 +265,9 @@ def run_txt2detection(
                 created=detection.date,
                 modified=detection.modified,
             )
-        detection.level = kwargs.get("level", detection.level)
-        detection.status = kwargs.get("status", detection.status)
+        kwargs['license'] = kwargs.get('license') or detection.license
+        detection.level = kwargs.get("level") or detection.level
+        detection.status = kwargs.get("status") or detection.status
         detection.date = as_date(kwargs.get("created"))
         detection.modified = as_date(kwargs.get("modified"))
         detection.references = kwargs["reference_urls"]
