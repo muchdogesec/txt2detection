@@ -1,6 +1,7 @@
 import io
 import logging
 import typing
+import json_repair
 
 from llama_index.core.output_parsers import PydanticOutputParser
 
@@ -16,4 +17,5 @@ class ParserWithLogging(PydanticOutputParser):
         print(text, file=f)
         print("=================close=================" + "\n" * 5, file=f)
         logging.debug(f.getvalue())
-        return super().parse(text)
+        repaired_json = json_repair.repair_json(text)
+        return super().parse(repaired_json)
