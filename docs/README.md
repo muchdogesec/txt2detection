@@ -8,6 +8,12 @@ The following marking defintion ID is added to all `object_marking_refs` of STIX
 
 https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/marking-definition/txt2detection.json
 
+### Sigma Extension Definition
+
+Because we use custom properties in the Indicator object, we also import an Extension Definition object into all bundles
+
+https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma_rule.json
+
 ### AI creation mode
 
 #### Report SDO (`report`)
@@ -68,6 +74,19 @@ For each detection rule produced by the AI (there could be more than one) an Ind
     "description": "<AI DESCRIPTION>",
     "pattern_type": "sigma",
     "pattern": "<DETECTION_RULE>",
+    "x_sigma_type": "base",
+    "x_sigma_level": "<LEVEL>",
+    "x_sigma_status": "<STATUS>",
+    "x_sigma_license": "<LICENSE>",
+    "x_sigma_fields": [
+        "<FIELD>"
+    ],
+    "x_sigma_falsepositives": [
+        "<FALSE POSITIVE>"
+    ],
+    "x_sigma_scope": [
+        "<SCOPE>"
+    ],
     "labels": [
         "<LABELS ADDED BY USER VIA CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
     ],
@@ -78,18 +97,6 @@ For each detection rule produced by the AI (there could be more than one) an Ind
         {
             "description": "rule_md5_hash",
             "external_id": "<MD5 HASH OF PATTERN FIELD>"
-        },
-        {
-            "source_name": "sigma-level",
-            "description": "<LEVEL>"
-        },
-        {
-            "source_name": "sigma-status",
-            "description": "<STATUS>"
-        },
-        {
-            "source_name": "sigma-license",
-            "description": "<LICENSE, IF DOES NOT EXIST IS OMITTED>"
         },
         {
             "source_name": "mitre-attack",
@@ -111,7 +118,12 @@ For each detection rule produced by the AI (there could be more than one) an Ind
     "object_marking_refs": [
         "marking-definition--<TLP LEVEL SET AT CLI>",
         "marking-definition--a4d70b75-6f4a-5d19-9137-da863edd33d7"
-    ]
+    ],
+    "extensions": {
+        "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7": {
+            "extension_type": "toplevel-property-extension"
+        }
+    }
 }
 ```
 
@@ -466,6 +478,19 @@ For the detection rule produced an Indicator object is created as follows;
     "description": "<DESCRIPTION OF RULE, IF DOES NOT EXIST IS OMITTED>",
     "pattern_type": "sigma",
     "pattern": "<DETECTION_RULE>",
+    "x_sigma_type": "base",
+    "x_sigma_level": "<LEVEL>",
+    "x_sigma_status": "<STATUS>",
+    "x_sigma_license": "<LICENSE>",
+    "x_sigma_fields": [
+        "<FIELD>"
+    ],
+    "x_sigma_falsepositives": [
+        "<FALSE POSITIVE>"
+    ],
+    "x_sigma_scope": [
+        "<SCOPE>"
+    ],
     "labels": [
         "<LABELS ADDED BY USER AT CLI, EXCEPT SPECIAL LABELS ATTACK / CVE>"
         "<TAGS FROM RULE EXCLUDING CVE,ATTACK,TLP>"
@@ -481,18 +506,6 @@ For the detection rule produced an Indicator object is created as follows;
         {
             "source_name": "sigma-old-id",
             "description": "<SIGMA ID REPLACED, ELSE BLANK>"
-        },
-        {
-            "source_name": "sigma-level",
-            "description": "<LEVEL, IF DOES NOT EXIST IS OMITTED>"
-        },
-        {
-            "source_name": "sigma-status",
-            "description": "<STATUS, IF DOES NOT EXIST IS OMITTED>"
-        },
-        {
-            "source_name": "sigma-license",
-            "description": "<LICENSE, IF DOES NOT EXIST IS OMITTED>"
         },
         {
             "source_name": "mitre-attack",
