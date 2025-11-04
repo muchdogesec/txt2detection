@@ -87,7 +87,7 @@ class Bundler:
     )
 
     extension_definition = load_stix_object_from_url(
-        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma_rule.json"
+        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma-rule.json"
     )
 
     @classmethod

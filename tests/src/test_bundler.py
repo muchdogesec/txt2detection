@@ -376,6 +376,7 @@ def test_generate_navigators(bundler_instance, dummy_detection):
     ] == {
         "name": "Test Detection",
         "domain": "enterprise-attack",
+        "description": "Detects something suspicious.",
         "versions": {
             "layer": "4.5",
             "attack": bundler_instance.mitre_version,
