@@ -9,7 +9,6 @@ python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Complete Sigma Rule" \
   --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5 \
   --report_id a18e76d1-f152-4b87-a552-d46f41afd637
 ```
 
@@ -21,8 +20,7 @@ Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92
 python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Complete Sigma Rule" \
-  --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5
+  --create_attack_navigator_layer
 ```
 
 Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a). Rule id generation (and report) is random. This happens because we can't be sure all id's in Rules uploaded will conform to UUIDv4 RFC.
@@ -311,9 +309,7 @@ python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-attack-enterprise.yml \
   --name "Attack Navigator Enterprise" \
   --report_id a18e76d1-f152-4b87-a552-d46f41afd637 \
-  --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5 \
-  
+  --create_attack_navigator_layer
 ```
 
 ### Mobile / ICS

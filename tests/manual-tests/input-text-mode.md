@@ -16,7 +16,7 @@ python3 txt2detection.py text \
 
 ```shell
 python3 txt2detection.py text \
-  --input_text "Write rule to detect 1.1.1.1.\n Write a second rule to detect google.com." \
+  --input_text "Write rule to detect 1.1.1.1.\n Write a second rule to detect google.com. The rule detects CVE-2021-1675 and the ATT&CK Technique T1566" \
   --name "Multi rule" \
   --ai_provider openai:gpt-5 \
   --create_attack_navigator_layer \
