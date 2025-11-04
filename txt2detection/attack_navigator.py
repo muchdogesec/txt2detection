@@ -38,9 +38,11 @@ def create_navigator_layer(report, indicator, technique_mapping, mitre_version):
         if tactic:
             technique_item["tactic"] = tactic
         techniques.append(technique_item)
+
     return {
         "name": indicator["name"],
         "domain": "enterprise-attack",
+        "description": indicator["description"],
         "versions": {
             "layer": "4.5",
             "attack": mitre_version,
