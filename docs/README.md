@@ -13,6 +13,7 @@ https://raw.githubusercontent.com/muchdogesec/stix4doge/refs/heads/main/objects/
 Because we use custom properties in the Indicator object, we also import an Extension Definition object into all bundles
 
 https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma_rule.json
+https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/scos/data-source.json
 
 ### AI creation mode
 

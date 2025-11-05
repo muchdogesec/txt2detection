@@ -20,6 +20,7 @@ tags:
     - attack.t1025
     - attack.command-and-control
     - attack.credential_access # not sigma spec format, but still supported
+    - cve.2025-12325
     - attack.t1661 # will fail is mobile
     - custom.tag
 logsource:
