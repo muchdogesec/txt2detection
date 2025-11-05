@@ -401,7 +401,7 @@ class Bundler:
             indicator = [
                 f
                 for f in self.bundle.objects
-                if str(f["id"]).endswith(detection_id) and f["type"] == "indicator"
+                if str(f["id"]).endswith(str(detection_id)) and f["type"] == "indicator"
             ][0]
             self.data.navigator_layer[detection_id] = (
                 attack_navigator.create_navigator_layer(
