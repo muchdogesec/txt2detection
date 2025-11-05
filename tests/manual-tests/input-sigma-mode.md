@@ -9,7 +9,6 @@ python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Complete Sigma Rule" \
   --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5 \
   --report_id a18e76d1-f152-4b87-a552-d46f41afd637
 ```
 
@@ -21,13 +20,20 @@ Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92
 python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-master.yml \
   --name "Complete Sigma Rule" \
-  --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5
+  --create_attack_navigator_layer
 ```
 
 Check that derived is created (original rule id is 1667a172-ed4c-463c-9969-efd92195319a). Rule id generation (and report) is random. This happens because we can't be sure all id's in Rules uploaded will conform to UUIDv4 RFC.
 
 ### Check required properties CLI overide
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-no-title.yml \
+  --report_id 272daf95-2790-4fd5-9ca6-ee8cef08315d
+```
+
+Should fail.
 
 ```shell
 python3 txt2detection.py sigma \
@@ -48,23 +54,6 @@ python3 txt2detection.py sigma \
   --name "Append related" \
   --report_id 655f0689-5209-4ad5-a6de-3f198c696060
 ```
-
-## Bad test cases
-
-### No title
-
-```shell
-python3 txt2detection.py sigma \
-  --sigma_file tests/files/sigma-rule-no-title.yml \
-  --name "No title"
-```
-
-Title, but report name is override by CLI input
-
-
-
-
-
 
 ## Check dates
 
@@ -166,7 +155,7 @@ python3 txt2detection.py sigma \
   --report_id 599f43dc-ecaf-421c-ae01-ba8b2d705756
 ```
 
-No TLP
+No TLP (will default to clear)
 
 ```shell
 python3 txt2detection.py sigma \
@@ -300,8 +289,6 @@ python3 txt2detection.py sigma \
   --report_id d2d01afa-dc55-4a80-8d62-15d154450112
 ```
 
-
-
 ## Attack Navigator
 
 ### Enterprise
@@ -311,9 +298,5 @@ python3 txt2detection.py sigma \
   --sigma_file tests/files/sigma-rule-attack-enterprise.yml \
   --name "Attack Navigator Enterprise" \
   --report_id a18e76d1-f152-4b87-a552-d46f41afd637 \
-  --create_attack_navigator_layer \
-  --ai_provider openai:gpt-5 \
-  
+  --create_attack_navigator_layer
 ```
-
-### Mobile / ICS
