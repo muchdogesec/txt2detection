@@ -49,7 +49,12 @@ def test_bundler_initialization(bundler_instance):
     assert (
         "extension-definition--c16c84c5-9cfd-50a2-970d-09c0ff2700f7"
         in bundler_instance.all_objects
-    ), "extension-definition not in bundle"
+    ), "sigma-indicator extension-definition not in bundle"
+
+    assert (
+        "extension-definition--afeeb724-bce2-575e-af3d-d705842ea84b"
+        in bundler_instance.all_objects
+    ), "data-source extension-definition not in bundle"
 
 
 def test_report_reference_urls():
