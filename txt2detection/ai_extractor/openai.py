@@ -7,7 +7,7 @@ from llama_index.llms.openai import OpenAI
 class OpenAIExtractor(BaseAIExtractor, provider="openai"):
     def __init__(self, **kwargs) -> None:
         kwargs.setdefault("temperature", float(os.environ.get("TEMPERATURE", 0.0)))
-        self.llm = OpenAI(system_prompt=self.system_prompt, **kwargs, max_tokens=4096)
+        self.llm = OpenAI(system_prompt=self.system_prompt, **kwargs, max_tokens=4096, timeout=self.TIMEOUT)
         super().__init__()
 
     def count_tokens(self, text):

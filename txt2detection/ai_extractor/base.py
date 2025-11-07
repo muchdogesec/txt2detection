@@ -17,6 +17,7 @@ _ai_extractor_registry: dict[str, "Type[BaseAIExtractor]"] = {}
 
 class BaseAIExtractor:
     llm: LLM
+    TIMEOUT = 180
     system_prompt = textwrap.dedent(
         """
     <persona>
