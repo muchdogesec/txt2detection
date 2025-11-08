@@ -86,8 +86,11 @@ class Bundler:
         }
     )
 
-    extension_definition = load_stix_object_from_url(
+    sigma_extension_definition = load_stix_object_from_url(
         "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma-rule.json"
+    )
+    data_source_extension_definition = load_stix_object_from_url(
+        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/scos/data-source.json"
     )
 
     @classmethod
@@ -169,7 +172,8 @@ class Bundler:
         self.bundle.objects.extend([self.default_marking, self.identity, self.report])
         # add default STIX 2.1 marking definition for txt2detection
         self.report.object_marking_refs.append(self.default_marking.id)
-        self.add_ref(self.extension_definition)
+        self.add_ref(self.sigma_extension_definition)
+        self.add_ref(self.data_source_extension_definition)
 
     def add_ref(self, sdo, append_report=False):
         sdo_id = sdo["id"]
@@ -204,7 +208,7 @@ class Bundler:
             "object_marking_refs": self.report.object_marking_refs,
             "external_references": self.external_refs,
             "extensions": {
-                self.extension_definition["id"]: {
+                self.sigma_extension_definition["id"]: {
                     "extension_type": "toplevel-property-extension"
                 }
             },
