@@ -4,7 +4,7 @@ Basic input
 
 ```shell
 python3 txt2detection.py text \
-  --input_text "a rule detecting suspicious logins on windows systems" \
+  --input_text "A rule detecting suspicious logins on windows systems because of multiple failed authentication attempts." \
   --name "Testing input txt" \
   --ai_provider openai:gpt-5 \
   --create_attack_navigator_layer \
