@@ -87,10 +87,10 @@ class Bundler:
     )
 
     sigma_extension_definition = load_stix_object_from_url(
-        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/properties/indicator-sigma-rule.json"
+        "https://github.com/muchdogesec/stix2extensions/raw/refs/heads/main/automodel_generated/extension-definitions/properties/indicator-sigma-rule.json"
     )
     data_source_extension_definition = load_stix_object_from_url(
-        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/extension-definitions/scos/data-source.json"
+        "https://raw.githubusercontent.com/muchdogesec/stix2extensions/refs/heads/main/automodel_generated/extension-definitions/scos/data-source.json"
     )
 
     @classmethod
