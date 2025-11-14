@@ -8,7 +8,7 @@ from slugify import slugify
 from datetime import date as dt_date
 from typing import Any, ClassVar, List, Literal, Optional, Union
 from uuid import UUID
-from stix2extensions.data_source import DataSource
+from stix2extensions import DataSource
 
 import jsonschema
 from pydantic import BaseModel, Field, computed_field, field_validator
