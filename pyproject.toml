@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "txt2detection"
-version = "1.1.6"
+version = "1.1.7"
 authors = [{ name = "dogesec" }]
 maintainers = [{ name = "dogesec" }]
 description = "A command line tool that takes a txt file containing threat intelligence and turns it into a detection rule."
@@ -25,8 +25,8 @@ dependencies = [
   "pyyaml",
   "python-slugify",
   "validators>=0.34.0",
-  "llama-index-core>=0.12.42",
-  'llama-index-llms-openai>=0.4.5',
+  "llama-index-core>=0.14.8",
+  'llama-index-llms-openai>=0.6.8',
   'stix2extensions',
   'json-repair',
 ]
@@ -39,11 +39,11 @@ Issues = "https://github.com/muchdogesec/txt2detection/issues"
 txt2detection = "txt2detection.__main__:main"
 
 [project.optional-dependencies]
-anthropic = ['llama-index-llms-anthropic>=0.7.2']
-gemini = ['llama-index-llms-gemini>=0.5.0']
-deepseek = ['llama-index-llms-deepseek>=0.1.2']
-openrouter = ['llama-index-llms-openrouter>=0.3.2']
-llms = ['txt2detection[anthropic,gemini,deepseek,openrouter]']
+anthropic = ['llama-index-llms-anthropic>=0.9.7']
+gemini = ['llama-index-llms-google-genai>=0.5.0']
+deepseek = ['llama-index-llms-deepseek>=0.2.2']
+openrouter = ['llama-index-llms-openrouter>=0.4.2']
+llms = ["txt2stix[anthropic,gemini,deepseek,openrouter]"]
 
 
 [tool.hatch.build.targets.wheel.force-include]
