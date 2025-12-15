@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "txt2detection"
-version = "1.1.7"
+version = "1.1.8"
 authors = [{ name = "dogesec" }]
 maintainers = [{ name = "dogesec" }]
 description = "A command line tool that takes a txt file containing threat intelligence and turns it into a detection rule."
