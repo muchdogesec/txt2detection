@@ -97,7 +97,7 @@ def parse_ref(value):
     return dict(source_name=m.group(1), external_id=m.group(2))
 
 def validate_length(value: str):
-    min_length = 200
+    min_length = 256
     if len(value) < min_length:
         raise argparse.ArgumentTypeError(
             f"Input text must be at least {min_length} characters long, got {len(value)}."
