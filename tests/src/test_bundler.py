@@ -3,6 +3,7 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import stix2
+from txt2detection.ai_extractor.utils import AIDetectionFailure
 from txt2detection.bundler import Bundler
 from txt2detection.models import DetectionContainer, SigmaRuleDetection, Level
 from datetime import datetime, timezone
@@ -200,7 +201,10 @@ def test_add_relation_creates_relationship(bundler_instance: Bundler):
     relationships = [
         o for o in bundler_instance.bundle.objects if isinstance(o, Relationship)
     ]
-    assert any((r.source_ref == indicator["id"] and r.target_ref == target['id']) for r in relationships)
+    assert any(
+        (r.source_ref == indicator["id"] and r.target_ref == target["id"])
+        for r in relationships
+    )
 
 
 def test_bundler_generates_valid_bundle(dummy_detection):
@@ -234,8 +238,13 @@ def test_bundler_generates_valid_bundle(dummy_detection):
 
 
 def test_bundle_detections(dummy_detection, bundler_instance):
-    container = DetectionContainer(success=False, detections=[])
-    with patch.object(Bundler, "add_rule_indicator") as mock_add_rule_indicator:
+    container = DetectionContainer(
+        success=False, fail_reason="Some failure", detections=[]
+    )
+    with (
+        patch.object(Bundler, "add_rule_indicator") as mock_add_rule_indicator,
+        pytest.raises(AIDetectionFailure, match="Some failure"),
+    ):
         bundler_instance.bundle_detections(container)
         mock_add_rule_indicator.assert_not_called()
         mock_add_rule_indicator.reset_mock()
@@ -316,7 +325,7 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
     ][0]
     obj["external_references"].sort(
         key=lambda x: (x["source_name"], x.get("external_id"))
-    ) # sort elements to avoid failing due to random order
+    )  # sort elements to avoid failing due to random order
     assert obj == {
         "type": "indicator",
         "spec_version": "2.1",
