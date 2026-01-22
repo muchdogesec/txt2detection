@@ -397,6 +397,7 @@ class SigmaRuleDetection(BaseDetection):
 
 class DetectionContainer(BaseModel):
     success: bool
+    fail_reason: Optional[str] = Field(default=None, description="Reason for failure if success is False")
     detections: list[Union[BaseDetection, AIDetection, SigmaRuleDetection]]
 
 

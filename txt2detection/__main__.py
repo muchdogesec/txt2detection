@@ -96,6 +96,13 @@ def parse_ref(value):
         raise argparse.ArgumentTypeError("must be in format key=value")
     return dict(source_name=m.group(1), external_id=m.group(2))
 
+def validate_length(value: str):
+    min_length = 200
+    if len(value) < min_length:
+        raise argparse.ArgumentTypeError(
+            f"Input text must be at least {min_length} characters long, got {len(value)}."
+        )
+    return value
 
 def parse_label(label: str):
     if not TAG_PATTERN.match(label):
@@ -197,7 +204,7 @@ def parse_args():
         help="The file to be converted. Must be .txt",
         type=lambda x: Path(x).read_text(),
     )
-    text.add_argument("--input_text", help="The text to be converted")
+    text.add_argument("--input_text", help="The text to be converted", type=validate_length)
     sigma.add_argument(
         "--sigma_file",
         help="The sigma file to be converted. Must be .yml",

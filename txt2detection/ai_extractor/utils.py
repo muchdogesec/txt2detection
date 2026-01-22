@@ -12,6 +12,9 @@ if typing.TYPE_CHECKING:
 class BadAIOutput(Exception):
     pass
 
+class AIDetectionFailure(Exception):
+    pass
+
 
 class ParserWithLogging(PydanticOutputParser):
     def parse(self, text: str):

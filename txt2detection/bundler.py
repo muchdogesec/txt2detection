@@ -17,6 +17,7 @@ from stix2.serialization import serialize
 import hashlib
 
 from txt2detection import attack_navigator, observables
+from txt2detection.ai_extractor.utils import AIDetectionFailure
 from txt2detection.models import (
     AIDetection,
     BaseDetection,
@@ -380,7 +381,7 @@ class Bundler:
     def bundle_detections(self, container: DetectionContainer):
         self.data.detections = container
         if not container.success:
-            return
+            raise AIDetectionFailure(container.fail_reason)
         for d in container.detections:
             self.add_rule_indicator(d)
 
