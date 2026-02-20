@@ -262,6 +262,7 @@ def run_txt2detection(
         detection = get_sigma_detections(sigma, name=name)
         if not identity and detection.author:
             identity = make_identity(detection.author)
+            detection.x_author = detection.author
         kwargs.update(
             reference_urls=kwargs.setdefault("reference_urls", [])
             + detection.references

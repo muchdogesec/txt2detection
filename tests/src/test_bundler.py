@@ -380,6 +380,19 @@ def test_add_rule_indicator__adds_sigma_extension_properties(
         "x_sigma_falsepositives": ["Not actually suspicious", "the source is random"],
     }
 
+def test_add_rule_indicator__adds_author_reference(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    dummy_detection.x_author = "example_author"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    obj = [
+        k
+        for k in bundler_instance.bundle_dict["objects"]
+        if k["type"] == "indicator"
+    ][0]
+    assert {
+        "source_name": "sigma_author",
+        "description": "example_author",
+    } in obj["external_references"], "Author reference should be present in external_references"
 
 def test_generate_navigators(bundler_instance, dummy_detection):
     dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"

@@ -227,6 +227,13 @@ class Bundler:
                 "external_id": hashlib.md5(indicator["pattern"].encode()).hexdigest(),
             }
         )
+        if detection.x_author:
+            indicator["external_references"].append(
+                {
+                    "source_name": "sigma_author",
+                    "description": detection.x_author,
+                }
+            )
         logsource = detection.make_data_source()
 
         logger.debug(f"===== rule {detection.detection_id} =====")

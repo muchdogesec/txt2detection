@@ -338,6 +338,7 @@ class SigmaRuleDetection(BaseDetection):
     level: Optional[Level] = None
     tags: Optional[List[SigmaTag]] = Field(default_factory=list)
     scope: Optional[List[str]] = None
+    x_author: Optional[str] = Field(default=None)
     _indicator_types: list = None
 
     @property
