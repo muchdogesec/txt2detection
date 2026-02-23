@@ -394,6 +394,28 @@ def test_add_rule_indicator__adds_author_reference(bundler_instance, dummy_detec
         "description": "example_author",
     } in obj["external_references"], "Author reference should be present in external_references"
 
+def test_add_rule_indicator__adds_revoked_property_for_deprecated_status(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    dummy_detection.status = "deprecated"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    obj = [
+        k
+        for k in bundler_instance.bundle_dict["objects"]
+        if k["type"] == "indicator"
+    ][0]
+    assert obj.get("revoked") is True, "Indicator should have revoked=True when status is deprecated"
+
+def test_add_rule_indicator__does_not_add_revoked_property_for_non_deprecated_status(bundler_instance, dummy_detection):
+    dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
+    dummy_detection.status = "stable"
+    bundler_instance.add_rule_indicator(dummy_detection)
+    obj = [
+        k
+        for k in bundler_instance.bundle_dict["objects"]
+        if k["type"] == "indicator"
+    ][0]
+    assert "revoked" not in obj, "Indicator should not have revoked property when status is not deprecated"
+
 def test_generate_navigators(bundler_instance, dummy_detection):
     dummy_detection.detection_id = "cd7ff0b1-fbf3-4c2d-ba70-5d127eb8b4be"
     bundler_instance.add_rule_indicator(dummy_detection)

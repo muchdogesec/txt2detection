@@ -25,6 +25,7 @@ from txt2detection.models import (
     DetectionContainer,
     UUID_NAMESPACE,
     SigmaRuleDetection,
+    Statuses,
 )
 
 from datetime import UTC, datetime as dt
@@ -234,6 +235,8 @@ class Bundler:
                     "description": detection.x_author,
                 }
             )
+        if detection.status == Statuses.deprecated:
+            indicator['revoked'] = True
         logsource = detection.make_data_source()
 
         logger.debug(f"===== rule {detection.detection_id} =====")
