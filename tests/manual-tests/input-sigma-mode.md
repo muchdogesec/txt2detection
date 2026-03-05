@@ -185,6 +185,15 @@ python3 txt2detection.py sigma \
   --report_id 4af65c32-8f6c-4a0f-9c9d-dae3cde73aa2
 ```
 
+## Check status deprecated
+
+```shell
+python3 txt2detection.py sigma \
+  --sigma_file tests/files/sigma-rule-deprecated.yml \
+  --name "Sigma Rule Deprecated" \
+  --report_id 12a1cc2a-b11f-4fe2-b3e0-8515e5570f8e
+```
+
 ## External references
 
 ```shell
