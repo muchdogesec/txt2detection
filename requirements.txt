@@ -271,7 +271,7 @@ regex==2026.2.19
     #   nltk
     #   tiktoken
     #   transformers
-requests==2.32.5 ; python_version >= "3.7"
+requests==2.33.0 ; python_version >= "3.7"
     # via
     #   google-auth
     #   google-genai
