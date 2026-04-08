@@ -53,7 +53,7 @@ click==8.3.1
     # via nltk
 colorama==0.4.6
     # via griffecli
-cryptography==46.0.5
+cryptography==46.0.7
     # via google-auth
 dataclasses-json==0.6.7
     # via llama-index-core
