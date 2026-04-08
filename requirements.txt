@@ -340,7 +340,7 @@ tqdm==4.67.3 ; python_version >= "3.7"
     #   transformers
     #   txt2detection
     #   txt2detection (pyproject.toml)
-transformers==4.57.6
+transformers==5.0.0rc3
     # via llama-index-llms-openai-like
 txt2detection[anthropic,deepseek,gemini,openrouter]==1.2.0
     # via txt2detection (pyproject.toml)
