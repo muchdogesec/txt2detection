@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.13.3
+aiohttp==3.13.4
     # via
     #   google-genai
     #   llama-index-core
@@ -53,7 +53,7 @@ click==8.3.1
     # via nltk
 colorama==0.4.6
     # via griffecli
-cryptography==46.0.5
+cryptography==46.0.7
     # via google-auth
 dataclasses-json==0.6.7
     # via llama-index-core
@@ -191,7 +191,7 @@ nest-asyncio==1.6.0
     # via llama-index-core
 networkx==3.6.1
     # via llama-index-core
-nltk==3.9.3
+nltk==3.9.4
     # via llama-index-core
 numpy==2.4.2
     # via
@@ -271,7 +271,7 @@ regex==2026.2.19
     #   nltk
     #   tiktoken
     #   transformers
-requests==2.32.5 ; python_version >= "3.7"
+requests==2.33.0 ; python_version >= "3.7"
     # via
     #   google-auth
     #   google-genai
@@ -340,7 +340,7 @@ tqdm==4.67.3 ; python_version >= "3.7"
     #   transformers
     #   txt2detection
     #   txt2detection (pyproject.toml)
-transformers==4.57.6
+transformers==5.0.0rc3
     # via llama-index-llms-openai-like
 txt2detection[anthropic,deepseek,gemini,openrouter]==1.2.0
     # via txt2detection (pyproject.toml)
