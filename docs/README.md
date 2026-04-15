@@ -254,7 +254,7 @@ The objects themselves are imported from Vulmatch defined in the `.env` file.
 
 #### Observable creation
 
-If an observable is detected in the `detection` part of the rule, then it should be turned into a STIX SCO and joined to the Indicator object of the rule the SCO is found in.
+If an observable is detected in the `detection` part of the rule, then it should be turned into a STIX SCO and joined to the Indicator object of the rule the SCO is found in. This applies to whatever mode is run.
 
 The logic for detection an observable type should be powered by regex. The following types are supported.
 
@@ -271,6 +271,7 @@ The logic for detection an observable type should be powered by regex. The follo
 * `file.hashes.SHA-256`
 * `file.hashes.SHA-512`
 * `file.hashes.SSDEEP`
+* `process`
 
 In the following text, report them in a structured json output as follows;
 
