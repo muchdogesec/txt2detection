@@ -205,7 +205,7 @@ packaging==26.0
     #   marshmallow
     #   python-arango
     #   transformers
-pillow==12.1.1
+pillow==12.2.0
     # via
     #   llama-index-core
     #   llama-index-llms-google-genai
@@ -245,7 +245,7 @@ python-arango==8.3.0 ; python_version >= "3.8"
     #   txt2detection (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via botocore
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via
     #   txt2detection
     #   txt2detection (pyproject.toml)
