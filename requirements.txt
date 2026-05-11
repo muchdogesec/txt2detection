@@ -366,7 +366,7 @@ typing-inspect==0.9.0
     #   llama-index-core
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   botocore
     #   python-arango
