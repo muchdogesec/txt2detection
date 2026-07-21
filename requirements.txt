@@ -205,7 +205,7 @@ packaging==26.0
     #   marshmallow
     #   python-arango
     #   transformers
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   llama-index-core
     #   llama-index-llms-google-genai
