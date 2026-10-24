@@ -71,7 +71,7 @@ distro==1.9.0
     #   openai
 docstring-parser==0.17.0
     # via anthropic
-filelock==3.24.3
+filelock==4.2.1
     # via
     #   huggingface-hub
     #   transformers
